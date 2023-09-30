@@ -7,5 +7,6 @@
 - [cite:@rijke2022introduction]
 - [cite:@hottbook]
 - [cite:@warn2023pushouts]
+- [cite:@sojakova2020sequentialcolimits]
 
 #+PRINT_BIBLIOGRAPHY:
