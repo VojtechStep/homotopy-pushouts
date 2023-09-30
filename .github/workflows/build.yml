@@ -13,7 +13,7 @@ jobs:
           nix_path: ""
 
       - name: Build PDF
-        run: "nix build | xargs -I{} cp {} Thesis.pdf"
+        run: "nix build --no-link --print-out-paths | xargs -I{} cp {} Thesis.pdf"
 
       - name: Create release
         id: release
