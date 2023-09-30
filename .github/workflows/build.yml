@@ -1,0 +1,23 @@
+name: PDF build
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v23
+        with:
+          nix_path: ""
+
+      - name: Build PDF
+        run: "nix build | xargs -I{} cp {} Thesis.pdf"
+
+      - name: Create release
+        id: release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Thesis.pdf
+

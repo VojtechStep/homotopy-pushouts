@@ -1,0 +1,11 @@
+#+BIBLIOGRAPHY: ./bibliography.bib
+#+CITE_EXPORT: biblatex alphabetic
+#+LATEX_COMPILER: lualatex
+
+* Introduction
+
+- [cite:@rijke2022introduction]
+- [cite:@hottbook]
+- [cite:@warn2023pushouts]
+
+#+PRINT_BIBLIOGRAPHY:
