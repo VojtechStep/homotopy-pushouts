@@ -1,6 +1,29 @@
+#+TITLE: Formalization of Homotopy Pushouts in Homotopy Type Theory
+#+AUTHOR: Vojtěch Štěpančík
+#+KEYWORDS: synthetic homotopy theory, homotopy type theory, univalent foundations of mathematics, formalization, homotopy pushouts
+#+DESCRIPTION: ABSTRACT
+#+DESCRIPTION: MORE ABSTRACT
+#+LATEX_COMPILER: lualatex
 #+BIBLIOGRAPHY: ./bibliography.bib
 #+CITE_EXPORT: biblatex alphabetic
-#+LATEX_COMPILER: lualatex
+
+#+LATEX_CLASS: report
+#+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
+#+OPTIONS: toc:nil
+
+# Package options, derived partially from the thesis template
+#+LATEX_HEADER: \geometry{margin=25mm,bindingoffset=14.2mm}
+#+LATEX_HEADER: \let\openright=\cleardoublepage
+#+LATEX_HEADER: \hypersetup{unicode,breaklinks=true,pdfapart=2,pdfaconformance=U}
+#+LATEX_HEADER: \input{tex/pdfa.tex}
+#+LATEX_HEADER: \overfullrule=1mm
+
+#+LATEX_HEADER: \def\YearSubmitted{2023}
+#+LATEX_HEADER: \def\Department{Department of Algebra}
+#+LATEX_HEADER: \def\ThesisSupervisor{doctor Egbert Rijke}
+
+# Title page
+@@latex:\include{tex/title.tex}@@
 
 * Introduction
 
@@ -10,3 +33,9 @@
 - [cite:@sojakova2020sequentialcolimits]
 
 #+PRINT_BIBLIOGRAPHY:
+
+# The local variable is necessary to setup hyperref correctly
+
+# Local Variables:
+# org-latex-default-packages-alist: (("" "graphicx" t) ("" "wrapfig" nil) ("" "rotating" nil) ("normalem" "ulem" t) ("" "amsmath" t) ("" "amssymb" t) ("" "capt-of" nil) ("rgb" "xcolor" nil) ("" "hyperxmp" nil) ("pdfa" "hyperref" nil) ("" "geometry" nil) ("nottoc" "tocbibind" nil) ("" "lmodern" t))
+# End:

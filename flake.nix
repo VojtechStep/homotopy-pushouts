@@ -16,19 +16,21 @@
         #   topiclongtable;
         inherit (pkgs.texlive)
           # Bare minimum working packages
+          # scheme-basic
           scheme-minimal
           # Compiler binaries
           latexmk latex-bin
           # Org dependencies
-          # - for longtable
-          tools
-          # - default packages
+          # - default packages and their dependencies
           amsmath wrapfig ulem hyperref capt-of infwarerr epstopdf-pkg
           # Bibliography
-          biblatex;
+          biblatex
+          # Other utility packages
+          geometry xcolor tocbibind
+          # Generating PDF/A-2U
+          hyperxmp ifmtarg luacode luatexbase oberdiek colorprofiles;
       };
       env = {
-        SOURCE_DATE_EPOCH = self.lastModified;
         TEXMFHOME = ".cache";
         TEXMFVAR = ".cache/texmf-var";
       };

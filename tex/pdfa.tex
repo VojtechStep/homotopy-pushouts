@@ -1,0 +1,14 @@
+\usepackage{colorprofiles}
+\makeatletter
+\immediate\pdfobj stream attr{/N 3}  file{\colorpro@rgb@profile}
+\pdfcatalog{%
+/OutputIntents [ <<
+/Type /OutputIntent
+/S/GTS_PDFA1
+/DestOutputProfile \the\pdflastobj\space 0 R
+/OutputConditionIdentifier (\colorpro@rgb@identifier)
+/Info(\colorpro@rgb@info)
+/RegistryName(\colorpro@rgb@registry)
+>> ]
+}
+\makeatother
