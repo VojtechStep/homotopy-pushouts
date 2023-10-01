@@ -31,6 +31,7 @@
           hyperxmp ifmtarg luacode luatexbase oberdiek colorprofiles;
       };
       env = {
+        SOURCE_DATE_EPOCH = self.lastModified;
         TEXMFHOME = ".cache";
         TEXMFVAR = ".cache/texmf-var";
       };
