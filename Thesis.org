@@ -3,10 +3,11 @@
 #+KEYWORDS: synthetic homotopy theory, homotopy type theory, univalent foundations of mathematics, formalization, homotopy pushouts
 #+DESCRIPTION: ABSTRACT
 #+DESCRIPTION: MORE ABSTRACT
+
+# Document settings
 #+LATEX_COMPILER: lualatex
 #+BIBLIOGRAPHY: ./bibliography.bib
 #+CITE_EXPORT: biblatex alphabetic
-
 #+LATEX_CLASS: report
 #+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
 #+OPTIONS: title:nil toc:nil
@@ -18,12 +19,18 @@
 #+LATEX_HEADER: \input{tex/pdfa.tex}
 #+LATEX_HEADER: \overfullrule=1mm
 
-#+LATEX_HEADER: \def\YearSubmitted{2023}
-#+LATEX_HEADER: \def\Department{Department of Algebra}
-#+LATEX_HEADER: \def\ThesisSupervisor{doctor Egbert Rijke}
-
 # Title page
-@@latex:\include{tex/title.tex}@@
+#+begin_export latex
+\def\Department{Department of Algebra}
+\def\ThesisSupervisor{doctor Egbert Rijke}
+\def\StudyProgramme{Mathematical Structures}
+\def\StudyBranch{MSPN}
+\def\YearSubmitted{2023}
+\def\Dedication{
+DEDICATION
+}
+\include{tex/title.tex}
+#+end_export
 
 * Introduction
 
