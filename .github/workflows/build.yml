@@ -12,6 +12,10 @@ jobs:
         with:
           nix_path: ""
 
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+        with:
+          diagnostic-endpoint: ""
+
       - name: Build PDF
         run: "nix build --no-link --print-out-paths | xargs -I{} cp {} Thesis.pdf"
 
