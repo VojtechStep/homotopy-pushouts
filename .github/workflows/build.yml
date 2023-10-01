@@ -21,7 +21,7 @@ jobs:
           diagnostic-endpoint: ""
 
       - name: Build PDF
-        run: "nix build --no-link --print-out-paths | xargs -I{} cp {} Thesis.pdf"
+        run: "nix build --no-link --print-out-paths --print-build-logs | xargs -I{} cp {} Thesis.pdf"
 
       - name: Create release
         id: release
