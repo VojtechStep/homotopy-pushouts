@@ -39,6 +39,19 @@ DEDICATION
 - [cite:@warn2023pushouts]
 - [cite:@sojakova2020sequentialcolimits]
 
+* Battle plan
+- [-] Σ-types over pushouts
+  - [X] Flattening lemma
+  - [ ] Applications
+- [-] Path spaces of pushouts
+  - [ ] Formalize Kraus, von Raumer
+    - [ ] Understand the proof
+    - [ ] Convert from relations to spans?
+  - [-] Figure out how to encode the sequence construction
+    - [X] Induction on naturals into Σ, pushing forward (a_0 ⇝_t a , a_0 ⇝_{t+1} b) ↦ (a_0 ⇝_{t + 2} a , a_0 ⇝_{t + 3} b)
+    - [ ] Try encoding the construction with spans instead of relations
+- [ ] Descent stuff
+
 #+PRINT_BIBLIOGRAPHY:
 
 # The local variable is necessary to setup hyperref correctly
