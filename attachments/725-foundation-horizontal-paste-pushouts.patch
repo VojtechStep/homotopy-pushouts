@@ -1,0 +1,196 @@
+From b0197432f854b633ba502764bf244056fd0c50f0 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Fri, 8 Sep 2023 22:15:33 +0200
+Subject: [PATCH] Horizontal pasting of pushouts
+
+---
+ .../cocones-under-spans.lagda.md              | 22 ++++-
+ .../pullback-property-pushouts.lagda.md       |  9 +-
+ .../universal-property-pushouts.lagda.md      | 98 +++++++++++++++++++
+ 3 files changed, 125 insertions(+), 4 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md b/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md
+index ac8d493fc8..bb8ced1e79 100644
+--- a/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md
++++ b/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md
+@@ -177,6 +177,15 @@ cocone-map-comp f g (i , j , H) h k =
+ 
+ ### Horizontal composition of cocones
+ 
++```text
++      i       k
++  A ----> B ----> C
++  |       |       |
++ f|       |       |
++  v       v       v
++  X ----> Y ----> Z
++```
++
+ ```agda
+ cocone-comp-horizontal :
+   { l1 l2 l3 l4 l5 l6 : Level}
+@@ -189,7 +198,14 @@ pr1 (cocone-comp-horizontal f i k c d) =
+ pr1 (pr2 (cocone-comp-horizontal f i k c d)) =
+   vertical-map-cocone (vertical-map-cocone f i c) k d
+ pr2 (pr2 (cocone-comp-horizontal f i k c d)) =
+-  ( ( horizontal-map-cocone (vertical-map-cocone f i c) k d) ·l
+-    ( coherence-square-cocone f i c)) ∙h
+-  ( coherence-square-cocone (vertical-map-cocone f i c) k d ·r i)
++  pasting-horizontal-coherence-square-maps
++    ( i)
++    ( k)
++    ( f)
++    ( vertical-map-cocone f i c)
++    ( vertical-map-cocone (vertical-map-cocone f i c) k d)
++    ( horizontal-map-cocone f i c)
++    ( horizontal-map-cocone (vertical-map-cocone f i c) k d)
++    ( coherence-square-cocone f i c)
++    ( coherence-square-cocone (vertical-map-cocone f i c) k d)
+ ```
+diff --git a/src/synthetic-homotopy-theory/pullback-property-pushouts.lagda.md b/src/synthetic-homotopy-theory/pullback-property-pushouts.lagda.md
+index 56ac8f968a..41ccd22018 100644
+--- a/src/synthetic-homotopy-theory/pullback-property-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/pullback-property-pushouts.lagda.md
+@@ -7,6 +7,7 @@ module synthetic-homotopy-theory.pullback-property-pushouts where
+ <details><summary>Imports</summary>
+ 
+ ```agda
++open import foundation.commuting-squares-of-maps
+ open import foundation.cones-over-cospans
+ open import foundation.dependent-pair-types
+ open import foundation.function-types
+@@ -54,7 +55,13 @@ pr1 (cone-pullback-property-pushout f g c Y) =
+ pr1 (pr2 (cone-pullback-property-pushout f g c Y)) =
+   precomp (vertical-map-cocone f g c) Y
+ pr2 (pr2 (cone-pullback-property-pushout f g c Y)) =
+-  htpy-precomp (coherence-square-cocone f g c) Y
++  precomp-coherence-square-maps
++    ( g)
++    ( f)
++    ( vertical-map-cocone f g c)
++    ( horizontal-map-cocone f g c)
++    ( coherence-square-cocone f g c)
++    ( Y)
+ 
+ pullback-property-pushout :
+   {l1 l2 l3 l4 : Level} (l : Level) {S : UU l1} {A : UU l2} {B : UU l3}
+diff --git a/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md b/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
+index 48e4b6875b..a03839956a 100644
+--- a/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
+@@ -8,6 +8,8 @@ module synthetic-homotopy-theory.universal-property-pushouts where
+ 
+ ```agda
+ open import foundation.action-on-identifications-functions
++open import foundation.commuting-squares-of-maps
++open import foundation.cones-over-cospans
+ open import foundation.contractible-maps
+ open import foundation.contractible-types
+ open import foundation.dependent-pair-types
+@@ -22,6 +24,7 @@ open import foundation.homotopies
+ open import foundation.identity-types
+ open import foundation.pullbacks
+ open import foundation.subtype-identity-principle
++open import foundation.transport-along-identifications
+ open import foundation.universe-levels
+ 
+ open import synthetic-homotopy-theory.cocones-under-spans
+@@ -352,3 +355,98 @@ universal-property-pushout-is-equiv' f g (i , j , H) is-equiv-g is-equiv-i {l} =
+       ( is-equiv-precomp-is-equiv g is-equiv-g T)
+       ( is-equiv-precomp-is-equiv i is-equiv-i T))
+ ```
++
++### Horizontal composition of pushouts
++
++If in the following diagram both squares are pushouts, then the outer square is
++a pushout as well.
++
++```text
++      g       k
++  A ----> B ----> C
++  |       |       |
++ f|       |       |
++  v       v       v
++  X ----> Y ----> Z
++```
++
++```agda
++universal-property-pushout-rectangle-universal-property-pushout-right :
++  { l1 l2 l3 l4 l5 l6 : Level}
++  { A : UU l1} {B : UU l2} {C : UU l3} {X : UU l4} {Y : UU l5} {Z : UU l6}
++  ( f : A → X) (g : A → B) (k : B → C) →
++  ( c : cocone f g Y) (d : cocone (vertical-map-cocone f g c) k Z) →
++  ( up-c : {l : Level} → universal-property-pushout l f g c) →
++  ( up-d :
++    {l : Level} →
++    universal-property-pushout l (vertical-map-cocone f g c) k d) →
++  ( {l : Level} →
++    universal-property-pushout l f (k ∘ g) (cocone-comp-horizontal f g k c d))
++universal-property-pushout-rectangle-universal-property-pushout-right
++  ( f)
++  ( g)
++  ( k)
++  ( c)
++  ( d)
++  ( up-c)
++  ( up-d)
++  { l} =
++  universal-property-pushout-pullback-property-pushout l f (k ∘ g)
++    ( cocone-comp-horizontal f g k c d)
++    ( λ W →
++      tr
++        ( is-pullback (precomp f W) (precomp (k ∘ g) W))
++        ( inv
++          ( eq-htpy-cone
++            ( precomp f W)
++            ( precomp (k ∘ g) W)
++            ( cone-pullback-property-pushout
++              ( f)
++              ( k ∘ g)
++              ( cocone-comp-horizontal f g k c d)
++              ( W))
++            ( pasting-vertical-cone
++              ( precomp f W)
++              ( precomp g W)
++              ( precomp k W)
++              ( cone-pullback-property-pushout f g c W)
++              ( cone-pullback-property-pushout
++                ( vertical-map-cocone f g c)
++                ( k)
++                ( d)
++                ( W)))
++            ( refl-htpy ,
++              refl-htpy ,
++              λ h →
++                right-unit ∙
++                distributive-precomp-pasting-horizontal-coherence-square-maps
++                  ( W)
++                  ( g)
++                  ( k)
++                  ( f)
++                  ( vertical-map-cocone f g c)
++                  ( vertical-map-cocone (vertical-map-cocone f g c) k d)
++                  ( horizontal-map-cocone f g c)
++                  ( horizontal-map-cocone (vertical-map-cocone f g c) k d)
++                  ( coherence-square-cocone f g c)
++                  ( coherence-square-cocone (vertical-map-cocone f g c) k d)
++                  ( h))))
++        ( is-pullback-rectangle-is-pullback-top
++          ( precomp f W)
++          ( precomp g W)
++          ( precomp k W)
++          ( cone-pullback-property-pushout f g c W)
++          ( cone-pullback-property-pushout
++            ( vertical-map-cocone f g c)
++            ( k)
++            ( d)
++            ( W))
++          ( pullback-property-pushout-universal-property-pushout l f g c up-c W)
++          ( pullback-property-pushout-universal-property-pushout
++            ( l)
++            ( vertical-map-cocone f g c)
++            ( k)
++            ( d)
++            ( up-d)
++            ( W))))
++```
