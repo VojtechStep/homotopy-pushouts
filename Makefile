@@ -12,6 +12,7 @@ Thesis.tex: Thesis.org
 	(progn\
 	  (require 'org)\
 	  (put 'org-latex-default-packages-alist 'safe-local-variable (lambda (_) t))\
+	  (put 'org-latex-classes 'safe-local-variable (lambda (_) t))\
 	  (with-current-buffer\
 	    (find-file \"$<\")\
 	    (org-latex-export-to-latex)))"
