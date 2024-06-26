@@ -1,0 +1,3030 @@
+From c01aac95fd60f8274db745ad04a460bb32f780e8 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Sat, 1 Jun 2024 16:13:30 +0200
+Subject: [PATCH 1/7] Sections and families of functions over pushouts
+
+---
+ .../commuting-triangles-of-maps.lagda.md      |  20 +-
+ src/synthetic-homotopy-theory.lagda.md        |   2 +
+ .../dependent-cocones-under-spans.lagda.md    |  15 +
+ ...t-data-pushouts-function-families.lagda.md | 410 +++++++++++++++++
+ ...quivalences-descent-data-pushouts.lagda.md |  14 +
+ .../families-descent-data-pushouts.lagda.md   |  34 ++
+ .../sections-descent-data-pushouts.lagda.md   | 429 ++++++++++++++++++
+ 7 files changed, 917 insertions(+), 7 deletions(-)
+ create mode 100644 src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
+ create mode 100644 src/synthetic-homotopy-theory/sections-descent-data-pushouts.lagda.md
+
+diff --git a/src/foundation/commuting-triangles-of-maps.lagda.md b/src/foundation/commuting-triangles-of-maps.lagda.md
+index f657e5d08d..ef0e081b0a 100644
+--- a/src/foundation/commuting-triangles-of-maps.lagda.md
++++ b/src/foundation/commuting-triangles-of-maps.lagda.md
+@@ -56,6 +56,18 @@ module _
+   (left : A → X) (right : B → X) (e : A ≃ B)
+   where
+ 
++  equiv-coherence-triangle-maps-inv-top' :
++    coherence-triangle-maps left right (map-equiv e) ≃
++    coherence-triangle-maps' right left (map-inv-equiv e)
++  equiv-coherence-triangle-maps-inv-top' =
++    equiv-Π
++      ( λ b → left (map-inv-equiv e b) ＝ right b)
++      ( e)
++      ( λ a →
++        equiv-concat
++          ( ap left (is-retraction-map-inv-equiv e a))
++          ( right (map-equiv e a)))
++
+   equiv-coherence-triangle-maps-inv-top :
+     coherence-triangle-maps left right (map-equiv e) ≃
+     coherence-triangle-maps right left (map-inv-equiv e)
+@@ -63,13 +75,7 @@ module _
+     ( equiv-inv-htpy
+       ( left ∘ (map-inv-equiv e))
+       ( right)) ∘e
+-    ( equiv-Π
+-      ( λ b → left (map-inv-equiv e b) ＝ right b)
+-      ( e)
+-      ( λ a →
+-        equiv-concat
+-          ( ap left (is-retraction-map-inv-equiv e a))
+-          ( right (map-equiv e a))))
++    ( equiv-coherence-triangle-maps-inv-top')
+ 
+   coherence-triangle-maps-inv-top :
+     coherence-triangle-maps left right (map-equiv e) →
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index 307d4ac9a6..fff0e41691 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -48,6 +48,7 @@ open import synthetic-homotopy-theory.descent-circle-equivalence-types public
+ open import synthetic-homotopy-theory.descent-circle-function-types public
+ open import synthetic-homotopy-theory.descent-circle-subtypes public
+ open import synthetic-homotopy-theory.descent-data-pushouts public
++open import synthetic-homotopy-theory.descent-data-pushouts-function-families public
+ open import synthetic-homotopy-theory.descent-data-sequential-colimits public
+ open import synthetic-homotopy-theory.descent-property-pushouts public
+ open import synthetic-homotopy-theory.descent-property-sequential-colimits public
+@@ -103,6 +104,7 @@ open import synthetic-homotopy-theory.recursion-principle-pushouts public
+ open import synthetic-homotopy-theory.retracts-of-sequential-diagrams public
+ open import synthetic-homotopy-theory.rewriting-pushouts public
+ open import synthetic-homotopy-theory.sections-descent-circle public
++open import synthetic-homotopy-theory.sections-descent-data-pushouts public
+ open import synthetic-homotopy-theory.sequential-colimits public
+ open import synthetic-homotopy-theory.sequential-diagrams public
+ open import synthetic-homotopy-theory.sequentially-compact-types public
+diff --git a/src/synthetic-homotopy-theory/dependent-cocones-under-spans.lagda.md b/src/synthetic-homotopy-theory/dependent-cocones-under-spans.lagda.md
+index f3b33ac51b..cfba684dd3 100644
+--- a/src/synthetic-homotopy-theory/dependent-cocones-under-spans.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-cocones-under-spans.lagda.md
+@@ -27,6 +27,7 @@ open import foundation.homotopy-induction
+ open import foundation.identity-types
+ open import foundation.retractions
+ open import foundation.sections
++open import foundation.span-diagrams
+ open import foundation.structure-identity-principle
+ open import foundation.torsorial-type-families
+ open import foundation.transport-along-higher-identifications
+@@ -104,6 +105,13 @@ module _
+         ( horizontal-map-dependent-cocone (f s))
+         ( vertical-map-dependent-cocone (g s))
+     coherence-square-dependent-cocone = pr2 (pr2 d)
++
++dependent-cocone-span-diagram :
++  { l1 l2 l3 l4 l5 : Level} {𝒮 : span-diagram l1 l2 l3} {X : UU l4}
++  ( c : cocone-span-diagram 𝒮 X) (P : X → UU l5) →
++  UU (l1 ⊔ l2 ⊔ l3 ⊔ l5)
++dependent-cocone-span-diagram {𝒮 = 𝒮} =
++  dependent-cocone (left-map-span-diagram 𝒮) (right-map-span-diagram 𝒮)
+ ```
+ 
+ ### Cocones equipped with dependent cocones
+@@ -188,6 +196,13 @@ pr1 (pr2 (dependent-cocone-map f g c P h)) b =
+   h (vertical-map-cocone f g c b)
+ pr2 (pr2 (dependent-cocone-map f g c P h)) s =
+   apd h (coherence-square-cocone f g c s)
++
++dependent-cocone-map-span-diagram :
++  { l1 l2 l3 l4 l5 : Level} {𝒮 : span-diagram l1 l2 l3} {X : UU l4}
++  ( c : cocone-span-diagram 𝒮 X) (P : X → UU l5) →
++  ( (x : X) → P x) → dependent-cocone-span-diagram c P
++dependent-cocone-map-span-diagram {𝒮 = 𝒮} c =
++  dependent-cocone-map (left-map-span-diagram 𝒮) (right-map-span-diagram 𝒮) c
+ ```
+ 
+ ## Properties
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md b/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
+new file mode 100644
+index 0000000000..e088755540
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
+@@ -0,0 +1,410 @@
++# Descent data for families of functions over pushouts
++
++```agda
++{-# OPTIONS --lossy-unification #-}
++module synthetic-homotopy-theory.descent-data-pushouts-function-families where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.commuting-squares-of-maps
++open import foundation.commuting-triangles-of-maps
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.function-extensionality
++open import foundation.function-types
++open import foundation.functoriality-dependent-function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.homotopy-algebra
++open import foundation.postcomposition-functions
++open import foundation.span-diagrams
++open import foundation.transport-along-identifications
++open import foundation.universal-property-equivalences
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies-composition
++
++open import synthetic-homotopy-theory.cocones-under-spans
++open import synthetic-homotopy-theory.descent-data-pushouts
++open import synthetic-homotopy-theory.equivalences-descent-data-pushouts
++open import synthetic-homotopy-theory.families-descent-data-pushouts
++open import synthetic-homotopy-theory.morphisms-descent-data-pushouts
++open import synthetic-homotopy-theory.sections-descent-data-pushouts
++open import synthetic-homotopy-theory.universal-property-pushouts
++```
++
++</details>
++
++## Idea
++
++Given two
++[families with descent data](synthetic-homotopy-theory.families-descent-data-pushouts.md)
++for [pushouts](synthetic-homotopy-theory.pushouts.md) `P ≈ (PA, PB, PS)` and
++`Q ≈ (QA, QB, QS)`, we show that fiberwise maps `(x : X) → P x → Q x` correspond
++to [morphisms](synthetic-homotopy-theory.morphisms-descent-data-pushouts.md)
++`(PA, PB, PS) → (QA, QB, QS)`.
++
++**Proof:** We first characterize the type family `x ↦ P x → Q x`. The
++corresponding [descent data](synthetic-homotopy-theory.descent-data-pushouts.md)
++consists of the type families
++
++```text
++  a ↦ PA a → QA a
++  b ↦ PB b → QB b,
++```
++
++and the gluing data sending `h : PA (fs) → QA (fs)` to
++`(QS s ∘ h ∘ (PS s)⁻¹) : PB (gs) → QB (gs)`.
++
++The fiberwise families then correspond to
++[sections](synthetic-homotopy-theory.sections-descent-data-pushouts.md) of this
++descent data, and it suffices to show that those correspond to morphisms. The
++coherence datum of such a section has the type
++
++```text
++  (s : S) → QS s ∘ sA (fs) ∘ (PS s)⁻¹ ＝ sB (gs),
++```
++
++which we can massage into a coherence of the morphism as
++
++```text
++  QS s ∘ sA (fs) ∘ (PS s)⁻¹ = sB (gs)
++  ≃ QS s ∘ sA (fs) ∘ (PS s)⁻¹ ~ sB (gs)  by function extensionality
++  ≃ QS s ∘ sA (fs) ~ sB (gs) ∘ PS s      by transposition of (PS s)
++  ≃ sB (gs) ∘ PS s ~ QS s ∘ sA (fs)      by symmetry of homotopies.
++```
++
++## Definitions
++
++### The type family of fiberwise functions with corresponding descent data for pushouts
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (P : family-with-descent-data-pushout c l5)
++  (Q : family-with-descent-data-pushout c l6)
++  where
++
++  family-cocone-family-with-descent-data-pushout-function-family :
++    X → UU (l5 ⊔ l6)
++  family-cocone-family-with-descent-data-pushout-function-family x =
++    family-cocone-family-with-descent-data-pushout P x →
++    family-cocone-family-with-descent-data-pushout Q x
++
++  descent-data-pushout-function-family :
++    descent-data-pushout 𝒮 (l5 ⊔ l6)
++  pr1 descent-data-pushout-function-family a =
++    left-family-family-with-descent-data-pushout P a →
++    left-family-family-with-descent-data-pushout Q a
++  pr1 (pr2 descent-data-pushout-function-family) b =
++    right-family-family-with-descent-data-pushout P b →
++    right-family-family-with-descent-data-pushout Q b
++  pr2 (pr2 descent-data-pushout-function-family) s =
++    ( equiv-postcomp _
++      ( equiv-family-family-with-descent-data-pushout Q s)) ∘e
++    ( equiv-precomp
++      ( inv-equiv (equiv-family-family-with-descent-data-pushout P s))
++      ( _))
++
++  left-equiv-equiv-descent-data-pushout-function-family :
++    (a : domain-span-diagram 𝒮) →
++    ( family-cocone-family-with-descent-data-pushout P
++        ( horizontal-map-cocone _ _ c a) →
++      family-cocone-family-with-descent-data-pushout Q
++        ( horizontal-map-cocone _ _ c a)) ≃
++    ( left-family-family-with-descent-data-pushout P a →
++      left-family-family-with-descent-data-pushout Q a)
++  left-equiv-equiv-descent-data-pushout-function-family a =
++    ( equiv-postcomp _
++      ( left-equiv-family-with-descent-data-pushout Q a)) ∘e
++    ( equiv-precomp
++      ( inv-equiv (left-equiv-family-with-descent-data-pushout P a))
++      ( _))
++
++  right-equiv-equiv-descent-data-pushout-function-family :
++    (b : codomain-span-diagram 𝒮) →
++    ( family-cocone-family-with-descent-data-pushout P
++        ( vertical-map-cocone _ _ c b) →
++      family-cocone-family-with-descent-data-pushout Q
++        ( vertical-map-cocone _ _ c b)) ≃
++    ( right-family-family-with-descent-data-pushout P b →
++      right-family-family-with-descent-data-pushout Q b)
++  right-equiv-equiv-descent-data-pushout-function-family b =
++    ( equiv-postcomp _
++      ( right-equiv-family-with-descent-data-pushout Q b)) ∘e
++    ( equiv-precomp
++      ( inv-equiv (right-equiv-family-with-descent-data-pushout P b))
++      ( _))
++
++  coherence-equiv-descent-data-pushout-function-family :
++    (s : spanning-type-span-diagram 𝒮) →
++    coherence-square-maps
++      ( map-equiv
++        ( left-equiv-equiv-descent-data-pushout-function-family
++          ( left-map-span-diagram 𝒮 s)))
++      ( tr
++        ( family-cocone-family-with-descent-data-pushout-function-family)
++        ( coherence-square-cocone _ _ c s))
++      ( map-family-descent-data-pushout descent-data-pushout-function-family s)
++      ( map-equiv
++        ( right-equiv-equiv-descent-data-pushout-function-family
++          ( right-map-span-diagram 𝒮 s)))
++  coherence-equiv-descent-data-pushout-function-family s =
++    ( ( map-equiv
++        ( right-equiv-equiv-descent-data-pushout-function-family
++          ( right-map-span-diagram 𝒮 s))) ·l
++      ( tr-function-type
++        ( family-cocone-family-with-descent-data-pushout P)
++        ( family-cocone-family-with-descent-data-pushout Q)
++        ( coherence-square-cocone _ _ c s))) ∙h
++    ( λ h →
++      eq-htpy
++        ( horizontal-concat-htpy
++          ( coherence-family-with-descent-data-pushout Q s ·r h)
++          ( coherence-square-maps-inv-equiv
++            ( equiv-tr
++              ( family-cocone-family-with-descent-data-pushout P)
++              ( coherence-square-cocone _ _ c s))
++            ( left-equiv-family-with-descent-data-pushout P
++              ( left-map-span-diagram 𝒮 s))
++            ( right-equiv-family-with-descent-data-pushout P
++              ( right-map-span-diagram 𝒮 s))
++            ( equiv-family-family-with-descent-data-pushout P s)
++            ( inv-htpy (coherence-family-with-descent-data-pushout P s)))))
++
++  equiv-descent-data-pushout-function-family :
++    equiv-descent-data-pushout
++      ( descent-data-family-cocone-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout-function-family))
++      ( descent-data-pushout-function-family)
++  pr1 equiv-descent-data-pushout-function-family =
++    left-equiv-equiv-descent-data-pushout-function-family
++  pr1 (pr2 equiv-descent-data-pushout-function-family) =
++    right-equiv-equiv-descent-data-pushout-function-family
++  pr2 (pr2 equiv-descent-data-pushout-function-family) =
++    coherence-equiv-descent-data-pushout-function-family
++
++  family-with-descent-data-pushout-function-family :
++    family-with-descent-data-pushout c (l5 ⊔ l6)
++  pr1 family-with-descent-data-pushout-function-family =
++    family-cocone-family-with-descent-data-pushout-function-family
++  pr1 (pr2 family-with-descent-data-pushout-function-family) =
++    descent-data-pushout-function-family
++  pr2 (pr2 family-with-descent-data-pushout-function-family) =
++    equiv-descent-data-pushout-function-family
++```
++
++## Properties
++
++### Sections of descent data for families of functions correspond to morphisms of descent data
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (P : family-with-descent-data-pushout c l5)
++  (Q : family-with-descent-data-pushout c l6)
++  where
++
++  hom-section-descent-data-pushout-function-family :
++    section-descent-data-pushout (descent-data-pushout-function-family P Q) →
++    hom-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( descent-data-family-with-descent-data-pushout Q)
++  pr1 (hom-section-descent-data-pushout-function-family t) =
++    left-map-section-descent-data-pushout
++      ( descent-data-pushout-function-family P Q)
++      ( t)
++  pr1 (pr2 (hom-section-descent-data-pushout-function-family t)) =
++    right-map-section-descent-data-pushout
++      ( descent-data-pushout-function-family P Q)
++      ( t)
++  pr2 (pr2 (hom-section-descent-data-pushout-function-family t)) s =
++    inv-htpy
++      ( map-inv-equiv
++        ( equiv-coherence-triangle-maps-inv-top'
++          ( ( map-family-family-with-descent-data-pushout Q s) ∘
++            ( left-map-section-descent-data-pushout
++              ( descent-data-pushout-function-family P Q)
++              ( t)
++              ( left-map-span-diagram 𝒮 s)))
++          ( right-map-section-descent-data-pushout
++            ( descent-data-pushout-function-family P Q)
++            ( t)
++            ( right-map-span-diagram 𝒮 s))
++          ( equiv-family-family-with-descent-data-pushout P s))
++        ( htpy-eq
++          ( coherence-section-descent-data-pushout
++            ( descent-data-pushout-function-family P Q)
++            ( t)
++            ( s))))
++
++  abstract
++    is-equiv-hom-section-descent-data-pushout-function-family :
++      is-equiv hom-section-descent-data-pushout-function-family
++    is-equiv-hom-section-descent-data-pushout-function-family =
++      is-equiv-tot-is-fiberwise-equiv
++        ( λ tA →
++          is-equiv-tot-is-fiberwise-equiv
++            ( λ tB →
++              is-equiv-map-Π-is-fiberwise-equiv
++                ( λ s →
++                  is-equiv-comp _ _
++                    ( funext _ _)
++                    ( is-equiv-comp _ _
++                      ( is-equiv-map-inv-equiv
++                        ( equiv-coherence-triangle-maps-inv-top'
++                          ( ( map-family-family-with-descent-data-pushout Q s) ∘
++                            ( tA (left-map-span-diagram 𝒮 s)))
++                          ( tB (right-map-span-diagram 𝒮 s))
++                          ( equiv-family-family-with-descent-data-pushout P s)))
++                      ( is-equiv-inv-htpy _ _)))))
++
++  hom-descent-data-map-family-cocone-span-diagram :
++    ( (x : X) →
++      family-cocone-family-with-descent-data-pushout P x →
++      family-cocone-family-with-descent-data-pushout Q x) →
++    hom-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( descent-data-family-with-descent-data-pushout Q)
++  hom-descent-data-map-family-cocone-span-diagram =
++    ( hom-section-descent-data-pushout-function-family) ∘
++    ( section-descent-data-section-family-cocone-span-diagram
++      ( family-with-descent-data-pushout-function-family P Q))
++
++  abstract
++    is-equiv-hom-descent-data-map-family-cocone-span-diagram :
++      universal-property-pushout _ _ c →
++      is-equiv hom-descent-data-map-family-cocone-span-diagram
++    is-equiv-hom-descent-data-map-family-cocone-span-diagram up-c =
++      is-equiv-comp _ _
++        ( is-equiv-section-descent-data-section-family-cocone-span-diagram _
++          ( up-c))
++        ( is-equiv-hom-section-descent-data-pushout-function-family)
++```
++
++As a corollary, given a morphism `(hA, hB, hS) : (PA, PB, PS) → (QA, QB, QS)`,
++there is a unique family of maps `h : (x : X) → P x → Q x` such that its induced
++morphism is homotopic to `(hA, hB, hS)`. The homotopy provides us in particular
++with the component-wise [homotopies](foundation-core.homotopies.md)
++
++```text
++                 hA a                               hB a
++          PA a --------> QA a                PB b --------> QB b
++            |              ∧                   |              ∧
++  (eᴾA a)⁻¹ |              | eꟴA a   (eᴾB b)⁻¹ |              | eꟴB b
++            |              |                   |              |
++            ∨              |                   ∨              |
++         P (ia) ------> Q (ia)              P (jb) ------> Q (jb)
++                h (ia)                             h (jb)
++```
++
++which we can turn into the computation rules
++
++```text
++              eᴾA a                           eᴾB a
++      P (ia) -------> PA a            P (jb) -------> PB b
++         |              |                |              |
++  h (ia) |              | hA a    h (jb) |              | hB b
++         |              |                |              |
++         ∨              ∨                ∨              ∨
++      Q (ia) -------> QA a            Q (jb) -------> QB b
++              eꟴA a                           eꟴB b
++```
++
++by inverting the inverted equivalences.
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (up-c : universal-property-pushout _ _ c)
++  (P : family-with-descent-data-pushout c l5)
++  (Q : family-with-descent-data-pushout c l6)
++  (m :
++    hom-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( descent-data-family-with-descent-data-pushout Q))
++  where
++
++  abstract
++    uniqueness-map-hom-descent-data-pushout :
++      is-contr
++        ( Σ ( (x : X) →
++              family-cocone-family-with-descent-data-pushout P x →
++              family-cocone-family-with-descent-data-pushout Q x)
++            ( λ h →
++              htpy-hom-descent-data-pushout
++                ( descent-data-family-with-descent-data-pushout P)
++                ( descent-data-family-with-descent-data-pushout Q)
++                ( hom-descent-data-map-family-cocone-span-diagram P Q h)
++                ( m)))
++    uniqueness-map-hom-descent-data-pushout =
++      is-contr-equiv'
++        ( fiber (hom-descent-data-map-family-cocone-span-diagram P Q) m)
++        ( equiv-tot
++          ( λ h → extensionality-hom-descent-data-pushout _ _ _ m))
++        ( is-contr-map-is-equiv
++          ( is-equiv-hom-descent-data-map-family-cocone-span-diagram P Q up-c)
++          ( m))
++
++  map-hom-descent-data-pushout :
++    (x : X) →
++    family-cocone-family-with-descent-data-pushout P x →
++    family-cocone-family-with-descent-data-pushout Q x
++  map-hom-descent-data-pushout =
++    pr1 (center uniqueness-map-hom-descent-data-pushout)
++
++  compute-left-map-map-hom-descent-data-pushout :
++    (a : domain-span-diagram 𝒮) →
++    coherence-square-maps
++      ( left-map-family-with-descent-data-pushout P a)
++      ( map-hom-descent-data-pushout (horizontal-map-cocone _ _ c a))
++      ( left-map-hom-descent-data-pushout
++        ( descent-data-family-with-descent-data-pushout P)
++        ( descent-data-family-with-descent-data-pushout Q)
++        ( m)
++        ( a))
++      ( left-map-family-with-descent-data-pushout Q a)
++  compute-left-map-map-hom-descent-data-pushout a =
++    map-inv-equiv
++      ( equiv-coherence-triangle-maps-inv-top'
++        ( left-map-family-with-descent-data-pushout Q a ∘
++          map-hom-descent-data-pushout (horizontal-map-cocone _ _ c a))
++        ( left-map-hom-descent-data-pushout
++          ( descent-data-family-with-descent-data-pushout P)
++          ( descent-data-family-with-descent-data-pushout Q)
++          ( m)
++          ( a))
++        ( left-equiv-family-with-descent-data-pushout P a))
++      ( pr1 (pr2 (center uniqueness-map-hom-descent-data-pushout)) a)
++
++  compute-right-map-map-hom-descent-data-pushout :
++    (b : codomain-span-diagram 𝒮) →
++    coherence-square-maps
++      ( right-map-family-with-descent-data-pushout P b)
++      ( map-hom-descent-data-pushout (vertical-map-cocone _ _ c b))
++      ( right-map-hom-descent-data-pushout
++        ( descent-data-family-with-descent-data-pushout P)
++        ( descent-data-family-with-descent-data-pushout Q)
++        ( m)
++        ( b))
++      ( right-map-family-with-descent-data-pushout Q b)
++  compute-right-map-map-hom-descent-data-pushout b =
++    map-inv-equiv
++      ( equiv-coherence-triangle-maps-inv-top'
++        ( right-map-family-with-descent-data-pushout Q b ∘
++          map-hom-descent-data-pushout (vertical-map-cocone _ _ c b))
++        ( right-map-hom-descent-data-pushout
++          ( descent-data-family-with-descent-data-pushout P)
++          ( descent-data-family-with-descent-data-pushout Q)
++          ( m)
++          ( b))
++        ( right-equiv-family-with-descent-data-pushout P b))
++      ( pr1 (pr2 (pr2 (center uniqueness-map-hom-descent-data-pushout))) b)
++```
+diff --git a/src/synthetic-homotopy-theory/equivalences-descent-data-pushouts.lagda.md b/src/synthetic-homotopy-theory/equivalences-descent-data-pushouts.lagda.md
+index 66b2c0803f..a95a4a12a1 100644
+--- a/src/synthetic-homotopy-theory/equivalences-descent-data-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/equivalences-descent-data-pushouts.lagda.md
+@@ -121,6 +121,13 @@ module _
+     is-equiv-left-map-equiv-descent-data-pushout a =
+       is-equiv-map-equiv (left-equiv-equiv-descent-data-pushout a)
+ 
++    inv-left-map-equiv-descent-data-pushout :
++      (a : domain-span-diagram 𝒮) →
++      left-family-descent-data-pushout Q a →
++      left-family-descent-data-pushout P a
++    inv-left-map-equiv-descent-data-pushout a =
++      map-inv-equiv (left-equiv-equiv-descent-data-pushout a)
++
+     right-equiv-equiv-descent-data-pushout :
+       (b : codomain-span-diagram 𝒮) →
+       right-family-descent-data-pushout P b ≃
+@@ -140,6 +147,13 @@ module _
+     is-equiv-right-map-equiv-descent-data-pushout b =
+       is-equiv-map-equiv (right-equiv-equiv-descent-data-pushout b)
+ 
++    inv-right-map-equiv-descent-data-pushout :
++      (b : codomain-span-diagram 𝒮) →
++      right-family-descent-data-pushout Q b →
++      right-family-descent-data-pushout P b
++    inv-right-map-equiv-descent-data-pushout b =
++      map-inv-equiv (right-equiv-equiv-descent-data-pushout b)
++
+     coherence-equiv-descent-data-pushout :
+       (s : spanning-type-span-diagram 𝒮) →
+       coherence-square-maps
+diff --git a/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md b/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md
+index ec5d935b6c..573147d1a5 100644
+--- a/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md
+@@ -145,6 +145,18 @@ module _
+       ( descent-data-family-with-descent-data-pushout)
+       ( equiv-descent-data-family-with-descent-data-pushout)
+ 
++  inv-left-map-family-with-descent-data-pushout :
++    (a : domain-span-diagram 𝒮) →
++    left-family-family-with-descent-data-pushout a →
++    family-cocone-family-with-descent-data-pushout
++      ( horizontal-map-cocone _ _ c a)
++  inv-left-map-family-with-descent-data-pushout =
++    inv-left-map-equiv-descent-data-pushout
++      ( descent-data-family-cocone-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout))
++      ( descent-data-family-with-descent-data-pushout)
++      ( equiv-descent-data-family-with-descent-data-pushout)
++
+   right-equiv-family-with-descent-data-pushout :
+     (b : codomain-span-diagram 𝒮) →
+     family-cocone-family-with-descent-data-pushout
+@@ -169,6 +181,28 @@ module _
+       ( descent-data-family-with-descent-data-pushout)
+       ( equiv-descent-data-family-with-descent-data-pushout)
+ 
++  is-equiv-right-map-family-with-descent-data-pushout :
++    (b : codomain-span-diagram 𝒮) →
++    is-equiv (right-map-family-with-descent-data-pushout b)
++  is-equiv-right-map-family-with-descent-data-pushout =
++    is-equiv-right-map-equiv-descent-data-pushout
++      ( descent-data-family-cocone-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout))
++      ( descent-data-family-with-descent-data-pushout)
++      ( equiv-descent-data-family-with-descent-data-pushout)
++
++  inv-right-map-family-with-descent-data-pushout :
++    (b : codomain-span-diagram 𝒮) →
++    right-family-family-with-descent-data-pushout b →
++    family-cocone-family-with-descent-data-pushout
++      ( vertical-map-cocone _ _ c b)
++  inv-right-map-family-with-descent-data-pushout =
++    inv-right-map-equiv-descent-data-pushout
++      ( descent-data-family-cocone-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout))
++      ( descent-data-family-with-descent-data-pushout)
++      ( equiv-descent-data-family-with-descent-data-pushout)
++
+   coherence-family-with-descent-data-pushout :
+     (s : spanning-type-span-diagram 𝒮) →
+     coherence-square-maps
+diff --git a/src/synthetic-homotopy-theory/sections-descent-data-pushouts.lagda.md b/src/synthetic-homotopy-theory/sections-descent-data-pushouts.lagda.md
+new file mode 100644
+index 0000000000..583235db13
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/sections-descent-data-pushouts.lagda.md
+@@ -0,0 +1,429 @@
++# Sections of descent data for pushouts
++
++```agda
++module synthetic-homotopy-theory.sections-descent-data-pushouts where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.action-on-identifications-dependent-functions
++open import foundation.action-on-identifications-functions
++open import foundation.commuting-squares-of-identifications
++open import foundation.commuting-triangles-of-maps
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.embeddings
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.functoriality-dependent-function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.span-diagrams
++open import foundation.structure-identity-principle
++open import foundation.torsorial-type-families
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-spans
++open import synthetic-homotopy-theory.dependent-cocones-under-spans
++open import synthetic-homotopy-theory.dependent-universal-property-pushouts
++open import synthetic-homotopy-theory.descent-data-pushouts
++open import synthetic-homotopy-theory.families-descent-data-pushouts
++open import synthetic-homotopy-theory.universal-property-pushouts
++```
++
++</details>
++
++## Idea
++
++Given [descent data](synthetic-homotopy-theory.descent-data-pushouts.md)
++`(PA, PB, PS)` for the [pushout](synthetic-homotopy-theory.pushouts.md) of a
++[span diagram](foundation.span-diagrams.md) `𝒮`, we define the type of
++{{#concept "sections" Disambiguation="descent data for pushouts" Agda=section-descent-data-pushout}}
++to be the type of triples `(tA, tB, tS)`, where
++
++```text
++  tA : (a : A) → PA a
++  tB : (b : B) → PB b
++```
++
++are [sections](foundation.dependent-function-types.md) of the type families `PA`
++and `PB`, respectively, and `tS` is a coherence datum, witnessing that for every
++`s : S`, the dependent triangle
++
++```text
++           tA ∘ f
++  (s : S) --------> PA (f s)
++          \       /
++    tB ∘ g  \   / PS s
++             ∨ ∨
++          PB (g s)
++```
++
++[commutes](foundation.commuting-triangles-of-maps.md).
++
++We show that for a
++[family with descent data](synthetic-homotopy-theory.families-descent-data-pushouts.md)
++`P ≈ (PA, PB, PS)`, the type of sections `(x : X) → P x` of `P` is
++[equivalent](foundation-core.equivalences.md) to the type of sections of
++`(PA, PB, PS)`.
++
++Furthermore, a
++{{#concept "homotopy" Disambiguation="sections of descent data for pushouts" Agda=htpy-section-descent-data-pushout}}
++between sections `(tA, tB, tS)` and `(rA, rB, rS)` consists of component-wise
++[homotopies](foundation-core.homotopies.md)
++
++```text
++  HA : tA ~ rA
++  HB : tB ~ rB
++```
++
++and a coherence datum `HS`, witnessing that for each `s : S`, the square of
++identifications
++
++```text
++               PS s ·l HA fs
++  PS s (tA fs) ------------> PS s (rA fs)
++       |                          |
++  tS s |                          | rS s
++       |                          |
++       ∨                          ∨
++     tB gs -------------------> rB gs
++                   HB gs
++```
++
++[commutes](foundation-core.commuting-squares-of-identifications.md).
++
++We show that the identity types of sections of descent data are characterized by
++homotopies between them.
++
++## Definitions
++
++### Sections of descent data for pushouts
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level} {𝒮 : span-diagram l1 l2 l3}
++  (P : descent-data-pushout 𝒮 l4)
++  where
++
++  section-descent-data-pushout : UU (l1 ⊔ l2 ⊔ l3 ⊔ l4)
++  section-descent-data-pushout =
++    Σ ( (a : domain-span-diagram 𝒮) → left-family-descent-data-pushout P a)
++      ( λ tA →
++        Σ ( (b : codomain-span-diagram 𝒮) →
++            right-family-descent-data-pushout P b)
++          ( λ tB →
++            (s : spanning-type-span-diagram 𝒮) →
++            map-family-descent-data-pushout P s
++              ( tA (left-map-span-diagram 𝒮 s)) ＝
++            tB (right-map-span-diagram 𝒮 s)))
++
++  module _
++    (t : section-descent-data-pushout)
++    where
++
++    left-map-section-descent-data-pushout :
++      (a : domain-span-diagram 𝒮) → left-family-descent-data-pushout P a
++    left-map-section-descent-data-pushout = pr1 t
++
++    right-map-section-descent-data-pushout :
++      (b : codomain-span-diagram 𝒮) → right-family-descent-data-pushout P b
++    right-map-section-descent-data-pushout = pr1 (pr2 t)
++
++    coherence-section-descent-data-pushout :
++      (s : spanning-type-span-diagram 𝒮) →
++      map-family-descent-data-pushout P s
++        ( left-map-section-descent-data-pushout (left-map-span-diagram 𝒮 s)) ＝
++      right-map-section-descent-data-pushout (right-map-span-diagram 𝒮 s)
++    coherence-section-descent-data-pushout = pr2 (pr2 t)
++```
++
++### Homotopies of sections of descent data for pushouts
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level} {𝒮 : span-diagram l1 l2 l3}
++  (P : descent-data-pushout 𝒮 l4)
++  (r t : section-descent-data-pushout P)
++  where
++
++  htpy-section-descent-data-pushout : UU (l1 ⊔ l2 ⊔ l3 ⊔ l4)
++  htpy-section-descent-data-pushout =
++    Σ ( left-map-section-descent-data-pushout P r ~
++        left-map-section-descent-data-pushout P t)
++      ( λ HA →
++        Σ ( right-map-section-descent-data-pushout P r ~
++            right-map-section-descent-data-pushout P t)
++          ( λ HB →
++            (s : spanning-type-span-diagram 𝒮) →
++            coherence-square-identifications
++              ( ap
++                ( map-family-descent-data-pushout P s)
++                ( HA (left-map-span-diagram 𝒮 s)))
++              ( coherence-section-descent-data-pushout P r s)
++              ( coherence-section-descent-data-pushout P t s)
++              ( HB (right-map-span-diagram 𝒮 s))))
++```
++
++### The reflexive homotopy of sections of descent data for pushouts
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level} {𝒮 : span-diagram l1 l2 l3}
++  (P : descent-data-pushout 𝒮 l4)
++  (r : section-descent-data-pushout P)
++  where
++
++  refl-htpy-section-descent-data-pushout :
++    htpy-section-descent-data-pushout P r r
++  pr1 refl-htpy-section-descent-data-pushout = refl-htpy
++  pr1 (pr2 refl-htpy-section-descent-data-pushout) = refl-htpy
++  pr2 (pr2 refl-htpy-section-descent-data-pushout) = right-unit-htpy
++```
++
++## Properties
++
++### Characterization of identity types of sections of descent data for pushouts
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level} {𝒮 : span-diagram l1 l2 l3}
++  (P : descent-data-pushout 𝒮 l4)
++  (r : section-descent-data-pushout P)
++  where
++
++  htpy-eq-section-descent-data-pushout :
++    (t : section-descent-data-pushout P) →
++    (r ＝ t) → htpy-section-descent-data-pushout P r t
++  htpy-eq-section-descent-data-pushout .r refl =
++    refl-htpy-section-descent-data-pushout P r
++
++  abstract
++    is-torsorial-htpy-section-descent-data-pushout :
++      is-torsorial (htpy-section-descent-data-pushout P r)
++    is-torsorial-htpy-section-descent-data-pushout =
++      is-torsorial-Eq-structure
++        ( is-torsorial-htpy (left-map-section-descent-data-pushout P r))
++        ( left-map-section-descent-data-pushout P r , refl-htpy)
++        ( is-torsorial-Eq-structure
++          ( is-torsorial-htpy (right-map-section-descent-data-pushout P r))
++          ( right-map-section-descent-data-pushout P r , refl-htpy)
++          ( is-torsorial-htpy
++            ( coherence-section-descent-data-pushout P r ∙h refl-htpy)))
++
++  is-equiv-htpy-eq-section-descent-data-pushout :
++    (t : section-descent-data-pushout P) →
++    is-equiv (htpy-eq-section-descent-data-pushout t)
++  is-equiv-htpy-eq-section-descent-data-pushout =
++    fundamental-theorem-id
++      ( is-torsorial-htpy-section-descent-data-pushout)
++      ( htpy-eq-section-descent-data-pushout)
++
++  extensionality-section-descent-data-pushout :
++    (t : section-descent-data-pushout P) →
++    (r ＝ t) ≃ htpy-section-descent-data-pushout P r t
++  pr1 (extensionality-section-descent-data-pushout t) =
++    htpy-eq-section-descent-data-pushout t
++  pr2 (extensionality-section-descent-data-pushout t) =
++    is-equiv-htpy-eq-section-descent-data-pushout t
++```
++
++### Sections of families over a pushout correspond to sections of the corresponding descent data
++
++**Proof:** Given a family with descent data `P ≈ (PA, PB, PS)`, note that a
++section `t : (x : X) → P x` of `P` induces a section `(tA, tB, tS)` of
++`(PA, PB, PS)`, where
++
++```text
++  tA a := eA (tia)
++  tB b := eB (tjb),
++```
++
++and `tS s` is given by the chain of identifications
++
++```text
++  PS s (eA (tifs))
++  = eB (tr P (H s) (tifs))   by coherence of P ≈ (PA, PB, PS)
++  = eB (tjgs)                by apd t (H s)
++```
++
++This map factors through the dependent cocone map
++
++```text
++                dependent-cocone-map
++  (x : X) → P x --------------------> dependent-cocone P
++                \                  /
++                  \              /
++                    \          /
++                      ∨      ∨
++                section (PA, PB, PS),
++```
++
++where the right map takes `(dA, dB, dS)` to
++
++```text
++  tA a := eA (dA a)
++  tB b := eB (dB a)
++  tS s : PS s (eA (dA fs))
++         = eB (tr P (H s) (dA fs))  by coherence of P ≈ (PA, PB, PS)
++         = eB (dB gs)               by dS.
++```
++
++The top map is an equivalence, since we assume `X` to be a pushout, and the
++right map is an equivalence, since concatenating an identification is an
++equivalence, and the action on identifications of equivalences is an
++equivalence. It follows that the left map is an equivalence
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (P : family-with-descent-data-pushout c l5)
++  where
++
++  section-descent-data-section-family-cocone-span-diagram :
++    ((x : X) → family-cocone-family-with-descent-data-pushout P x) →
++    section-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++  pr1 (section-descent-data-section-family-cocone-span-diagram f) a =
++    left-map-family-with-descent-data-pushout P a
++      ( f (horizontal-map-cocone _ _ c a))
++  pr1 (pr2 (section-descent-data-section-family-cocone-span-diagram f)) b =
++    right-map-family-with-descent-data-pushout P b
++      ( f (vertical-map-cocone _ _ c b))
++  pr2 (pr2 (section-descent-data-section-family-cocone-span-diagram f)) s =
++    ( inv
++      ( coherence-family-with-descent-data-pushout P s
++        ( f (horizontal-map-cocone _ _ c (left-map-span-diagram 𝒮 s))))) ∙
++    ( ap
++      ( right-map-family-with-descent-data-pushout P
++        ( right-map-span-diagram 𝒮 s))
++      ( apd f (coherence-square-cocone _ _ c s)))
++
++  section-descent-data-dependent-cocone-span-diagram :
++    dependent-cocone-span-diagram c
++      ( family-cocone-family-with-descent-data-pushout P) →
++    section-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++  pr1 (section-descent-data-dependent-cocone-span-diagram d) a =
++    left-map-family-with-descent-data-pushout P a
++      ( horizontal-map-dependent-cocone _ _ _ _ d a)
++  pr1 (pr2 (section-descent-data-dependent-cocone-span-diagram d)) b =
++    right-map-family-with-descent-data-pushout P b
++      ( vertical-map-dependent-cocone _ _ _ _ d b)
++  pr2 (pr2 (section-descent-data-dependent-cocone-span-diagram d)) s =
++    ( inv (coherence-family-with-descent-data-pushout P s _)) ∙
++    ( ap
++      ( right-map-family-with-descent-data-pushout P
++        ( right-map-span-diagram 𝒮 s))
++      ( coherence-square-dependent-cocone _ _ _ _ d s))
++
++  abstract
++    is-equiv-section-descent-data-depedent-cocone-span-diagram :
++      is-equiv section-descent-data-dependent-cocone-span-diagram
++    is-equiv-section-descent-data-depedent-cocone-span-diagram =
++      is-equiv-map-Σ _
++        ( is-equiv-map-Π-is-fiberwise-equiv
++          ( is-equiv-left-map-family-with-descent-data-pushout P))
++        ( λ tA →
++          is-equiv-map-Σ _
++            ( is-equiv-map-Π-is-fiberwise-equiv
++              ( is-equiv-right-map-family-with-descent-data-pushout P))
++            ( λ tB →
++              is-equiv-map-Π-is-fiberwise-equiv
++                ( λ s →
++                  is-equiv-comp _ _
++                    ( is-emb-equiv
++                      ( right-equiv-family-with-descent-data-pushout P
++                        ( right-map-span-diagram 𝒮 s))
++                      ( _)
++                      ( _))
++                    ( is-equiv-inv-concat _ _))))
++
++  triangle-section-descent-data-section-family-cocone-span-diagram :
++    coherence-triangle-maps
++      ( section-descent-data-section-family-cocone-span-diagram)
++      ( section-descent-data-dependent-cocone-span-diagram)
++      ( dependent-cocone-map-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout P))
++  triangle-section-descent-data-section-family-cocone-span-diagram = refl-htpy
++
++  abstract
++    is-equiv-section-descent-data-section-family-cocone-span-diagram :
++      universal-property-pushout _ _ c →
++      is-equiv (section-descent-data-section-family-cocone-span-diagram)
++    is-equiv-section-descent-data-section-family-cocone-span-diagram up-c =
++      is-equiv-left-map-triangle
++        ( section-descent-data-section-family-cocone-span-diagram)
++        ( section-descent-data-dependent-cocone-span-diagram)
++        ( dependent-cocone-map-span-diagram c
++          ( family-cocone-family-with-descent-data-pushout P))
++        ( triangle-section-descent-data-section-family-cocone-span-diagram)
++        ( dependent-universal-property-universal-property-pushout _ _ _ up-c
++          ( family-cocone-family-with-descent-data-pushout P))
++        ( is-equiv-section-descent-data-depedent-cocone-span-diagram)
++```
++
++As a corollary, for any given section `(tA, tB, tS)` of `(PA, PB, PS)`, there is
++a unique section `t : (x : X) → P x` of `P` such that its induced section of
++`(PA, PB, PS)` is homotopic to `(tA, tB, tS)`.
++
++**Proof:** Since the map taking sections of `P` to sections of `(PA, PB, PS)` is
++an equivalence, it has contractible fibers. The fiber at `(tA, tB, tS)` is the
++type of sections of `P` that induce a section of `(PA, PB, PS)` which is
++identified with `(tA, tB, tS)`, and such identifications are characterized by
++homotopies of sections of `(PA, PB, PS)`.
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (up-c : universal-property-pushout _ _ c)
++  (P : family-with-descent-data-pushout c l5)
++  (t :
++    section-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P))
++  where
++
++  abstract
++    uniqueness-section-family-section-descent-data-pushout :
++      is-contr
++        ( Σ ( (x : X) → family-cocone-family-with-descent-data-pushout P x)
++            ( λ h →
++              htpy-section-descent-data-pushout
++                ( descent-data-family-with-descent-data-pushout P)
++                ( section-descent-data-section-family-cocone-span-diagram P h)
++                ( t)))
++    uniqueness-section-family-section-descent-data-pushout =
++      is-contr-equiv'
++        ( fiber (section-descent-data-section-family-cocone-span-diagram P) t)
++        ( equiv-tot
++          ( λ h →
++            extensionality-section-descent-data-pushout
++              ( descent-data-family-with-descent-data-pushout P)
++              ( _)
++              ( t)))
++        ( is-contr-map-is-equiv
++          ( is-equiv-section-descent-data-section-family-cocone-span-diagram P
++            ( up-c))
++          ( t))
++
++  section-family-section-descent-data-pushout :
++    (x : X) → family-cocone-family-with-descent-data-pushout P x
++  section-family-section-descent-data-pushout =
++    pr1 (center uniqueness-section-family-section-descent-data-pushout)
++
++  htpy-section-family-section-descent-data-pushout :
++    htpy-section-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( section-descent-data-section-family-cocone-span-diagram P
++        ( section-family-section-descent-data-pushout))
++      ( t)
++  htpy-section-family-section-descent-data-pushout =
++    pr2 (center uniqueness-section-family-section-descent-data-pushout)
++```
+
+From bfc49db1e72e0d50e9606d48b07477e0c68f46c8 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Sat, 1 Jun 2024 16:25:30 +0200
+Subject: [PATCH 2/7] Families of equivalences over pushouts
+
+---
+ src/foundation/equivalences.lagda.md          |  14 +
+ src/synthetic-homotopy-theory.lagda.md        |   1 +
+ ...ata-pushouts-equivalence-families.lagda.md | 401 ++++++++++++++++++
+ 3 files changed, 416 insertions(+)
+ create mode 100644 src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
+
+diff --git a/src/foundation/equivalences.lagda.md b/src/foundation/equivalences.lagda.md
+index 0a3a32779f..354fa98d51 100644
+--- a/src/foundation/equivalences.lagda.md
++++ b/src/foundation/equivalences.lagda.md
+@@ -16,6 +16,7 @@ open import foundation.equivalence-extensionality
+ open import foundation.function-extensionality
+ open import foundation.functoriality-fibers-of-maps
+ open import foundation.logical-equivalences
++open import foundation.transport-along-identifications
+ open import foundation.transposition-identifications-along-equivalences
+ open import foundation.truncated-maps
+ open import foundation.universal-property-equivalences
+@@ -572,6 +573,19 @@ pr1 (equiv-precomp-equiv e C) = _∘e e
+ pr2 (equiv-precomp-equiv e C) = is-equiv-precomp-equiv-equiv e
+ ```
+ 
++### Computing transport in the type of equivalences
++
++```agda
++module _
++  {l1 l2 l3 : Level} {A : UU l1} (B : A → UU l2) (C : A → UU l3)
++  where
++
++  tr-equiv-type :
++    {x y : A} (p : x ＝ y) (e : B x ≃ C x) →
++    tr (λ x → B x ≃ C x) p e ＝ equiv-tr C p ∘e e ∘e equiv-tr B (inv p)
++  tr-equiv-type refl e = eq-htpy-equiv refl-htpy
++```
++
+ ### A cospan in which one of the legs is an equivalence is a pullback if and only if the corresponding map on the cone is an equivalence
+ 
+ ```agda
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index fff0e41691..d98744b118 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -48,6 +48,7 @@ open import synthetic-homotopy-theory.descent-circle-equivalence-types public
+ open import synthetic-homotopy-theory.descent-circle-function-types public
+ open import synthetic-homotopy-theory.descent-circle-subtypes public
+ open import synthetic-homotopy-theory.descent-data-pushouts public
++open import synthetic-homotopy-theory.descent-data-pushouts-equivalence-families public
+ open import synthetic-homotopy-theory.descent-data-pushouts-function-families public
+ open import synthetic-homotopy-theory.descent-data-sequential-colimits public
+ open import synthetic-homotopy-theory.descent-property-pushouts public
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md b/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
+new file mode 100644
+index 0000000000..ca17c3d298
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
+@@ -0,0 +1,401 @@
++# Descent data for families of equivalences over pushouts
++
++```agda
++{-# OPTIONS --lossy-unification #-}
++module synthetic-homotopy-theory.descent-data-pushouts-equivalence-families where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.commuting-squares-of-maps
++open import foundation.commuting-triangles-of-maps
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equivalence-extensionality
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.function-types
++open import foundation.functoriality-dependent-function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.homotopy-algebra
++open import foundation.postcomposition-functions
++open import foundation.span-diagrams
++open import foundation.transport-along-identifications
++open import foundation.universal-property-equivalences
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies-composition
++
++open import synthetic-homotopy-theory.cocones-under-spans
++open import synthetic-homotopy-theory.descent-data-pushouts
++open import synthetic-homotopy-theory.equivalences-descent-data-pushouts
++open import synthetic-homotopy-theory.families-descent-data-pushouts
++open import synthetic-homotopy-theory.morphisms-descent-data-pushouts
++open import synthetic-homotopy-theory.sections-descent-data-pushouts
++open import synthetic-homotopy-theory.universal-property-pushouts
++```
++
++</details>
++
++## Idea
++
++Given two
++[families with descent data](synthetic-homotopy-theory.families-descent-data-pushouts.md)
++for [pushouts](synthetic-homotopy-theory.pushouts.md) `P ≈ (PA, PB, PS)` and
++`Q ≈ (QA, QB, QS)`, we show that fiberwise equivalences `(x : X) → P x ≃ Q x`
++correspond to
++[equivalences](synthetic-homotopy-theory.equivalences-descent-data-pushouts.md)
++`(PA, PB, PS) ≃ (QA, QB, QS)`.
++
++**Proof:** The proof follows exactly the same pattern as the one in
++[`descent-data-pushouts-function-families`](synthetic-homotopy-theory.descent-data-pushouts-function-families.md).
++
++## Definitions
++
++### The type family of fiberwise equivalences with corresponding descent data for pushouts
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (P : family-with-descent-data-pushout c l5)
++  (Q : family-with-descent-data-pushout c l6)
++  where
++
++  family-cocone-family-with-descent-data-pushout-equivalence-family :
++    X → UU (l5 ⊔ l6)
++  family-cocone-family-with-descent-data-pushout-equivalence-family x =
++    family-cocone-family-with-descent-data-pushout P x ≃
++    family-cocone-family-with-descent-data-pushout Q x
++
++  descent-data-pushout-equivalence-family :
++    descent-data-pushout 𝒮 (l5 ⊔ l6)
++  pr1 descent-data-pushout-equivalence-family a =
++    left-family-family-with-descent-data-pushout P a ≃
++    left-family-family-with-descent-data-pushout Q a
++  pr1 (pr2 descent-data-pushout-equivalence-family) b =
++    right-family-family-with-descent-data-pushout P b ≃
++    right-family-family-with-descent-data-pushout Q b
++  pr2 (pr2 descent-data-pushout-equivalence-family) s =
++    ( equiv-postcomp-equiv
++      ( equiv-family-family-with-descent-data-pushout Q s)
++      ( _)) ∘e
++    ( equiv-precomp-equiv
++      ( inv-equiv (equiv-family-family-with-descent-data-pushout P s))
++      ( _))
++
++  left-equiv-equiv-descent-data-pushout-equivalence-family :
++    (a : domain-span-diagram 𝒮) →
++    ( family-cocone-family-with-descent-data-pushout P
++        ( horizontal-map-cocone _ _ c a) ≃
++      family-cocone-family-with-descent-data-pushout Q
++        ( horizontal-map-cocone _ _ c a)) ≃
++    ( left-family-family-with-descent-data-pushout P a ≃
++      left-family-family-with-descent-data-pushout Q a)
++  left-equiv-equiv-descent-data-pushout-equivalence-family a =
++    ( equiv-postcomp-equiv
++      ( left-equiv-family-with-descent-data-pushout Q a)
++      ( _)) ∘e
++    ( equiv-precomp-equiv
++      ( inv-equiv (left-equiv-family-with-descent-data-pushout P a))
++      ( _))
++
++  right-equiv-equiv-descent-data-pushout-equivalence-family :
++    (b : codomain-span-diagram 𝒮) →
++    ( family-cocone-family-with-descent-data-pushout P
++        ( vertical-map-cocone _ _ c b) ≃
++      family-cocone-family-with-descent-data-pushout Q
++        ( vertical-map-cocone _ _ c b)) ≃
++    ( right-family-family-with-descent-data-pushout P b ≃
++      right-family-family-with-descent-data-pushout Q b)
++  right-equiv-equiv-descent-data-pushout-equivalence-family b =
++    ( equiv-postcomp-equiv
++      ( right-equiv-family-with-descent-data-pushout Q b)
++      ( _)) ∘e
++    ( equiv-precomp-equiv
++      ( inv-equiv (right-equiv-family-with-descent-data-pushout P b))
++      ( _))
++
++  coherence-equiv-descent-data-pushout-equivalence-family :
++    (s : spanning-type-span-diagram 𝒮) →
++    coherence-square-maps
++      ( map-equiv
++        ( left-equiv-equiv-descent-data-pushout-equivalence-family
++          ( left-map-span-diagram 𝒮 s)))
++      ( tr
++        ( family-cocone-family-with-descent-data-pushout-equivalence-family)
++        ( coherence-square-cocone _ _ c s))
++      ( map-family-descent-data-pushout
++        ( descent-data-pushout-equivalence-family)
++        ( s))
++      ( map-equiv
++        ( right-equiv-equiv-descent-data-pushout-equivalence-family
++          ( right-map-span-diagram 𝒮 s)))
++  coherence-equiv-descent-data-pushout-equivalence-family s =
++    ( ( map-equiv
++      ( right-equiv-equiv-descent-data-pushout-equivalence-family
++        ( right-map-span-diagram 𝒮 s))) ·l
++      ( tr-equiv-type
++        ( family-cocone-family-with-descent-data-pushout P)
++        ( family-cocone-family-with-descent-data-pushout Q)
++        ( coherence-square-cocone _ _ c s))) ∙h
++    ( λ e →
++      eq-htpy-equiv
++        ( horizontal-concat-htpy
++          ( coherence-family-with-descent-data-pushout Q s ·r map-equiv e)
++          ( coherence-square-maps-inv-equiv
++            ( equiv-tr
++              ( family-cocone-family-with-descent-data-pushout P)
++              ( coherence-square-cocone _ _ c s))
++            ( left-equiv-family-with-descent-data-pushout P
++              ( left-map-span-diagram 𝒮 s))
++            ( right-equiv-family-with-descent-data-pushout P
++              ( right-map-span-diagram 𝒮 s))
++            ( equiv-family-family-with-descent-data-pushout P s)
++            ( inv-htpy (coherence-family-with-descent-data-pushout P s)))))
++
++  equiv-descent-data-pushout-equivalence-family :
++    equiv-descent-data-pushout
++      ( descent-data-family-cocone-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout-equivalence-family))
++      ( descent-data-pushout-equivalence-family)
++  pr1 equiv-descent-data-pushout-equivalence-family =
++    left-equiv-equiv-descent-data-pushout-equivalence-family
++  pr1 (pr2 equiv-descent-data-pushout-equivalence-family) =
++    right-equiv-equiv-descent-data-pushout-equivalence-family
++  pr2 (pr2 equiv-descent-data-pushout-equivalence-family) =
++    coherence-equiv-descent-data-pushout-equivalence-family
++
++  family-with-descent-data-pushout-equivalence-family :
++    family-with-descent-data-pushout c (l5 ⊔ l6)
++  pr1 family-with-descent-data-pushout-equivalence-family =
++    family-cocone-family-with-descent-data-pushout-equivalence-family
++  pr1 (pr2 family-with-descent-data-pushout-equivalence-family) =
++    descent-data-pushout-equivalence-family
++  pr2 (pr2 family-with-descent-data-pushout-equivalence-family) =
++    equiv-descent-data-pushout-equivalence-family
++```
++
++## Properties
++
++### Sections of descent data for families of equivalences correspond to equivalences of descent data
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (P : family-with-descent-data-pushout c l5)
++  (Q : family-with-descent-data-pushout c l6)
++  where
++
++  equiv-section-descent-data-pushout-equivalence-family :
++    section-descent-data-pushout
++      ( descent-data-pushout-equivalence-family P Q) →
++    equiv-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( descent-data-family-with-descent-data-pushout Q)
++  pr1 (equiv-section-descent-data-pushout-equivalence-family t) =
++    left-map-section-descent-data-pushout
++      ( descent-data-pushout-equivalence-family P Q)
++      ( t)
++  pr1 (pr2 (equiv-section-descent-data-pushout-equivalence-family t)) =
++    right-map-section-descent-data-pushout
++      ( descent-data-pushout-equivalence-family P Q)
++      ( t)
++  pr2 (pr2 (equiv-section-descent-data-pushout-equivalence-family t)) s =
++    inv-htpy
++      ( map-inv-equiv
++        ( equiv-coherence-triangle-maps-inv-top'
++          ( ( map-family-family-with-descent-data-pushout Q s) ∘
++            ( map-equiv
++              ( left-map-section-descent-data-pushout
++                ( descent-data-pushout-equivalence-family P Q)
++                ( t)
++                ( left-map-span-diagram 𝒮 s))))
++          ( map-equiv
++            ( right-map-section-descent-data-pushout
++              ( descent-data-pushout-equivalence-family P Q)
++              ( t)
++              ( right-map-span-diagram 𝒮 s)))
++          ( equiv-family-family-with-descent-data-pushout P s))
++        ( htpy-eq-equiv
++          ( coherence-section-descent-data-pushout
++            ( descent-data-pushout-equivalence-family P Q)
++            ( t)
++            ( s))))
++
++  abstract
++    is-equiv-equiv-section-descent-data-pushout-equivalence-family :
++      is-equiv equiv-section-descent-data-pushout-equivalence-family
++    is-equiv-equiv-section-descent-data-pushout-equivalence-family =
++      is-equiv-tot-is-fiberwise-equiv
++        ( λ tA →
++          is-equiv-tot-is-fiberwise-equiv
++            ( λ tB →
++              is-equiv-map-Π-is-fiberwise-equiv
++                ( λ s →
++                  is-equiv-comp _ _
++                    ( is-equiv-map-equiv (extensionality-equiv _ _))
++                    ( is-equiv-comp _ _
++                      ( is-equiv-map-inv-equiv
++                        ( equiv-coherence-triangle-maps-inv-top'
++                          ( (map-family-family-with-descent-data-pushout Q s) ∘
++                            ( map-equiv (tA (left-map-span-diagram 𝒮 s))))
++                          ( map-equiv (tB (right-map-span-diagram 𝒮 s)))
++                          ( equiv-family-family-with-descent-data-pushout P s)))
++                      ( is-equiv-inv-htpy _ _)))))
++
++  equiv-descent-data-equiv-family-cocone-span-diagram :
++    ( (x : X) →
++      family-cocone-family-with-descent-data-pushout P x ≃
++      family-cocone-family-with-descent-data-pushout Q x) →
++    equiv-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( descent-data-family-with-descent-data-pushout Q)
++  equiv-descent-data-equiv-family-cocone-span-diagram =
++    ( equiv-section-descent-data-pushout-equivalence-family) ∘
++    ( section-descent-data-section-family-cocone-span-diagram
++      ( family-with-descent-data-pushout-equivalence-family P Q))
++
++  abstract
++    is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram :
++      universal-property-pushout _ _ c →
++      is-equiv equiv-descent-data-equiv-family-cocone-span-diagram
++    is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram up-c =
++      is-equiv-comp _ _
++        ( is-equiv-section-descent-data-section-family-cocone-span-diagram _
++          ( up-c))
++        ( is-equiv-equiv-section-descent-data-pushout-equivalence-family)
++```
++
++As a corollary, given an equivalence
++`(hA, hB, hS) : (PA, PB, PS) ≃ (QA, QB, QS)`, there is a unique family of
++equivalences `h : (x : X) → P x → Q x` such that its induced equivalence is
++homotopic to `(hA, hB, hS)`. The homotopy provides us in particular with the
++component-wise [homotopies](foundation-core.homotopies.md)
++
++```text
++                 hA a                               hB a
++          PA a --------> QA a                PB b --------> QB b
++            |              ∧                   |              ∧
++  (eᴾA a)⁻¹ |              | eꟴA a   (eᴾB b)⁻¹ |              | eꟴB b
++            |              |                   |              |
++            ∨              |                   ∨              |
++         P (ia) ------> Q (ia)              P (jb) ------> Q (jb)
++                h (ia)                             h (jb)
++```
++
++which we can turn into the computation rules
++
++```text
++              eᴾA a                           eᴾB a
++      P (ia) -------> PA a            P (jb) -------> PB b
++         |              |                |              |
++  h (ia) |              | hA a    h (jb) |              | hB b
++         |              |                |              |
++         ∨              ∨                ∨              ∨
++      Q (ia) -------> QA a            Q (jb) -------> QB b
++              eꟴA a                           eꟴB b
++```
++
++by inverting the inverted equivalences.
++
++```agda
++module _
++  {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} {c : cocone-span-diagram 𝒮 X}
++  (up-c : universal-property-pushout _ _ c)
++  (P : family-with-descent-data-pushout c l5)
++  (Q : family-with-descent-data-pushout c l6)
++  (e :
++    equiv-descent-data-pushout
++      ( descent-data-family-with-descent-data-pushout P)
++      ( descent-data-family-with-descent-data-pushout Q))
++  where
++
++  abstract
++    uniqueness-equiv-equiv-descent-data-pushout :
++      is-contr
++        ( Σ ( (x : X) →
++              family-cocone-family-with-descent-data-pushout P x ≃
++              family-cocone-family-with-descent-data-pushout Q x)
++            ( λ h →
++              htpy-equiv-descent-data-pushout
++                ( descent-data-family-with-descent-data-pushout P)
++                ( descent-data-family-with-descent-data-pushout Q)
++                ( equiv-descent-data-equiv-family-cocone-span-diagram P Q h)
++                ( e)))
++    uniqueness-equiv-equiv-descent-data-pushout =
++      is-contr-equiv'
++        ( fiber (equiv-descent-data-equiv-family-cocone-span-diagram P Q) e)
++        ( equiv-tot
++          ( λ f → extensionality-equiv-descent-data-pushout _ e))
++        ( is-contr-map-is-equiv
++          ( is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram P Q
++            ( up-c))
++          ( e))
++
++  equiv-equiv-descent-data-pushout :
++    (x : X) →
++    family-cocone-family-with-descent-data-pushout P x ≃
++    family-cocone-family-with-descent-data-pushout Q x
++  equiv-equiv-descent-data-pushout =
++    pr1 (center uniqueness-equiv-equiv-descent-data-pushout)
++
++  map-equiv-descent-data-pushout :
++    (x : X) →
++    family-cocone-family-with-descent-data-pushout P x →
++    family-cocone-family-with-descent-data-pushout Q x
++  map-equiv-descent-data-pushout x =
++    map-equiv (equiv-equiv-descent-data-pushout x)
++
++  compute-left-map-equiv-equiv-descent-data-pushout :
++    (a : domain-span-diagram 𝒮) →
++    coherence-square-maps
++      ( left-map-family-with-descent-data-pushout P a)
++      ( map-equiv-descent-data-pushout (horizontal-map-cocone _ _ c a))
++      ( left-map-equiv-descent-data-pushout
++        ( descent-data-family-with-descent-data-pushout P)
++        ( descent-data-family-with-descent-data-pushout Q)
++        ( e)
++        ( a))
++      ( left-map-family-with-descent-data-pushout Q a)
++  compute-left-map-equiv-equiv-descent-data-pushout a =
++    map-inv-equiv
++      ( equiv-coherence-triangle-maps-inv-top'
++        ( left-map-family-with-descent-data-pushout Q a ∘
++          map-equiv-descent-data-pushout (horizontal-map-cocone _ _ c a))
++        ( left-map-equiv-descent-data-pushout
++          ( descent-data-family-with-descent-data-pushout P)
++          ( descent-data-family-with-descent-data-pushout Q)
++          ( e)
++          ( a))
++        ( left-equiv-family-with-descent-data-pushout P a))
++      ( pr1 (pr2 (center uniqueness-equiv-equiv-descent-data-pushout)) a)
++
++  compute-right-map-equiv-equiv-descent-data-pushout :
++    (b : codomain-span-diagram 𝒮) →
++    coherence-square-maps
++      ( right-map-family-with-descent-data-pushout P b)
++      ( map-equiv-descent-data-pushout (vertical-map-cocone _ _ c b))
++      ( right-map-equiv-descent-data-pushout
++        ( descent-data-family-with-descent-data-pushout P)
++        ( descent-data-family-with-descent-data-pushout Q)
++        ( e)
++        ( b))
++      ( right-map-family-with-descent-data-pushout Q b)
++  compute-right-map-equiv-equiv-descent-data-pushout b =
++    map-inv-equiv
++      ( equiv-coherence-triangle-maps-inv-top'
++        ( right-map-family-with-descent-data-pushout Q b ∘
++          map-equiv-descent-data-pushout (vertical-map-cocone _ _ c b))
++        ( right-map-equiv-descent-data-pushout
++          ( descent-data-family-with-descent-data-pushout P)
++          ( descent-data-family-with-descent-data-pushout Q)
++          ( e)
++          ( b))
++        ( right-equiv-family-with-descent-data-pushout P b))
++      ( pr1 (pr2 (pr2 (center uniqueness-equiv-equiv-descent-data-pushout))) b)
++```
+
+From 9c124664bb1b3c1cd895dad33c058e3c5660fcbf Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Sat, 1 Jun 2024 17:07:48 +0200
+Subject: [PATCH 3/7] Families of identity types over pushouts
+
+---
+ src/synthetic-homotopy-theory.lagda.md        |  1 +
+ ...cent-data-pushouts-identity-types.lagda.md | 94 +++++++++++++++++++
+ 2 files changed, 95 insertions(+)
+ create mode 100644 src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
+
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index d98744b118..ad3c8fd71f 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -50,6 +50,7 @@ open import synthetic-homotopy-theory.descent-circle-subtypes public
+ open import synthetic-homotopy-theory.descent-data-pushouts public
+ open import synthetic-homotopy-theory.descent-data-pushouts-equivalence-families public
+ open import synthetic-homotopy-theory.descent-data-pushouts-function-families public
++open import synthetic-homotopy-theory.descent-data-pushouts-identity-types public
+ open import synthetic-homotopy-theory.descent-data-sequential-colimits public
+ open import synthetic-homotopy-theory.descent-property-pushouts public
+ open import synthetic-homotopy-theory.descent-property-sequential-colimits public
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md b/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
+new file mode 100644
+index 0000000000..408f22ed36
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
+@@ -0,0 +1,94 @@
++# Descent data for families of identifications over pushouts
++
++```agda
++{-# OPTIONS --lossy-unification #-}
++module synthetic-homotopy-theory.descent-data-pushouts-identity-types where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.identity-types
++open import foundation.span-diagrams
++open import foundation.transport-along-identifications
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-spans
++open import synthetic-homotopy-theory.descent-data-pushouts
++open import synthetic-homotopy-theory.equivalences-descent-data-pushouts
++open import synthetic-homotopy-theory.families-descent-data-pushouts
++```
++
++</details>
++
++## Idea
++
++Given a [cocone](synthetic-homotopy-theory.cocones-under-spans.md) under a
++[span diagram](foundation.span-diagrams.md)
++
++```text
++        g
++    S -----> B
++    |        |
++  f |        | j
++    ∨        ∨
++    A -----> X
++        i
++```
++
++and a point `x₀ : X`, the type family of
++[identity types](foundation-core.identity-types.md) based at `x₀`, `x ↦ x₀ = x`,
++is [characterized](synthetic-homotopy-theory.families-descent-data-pushouts.md)
++by the [descent data](synthetic-homotopy-theory.descent-data-pushouts.md)
++`(IA, IB, IS)`, where `IA` and `IB` are families of identity types
++
++```text
++  IA a := x₀ = ia
++  IB b := x₀ = jb,
++```
++
++and the gluing data `IS s : (x₀ = ifs) ≃ (x₀ = jgs)` is given by concatenation
++with the coherence of the cocone `H s : ifs = jgs`.
++
++## Definitions
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level} {𝒮 : span-diagram l1 l2 l3}
++  {X : UU l4} (c : cocone-span-diagram 𝒮 X)
++  (x₀ : X)
++  where
++
++  family-cocone-family-with-descent-data-pushout-identity-type : X → UU l4
++  family-cocone-family-with-descent-data-pushout-identity-type x =
++    x₀ ＝ x
++
++  descent-data-pushout-identity-type : descent-data-pushout 𝒮 l4
++  pr1 descent-data-pushout-identity-type a =
++    x₀ ＝ horizontal-map-cocone _ _ c a
++  pr1 (pr2 descent-data-pushout-identity-type) b =
++    x₀ ＝ vertical-map-cocone _ _ c b
++  pr2 (pr2 descent-data-pushout-identity-type) s =
++    equiv-concat' x₀ (coherence-square-cocone _ _ c s)
++
++  equiv-descent-data-pushout-identity-type :
++    equiv-descent-data-pushout
++      ( descent-data-family-cocone-span-diagram c
++        ( family-cocone-family-with-descent-data-pushout-identity-type))
++      ( descent-data-pushout-identity-type)
++  pr1 equiv-descent-data-pushout-identity-type a = id-equiv
++  pr1 (pr2 equiv-descent-data-pushout-identity-type) b = id-equiv
++  pr2 (pr2 equiv-descent-data-pushout-identity-type) s =
++    tr-Id-right (coherence-square-cocone _ _ c s)
++
++  family-with-descent-data-pushout-identity-type :
++    family-with-descent-data-pushout c l4
++  pr1 family-with-descent-data-pushout-identity-type =
++    family-cocone-family-with-descent-data-pushout-identity-type
++  pr1 (pr2 family-with-descent-data-pushout-identity-type) =
++    descent-data-pushout-identity-type
++  pr2 (pr2 family-with-descent-data-pushout-identity-type) =
++    equiv-descent-data-pushout-identity-type
++```
+
+From 79aad87569f24af253aef35b21cf23f73f3e3741 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 4 Jun 2024 13:36:21 +0200
+Subject: [PATCH 4/7] Parenthesization and `Q` -> `R`
+
+---
+ ...ata-pushouts-equivalence-families.lagda.md | 108 +++++++--------
+ ...t-data-pushouts-function-families.lagda.md | 127 +++++++++---------
+ ...cent-data-pushouts-identity-types.lagda.md |  12 +-
+ 3 files changed, 127 insertions(+), 120 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md b/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
+index ca17c3d298..9baa8bd485 100644
+--- a/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
+@@ -2,6 +2,7 @@
+ 
+ ```agda
+ {-# OPTIONS --lossy-unification #-}
++
+ module synthetic-homotopy-theory.descent-data-pushouts-equivalence-families where
+ ```
+ 
+@@ -44,10 +45,11 @@ open import synthetic-homotopy-theory.universal-property-pushouts
+ Given two
+ [families with descent data](synthetic-homotopy-theory.families-descent-data-pushouts.md)
+ for [pushouts](synthetic-homotopy-theory.pushouts.md) `P ≈ (PA, PB, PS)` and
+-`Q ≈ (QA, QB, QS)`, we show that fiberwise equivalences `(x : X) → P x ≃ Q x`
+-correspond to
++`R ≈ (RA, RB, RS)`, we show that
++[fiberwise equivalences](foundation-core.families-of-equivalences.md)
++`(x : X) → P x ≃ R x` correspond to
+ [equivalences](synthetic-homotopy-theory.equivalences-descent-data-pushouts.md)
+-`(PA, PB, PS) ≃ (QA, QB, QS)`.
++`(PA, PB, PS) ≃ (RA, RB, RS)`.
+ 
+ **Proof:** The proof follows exactly the same pattern as the one in
+ [`descent-data-pushouts-function-families`](synthetic-homotopy-theory.descent-data-pushouts-function-families.md).
+@@ -61,26 +63,26 @@ module _
+   {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
+   {X : UU l4} {c : cocone-span-diagram 𝒮 X}
+   (P : family-with-descent-data-pushout c l5)
+-  (Q : family-with-descent-data-pushout c l6)
++  (R : family-with-descent-data-pushout c l6)
+   where
+ 
+   family-cocone-family-with-descent-data-pushout-equivalence-family :
+     X → UU (l5 ⊔ l6)
+   family-cocone-family-with-descent-data-pushout-equivalence-family x =
+     family-cocone-family-with-descent-data-pushout P x ≃
+-    family-cocone-family-with-descent-data-pushout Q x
++    family-cocone-family-with-descent-data-pushout R x
+ 
+   descent-data-pushout-equivalence-family :
+     descent-data-pushout 𝒮 (l5 ⊔ l6)
+   pr1 descent-data-pushout-equivalence-family a =
+     left-family-family-with-descent-data-pushout P a ≃
+-    left-family-family-with-descent-data-pushout Q a
++    left-family-family-with-descent-data-pushout R a
+   pr1 (pr2 descent-data-pushout-equivalence-family) b =
+     right-family-family-with-descent-data-pushout P b ≃
+-    right-family-family-with-descent-data-pushout Q b
++    right-family-family-with-descent-data-pushout R b
+   pr2 (pr2 descent-data-pushout-equivalence-family) s =
+     ( equiv-postcomp-equiv
+-      ( equiv-family-family-with-descent-data-pushout Q s)
++      ( equiv-family-family-with-descent-data-pushout R s)
+       ( _)) ∘e
+     ( equiv-precomp-equiv
+       ( inv-equiv (equiv-family-family-with-descent-data-pushout P s))
+@@ -90,13 +92,13 @@ module _
+     (a : domain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( horizontal-map-cocone _ _ c a) ≃
+-      family-cocone-family-with-descent-data-pushout Q
++      family-cocone-family-with-descent-data-pushout R
+         ( horizontal-map-cocone _ _ c a)) ≃
+     ( left-family-family-with-descent-data-pushout P a ≃
+-      left-family-family-with-descent-data-pushout Q a)
++      left-family-family-with-descent-data-pushout R a)
+   left-equiv-equiv-descent-data-pushout-equivalence-family a =
+     ( equiv-postcomp-equiv
+-      ( left-equiv-family-with-descent-data-pushout Q a)
++      ( left-equiv-family-with-descent-data-pushout R a)
+       ( _)) ∘e
+     ( equiv-precomp-equiv
+       ( inv-equiv (left-equiv-family-with-descent-data-pushout P a))
+@@ -106,13 +108,13 @@ module _
+     (b : codomain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( vertical-map-cocone _ _ c b) ≃
+-      family-cocone-family-with-descent-data-pushout Q
++      family-cocone-family-with-descent-data-pushout R
+         ( vertical-map-cocone _ _ c b)) ≃
+     ( right-family-family-with-descent-data-pushout P b ≃
+-      right-family-family-with-descent-data-pushout Q b)
++      right-family-family-with-descent-data-pushout R b)
+   right-equiv-equiv-descent-data-pushout-equivalence-family b =
+     ( equiv-postcomp-equiv
+-      ( right-equiv-family-with-descent-data-pushout Q b)
++      ( right-equiv-family-with-descent-data-pushout R b)
+       ( _)) ∘e
+     ( equiv-precomp-equiv
+       ( inv-equiv (right-equiv-family-with-descent-data-pushout P b))
+@@ -139,12 +141,12 @@ module _
+         ( right-map-span-diagram 𝒮 s))) ·l
+       ( tr-equiv-type
+         ( family-cocone-family-with-descent-data-pushout P)
+-        ( family-cocone-family-with-descent-data-pushout Q)
++        ( family-cocone-family-with-descent-data-pushout R)
+         ( coherence-square-cocone _ _ c s))) ∙h
+     ( λ e →
+       eq-htpy-equiv
+         ( horizontal-concat-htpy
+-          ( coherence-family-with-descent-data-pushout Q s ·r map-equiv e)
++          ( coherence-family-with-descent-data-pushout R s ·r map-equiv e)
+           ( coherence-square-maps-inv-equiv
+             ( equiv-tr
+               ( family-cocone-family-with-descent-data-pushout P)
+@@ -187,42 +189,42 @@ module _
+   {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
+   {X : UU l4} {c : cocone-span-diagram 𝒮 X}
+   (P : family-with-descent-data-pushout c l5)
+-  (Q : family-with-descent-data-pushout c l6)
++  (R : family-with-descent-data-pushout c l6)
+   where
+ 
+   equiv-section-descent-data-pushout-equivalence-family :
+     section-descent-data-pushout
+-      ( descent-data-pushout-equivalence-family P Q) →
++      ( descent-data-pushout-equivalence-family P R) →
+     equiv-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+-      ( descent-data-family-with-descent-data-pushout Q)
++      ( descent-data-family-with-descent-data-pushout R)
+   pr1 (equiv-section-descent-data-pushout-equivalence-family t) =
+     left-map-section-descent-data-pushout
+-      ( descent-data-pushout-equivalence-family P Q)
++      ( descent-data-pushout-equivalence-family P R)
+       ( t)
+   pr1 (pr2 (equiv-section-descent-data-pushout-equivalence-family t)) =
+     right-map-section-descent-data-pushout
+-      ( descent-data-pushout-equivalence-family P Q)
++      ( descent-data-pushout-equivalence-family P R)
+       ( t)
+   pr2 (pr2 (equiv-section-descent-data-pushout-equivalence-family t)) s =
+     inv-htpy
+       ( map-inv-equiv
+         ( equiv-coherence-triangle-maps-inv-top'
+-          ( ( map-family-family-with-descent-data-pushout Q s) ∘
++          ( ( map-family-family-with-descent-data-pushout R s) ∘
+             ( map-equiv
+               ( left-map-section-descent-data-pushout
+-                ( descent-data-pushout-equivalence-family P Q)
++                ( descent-data-pushout-equivalence-family P R)
+                 ( t)
+                 ( left-map-span-diagram 𝒮 s))))
+           ( map-equiv
+             ( right-map-section-descent-data-pushout
+-              ( descent-data-pushout-equivalence-family P Q)
++              ( descent-data-pushout-equivalence-family P R)
+               ( t)
+               ( right-map-span-diagram 𝒮 s)))
+           ( equiv-family-family-with-descent-data-pushout P s))
+         ( htpy-eq-equiv
+           ( coherence-section-descent-data-pushout
+-            ( descent-data-pushout-equivalence-family P Q)
++            ( descent-data-pushout-equivalence-family P R)
+             ( t)
+             ( s))))
+ 
+@@ -241,7 +243,7 @@ module _
+                     ( is-equiv-comp _ _
+                       ( is-equiv-map-inv-equiv
+                         ( equiv-coherence-triangle-maps-inv-top'
+-                          ( (map-family-family-with-descent-data-pushout Q s) ∘
++                          ( (map-family-family-with-descent-data-pushout R s) ∘
+                             ( map-equiv (tA (left-map-span-diagram 𝒮 s))))
+                           ( map-equiv (tB (right-map-span-diagram 𝒮 s)))
+                           ( equiv-family-family-with-descent-data-pushout P s)))
+@@ -250,14 +252,14 @@ module _
+   equiv-descent-data-equiv-family-cocone-span-diagram :
+     ( (x : X) →
+       family-cocone-family-with-descent-data-pushout P x ≃
+-      family-cocone-family-with-descent-data-pushout Q x) →
++      family-cocone-family-with-descent-data-pushout R x) →
+     equiv-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+-      ( descent-data-family-with-descent-data-pushout Q)
++      ( descent-data-family-with-descent-data-pushout R)
+   equiv-descent-data-equiv-family-cocone-span-diagram =
+     ( equiv-section-descent-data-pushout-equivalence-family) ∘
+     ( section-descent-data-section-family-cocone-span-diagram
+-      ( family-with-descent-data-pushout-equivalence-family P Q))
++      ( family-with-descent-data-pushout-equivalence-family P R))
+ 
+   abstract
+     is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram :
+@@ -271,19 +273,19 @@ module _
+ ```
+ 
+ As a corollary, given an equivalence
+-`(hA, hB, hS) : (PA, PB, PS) ≃ (QA, QB, QS)`, there is a unique family of
+-equivalences `h : (x : X) → P x → Q x` such that its induced equivalence is
++`(hA, hB, hS) : (PA, PB, PS) ≃ (RA, RB, RS)`, there is a unique family of
++equivalences `h : (x : X) → P x → R x` such that its induced equivalence is
+ homotopic to `(hA, hB, hS)`. The homotopy provides us in particular with the
+ component-wise [homotopies](foundation-core.homotopies.md)
+ 
+ ```text
+                  hA a                               hB a
+-          PA a --------> QA a                PB b --------> QB b
++          PA a --------> RA a                PB b --------> RB b
+             |              ∧                   |              ∧
+-  (eᴾA a)⁻¹ |              | eꟴA a   (eᴾB b)⁻¹ |              | eꟴB b
++  (eᴾA a)⁻¹ |              | eᴿA a   (eᴾB b)⁻¹ |              | eᴿB b
+             |              |                   |              |
+             ∨              |                   ∨              |
+-         P (ia) ------> Q (ia)              P (jb) ------> Q (jb)
++         P (ia) ------> R (ia)              P (jb) ------> R (jb)
+                 h (ia)                             h (jb)
+ ```
+ 
+@@ -296,8 +298,8 @@ which we can turn into the computation rules
+   h (ia) |              | hA a    h (jb) |              | hB b
+          |              |                |              |
+          ∨              ∨                ∨              ∨
+-      Q (ia) -------> QA a            Q (jb) -------> QB b
+-              eꟴA a                           eꟴB b
++      R (ia) -------> RA a            R (jb) -------> RB b
++              eᴿA a                           eᴿB b
+ ```
+ 
+ by inverting the inverted equivalences.
+@@ -308,11 +310,11 @@ module _
+   {X : UU l4} {c : cocone-span-diagram 𝒮 X}
+   (up-c : universal-property-pushout _ _ c)
+   (P : family-with-descent-data-pushout c l5)
+-  (Q : family-with-descent-data-pushout c l6)
++  (R : family-with-descent-data-pushout c l6)
+   (e :
+     equiv-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+-      ( descent-data-family-with-descent-data-pushout Q))
++      ( descent-data-family-with-descent-data-pushout R))
+   where
+ 
+   abstract
+@@ -320,34 +322,34 @@ module _
+       is-contr
+         ( Σ ( (x : X) →
+               family-cocone-family-with-descent-data-pushout P x ≃
+-              family-cocone-family-with-descent-data-pushout Q x)
++              family-cocone-family-with-descent-data-pushout R x)
+             ( λ h →
+               htpy-equiv-descent-data-pushout
+                 ( descent-data-family-with-descent-data-pushout P)
+-                ( descent-data-family-with-descent-data-pushout Q)
+-                ( equiv-descent-data-equiv-family-cocone-span-diagram P Q h)
++                ( descent-data-family-with-descent-data-pushout R)
++                ( equiv-descent-data-equiv-family-cocone-span-diagram P R h)
+                 ( e)))
+     uniqueness-equiv-equiv-descent-data-pushout =
+       is-contr-equiv'
+-        ( fiber (equiv-descent-data-equiv-family-cocone-span-diagram P Q) e)
++        ( fiber (equiv-descent-data-equiv-family-cocone-span-diagram P R) e)
+         ( equiv-tot
+           ( λ f → extensionality-equiv-descent-data-pushout _ e))
+         ( is-contr-map-is-equiv
+-          ( is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram P Q
++          ( is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram P R
+             ( up-c))
+           ( e))
+ 
+   equiv-equiv-descent-data-pushout :
+     (x : X) →
+     family-cocone-family-with-descent-data-pushout P x ≃
+-    family-cocone-family-with-descent-data-pushout Q x
++    family-cocone-family-with-descent-data-pushout R x
+   equiv-equiv-descent-data-pushout =
+     pr1 (center uniqueness-equiv-equiv-descent-data-pushout)
+ 
+   map-equiv-descent-data-pushout :
+     (x : X) →
+     family-cocone-family-with-descent-data-pushout P x →
+-    family-cocone-family-with-descent-data-pushout Q x
++    family-cocone-family-with-descent-data-pushout R x
+   map-equiv-descent-data-pushout x =
+     map-equiv (equiv-equiv-descent-data-pushout x)
+ 
+@@ -358,18 +360,18 @@ module _
+       ( map-equiv-descent-data-pushout (horizontal-map-cocone _ _ c a))
+       ( left-map-equiv-descent-data-pushout
+         ( descent-data-family-with-descent-data-pushout P)
+-        ( descent-data-family-with-descent-data-pushout Q)
++        ( descent-data-family-with-descent-data-pushout R)
+         ( e)
+         ( a))
+-      ( left-map-family-with-descent-data-pushout Q a)
++      ( left-map-family-with-descent-data-pushout R a)
+   compute-left-map-equiv-equiv-descent-data-pushout a =
+     map-inv-equiv
+       ( equiv-coherence-triangle-maps-inv-top'
+-        ( left-map-family-with-descent-data-pushout Q a ∘
++        ( left-map-family-with-descent-data-pushout R a ∘
+           map-equiv-descent-data-pushout (horizontal-map-cocone _ _ c a))
+         ( left-map-equiv-descent-data-pushout
+           ( descent-data-family-with-descent-data-pushout P)
+-          ( descent-data-family-with-descent-data-pushout Q)
++          ( descent-data-family-with-descent-data-pushout R)
+           ( e)
+           ( a))
+         ( left-equiv-family-with-descent-data-pushout P a))
+@@ -382,18 +384,18 @@ module _
+       ( map-equiv-descent-data-pushout (vertical-map-cocone _ _ c b))
+       ( right-map-equiv-descent-data-pushout
+         ( descent-data-family-with-descent-data-pushout P)
+-        ( descent-data-family-with-descent-data-pushout Q)
++        ( descent-data-family-with-descent-data-pushout R)
+         ( e)
+         ( b))
+-      ( right-map-family-with-descent-data-pushout Q b)
++      ( right-map-family-with-descent-data-pushout R b)
+   compute-right-map-equiv-equiv-descent-data-pushout b =
+     map-inv-equiv
+       ( equiv-coherence-triangle-maps-inv-top'
+-        ( right-map-family-with-descent-data-pushout Q b ∘
++        ( right-map-family-with-descent-data-pushout R b ∘
+           map-equiv-descent-data-pushout (vertical-map-cocone _ _ c b))
+         ( right-map-equiv-descent-data-pushout
+           ( descent-data-family-with-descent-data-pushout P)
+-          ( descent-data-family-with-descent-data-pushout Q)
++          ( descent-data-family-with-descent-data-pushout R)
+           ( e)
+           ( b))
+         ( right-equiv-family-with-descent-data-pushout P b))
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md b/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
+index e088755540..02da2fd37d 100644
+--- a/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
+@@ -2,6 +2,7 @@
+ 
+ ```agda
+ {-# OPTIONS --lossy-unification #-}
++
+ module synthetic-homotopy-theory.descent-data-pushouts-function-families where
+ ```
+ 
+@@ -44,21 +45,23 @@ open import synthetic-homotopy-theory.universal-property-pushouts
+ Given two
+ [families with descent data](synthetic-homotopy-theory.families-descent-data-pushouts.md)
+ for [pushouts](synthetic-homotopy-theory.pushouts.md) `P ≈ (PA, PB, PS)` and
+-`Q ≈ (QA, QB, QS)`, we show that fiberwise maps `(x : X) → P x → Q x` correspond
+-to [morphisms](synthetic-homotopy-theory.morphisms-descent-data-pushouts.md)
+-`(PA, PB, PS) → (QA, QB, QS)`.
++`R ≈ (RA, RB, RS)`, we show that
++[fiberwise maps](foundation.families-of-maps.md) `(x : X) → P x → R x`
++correspond to
++[morphisms](synthetic-homotopy-theory.morphisms-descent-data-pushouts.md)
++`(PA, PB, PS) → (RA, RB, RS)`.
+ 
+-**Proof:** We first characterize the type family `x ↦ P x → Q x`. The
++**Proof:** We first characterize the type family `x ↦ (P x → R x)`. The
+ corresponding [descent data](synthetic-homotopy-theory.descent-data-pushouts.md)
+ consists of the type families
+ 
+ ```text
+-  a ↦ PA a → QA a
+-  b ↦ PB b → QB b,
++  a ↦ (PA a → RA a)
++  b ↦ (PB b → RB b),
+ ```
+ 
+-and the gluing data sending `h : PA (fs) → QA (fs)` to
+-`(QS s ∘ h ∘ (PS s)⁻¹) : PB (gs) → QB (gs)`.
++and the gluing data sending `h : PA (fs) → RA (fs)` to
++`(RS s ∘ h ∘ (PS s)⁻¹) : PB (gs) → RB (gs)`.
+ 
+ The fiberwise families then correspond to
+ [sections](synthetic-homotopy-theory.sections-descent-data-pushouts.md) of this
+@@ -66,16 +69,16 @@ descent data, and it suffices to show that those correspond to morphisms. The
+ coherence datum of such a section has the type
+ 
+ ```text
+-  (s : S) → QS s ∘ sA (fs) ∘ (PS s)⁻¹ ＝ sB (gs),
++  (s : S) → RS s ∘ sA (fs) ∘ (RS s)⁻¹ = sB (gs),
+ ```
+ 
+ which we can massage into a coherence of the morphism as
+ 
+ ```text
+-  QS s ∘ sA (fs) ∘ (PS s)⁻¹ = sB (gs)
+-  ≃ QS s ∘ sA (fs) ∘ (PS s)⁻¹ ~ sB (gs)  by function extensionality
+-  ≃ QS s ∘ sA (fs) ~ sB (gs) ∘ PS s      by transposition of (PS s)
+-  ≃ sB (gs) ∘ PS s ~ QS s ∘ sA (fs)      by symmetry of homotopies.
++  RS s ∘ sA (fs) ∘ (PS s)⁻¹ = sB (gs)
++  ≃ RS s ∘ sA (fs) ∘ (PS s)⁻¹ ~ sB (gs)  by function extensionality
++  ≃ RS s ∘ sA (fs) ~ sB (gs) ∘ PS s      by transposition of (PS s)
++  ≃ sB (gs) ∘ PS s ~ RS s ∘ sA (fs)      by symmetry of homotopies.
+ ```
+ 
+ ## Definitions
+@@ -87,26 +90,26 @@ module _
+   {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
+   {X : UU l4} {c : cocone-span-diagram 𝒮 X}
+   (P : family-with-descent-data-pushout c l5)
+-  (Q : family-with-descent-data-pushout c l6)
++  (R : family-with-descent-data-pushout c l6)
+   where
+ 
+   family-cocone-family-with-descent-data-pushout-function-family :
+     X → UU (l5 ⊔ l6)
+   family-cocone-family-with-descent-data-pushout-function-family x =
+     family-cocone-family-with-descent-data-pushout P x →
+-    family-cocone-family-with-descent-data-pushout Q x
++    family-cocone-family-with-descent-data-pushout R x
+ 
+   descent-data-pushout-function-family :
+     descent-data-pushout 𝒮 (l5 ⊔ l6)
+   pr1 descent-data-pushout-function-family a =
+     left-family-family-with-descent-data-pushout P a →
+-    left-family-family-with-descent-data-pushout Q a
++    left-family-family-with-descent-data-pushout R a
+   pr1 (pr2 descent-data-pushout-function-family) b =
+     right-family-family-with-descent-data-pushout P b →
+-    right-family-family-with-descent-data-pushout Q b
++    right-family-family-with-descent-data-pushout R b
+   pr2 (pr2 descent-data-pushout-function-family) s =
+     ( equiv-postcomp _
+-      ( equiv-family-family-with-descent-data-pushout Q s)) ∘e
++      ( equiv-family-family-with-descent-data-pushout R s)) ∘e
+     ( equiv-precomp
+       ( inv-equiv (equiv-family-family-with-descent-data-pushout P s))
+       ( _))
+@@ -115,13 +118,13 @@ module _
+     (a : domain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( horizontal-map-cocone _ _ c a) →
+-      family-cocone-family-with-descent-data-pushout Q
++      family-cocone-family-with-descent-data-pushout R
+         ( horizontal-map-cocone _ _ c a)) ≃
+     ( left-family-family-with-descent-data-pushout P a →
+-      left-family-family-with-descent-data-pushout Q a)
++      left-family-family-with-descent-data-pushout R a)
+   left-equiv-equiv-descent-data-pushout-function-family a =
+     ( equiv-postcomp _
+-      ( left-equiv-family-with-descent-data-pushout Q a)) ∘e
++      ( left-equiv-family-with-descent-data-pushout R a)) ∘e
+     ( equiv-precomp
+       ( inv-equiv (left-equiv-family-with-descent-data-pushout P a))
+       ( _))
+@@ -130,13 +133,13 @@ module _
+     (b : codomain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( vertical-map-cocone _ _ c b) →
+-      family-cocone-family-with-descent-data-pushout Q
++      family-cocone-family-with-descent-data-pushout R
+         ( vertical-map-cocone _ _ c b)) ≃
+     ( right-family-family-with-descent-data-pushout P b →
+-      right-family-family-with-descent-data-pushout Q b)
++      right-family-family-with-descent-data-pushout R b)
+   right-equiv-equiv-descent-data-pushout-function-family b =
+     ( equiv-postcomp _
+-      ( right-equiv-family-with-descent-data-pushout Q b)) ∘e
++      ( right-equiv-family-with-descent-data-pushout R b)) ∘e
+     ( equiv-precomp
+       ( inv-equiv (right-equiv-family-with-descent-data-pushout P b))
+       ( _))
+@@ -160,12 +163,12 @@ module _
+           ( right-map-span-diagram 𝒮 s))) ·l
+       ( tr-function-type
+         ( family-cocone-family-with-descent-data-pushout P)
+-        ( family-cocone-family-with-descent-data-pushout Q)
++        ( family-cocone-family-with-descent-data-pushout R)
+         ( coherence-square-cocone _ _ c s))) ∙h
+     ( λ h →
+       eq-htpy
+         ( horizontal-concat-htpy
+-          ( coherence-family-with-descent-data-pushout Q s ·r h)
++          ( coherence-family-with-descent-data-pushout R s ·r h)
+           ( coherence-square-maps-inv-equiv
+             ( equiv-tr
+               ( family-cocone-family-with-descent-data-pushout P)
+@@ -208,39 +211,39 @@ module _
+   {l1 l2 l3 l4 l5 l6 : Level} {𝒮 : span-diagram l1 l2 l3}
+   {X : UU l4} {c : cocone-span-diagram 𝒮 X}
+   (P : family-with-descent-data-pushout c l5)
+-  (Q : family-with-descent-data-pushout c l6)
++  (R : family-with-descent-data-pushout c l6)
+   where
+ 
+   hom-section-descent-data-pushout-function-family :
+-    section-descent-data-pushout (descent-data-pushout-function-family P Q) →
++    section-descent-data-pushout (descent-data-pushout-function-family P R) →
+     hom-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+-      ( descent-data-family-with-descent-data-pushout Q)
++      ( descent-data-family-with-descent-data-pushout R)
+   pr1 (hom-section-descent-data-pushout-function-family t) =
+     left-map-section-descent-data-pushout
+-      ( descent-data-pushout-function-family P Q)
++      ( descent-data-pushout-function-family P R)
+       ( t)
+   pr1 (pr2 (hom-section-descent-data-pushout-function-family t)) =
+     right-map-section-descent-data-pushout
+-      ( descent-data-pushout-function-family P Q)
++      ( descent-data-pushout-function-family P R)
+       ( t)
+   pr2 (pr2 (hom-section-descent-data-pushout-function-family t)) s =
+     inv-htpy
+       ( map-inv-equiv
+         ( equiv-coherence-triangle-maps-inv-top'
+-          ( ( map-family-family-with-descent-data-pushout Q s) ∘
++          ( ( map-family-family-with-descent-data-pushout R s) ∘
+             ( left-map-section-descent-data-pushout
+-              ( descent-data-pushout-function-family P Q)
++              ( descent-data-pushout-function-family P R)
+               ( t)
+               ( left-map-span-diagram 𝒮 s)))
+           ( right-map-section-descent-data-pushout
+-            ( descent-data-pushout-function-family P Q)
++            ( descent-data-pushout-function-family P R)
+             ( t)
+             ( right-map-span-diagram 𝒮 s))
+           ( equiv-family-family-with-descent-data-pushout P s))
+         ( htpy-eq
+           ( coherence-section-descent-data-pushout
+-            ( descent-data-pushout-function-family P Q)
++            ( descent-data-pushout-function-family P R)
+             ( t)
+             ( s))))
+ 
+@@ -259,7 +262,7 @@ module _
+                     ( is-equiv-comp _ _
+                       ( is-equiv-map-inv-equiv
+                         ( equiv-coherence-triangle-maps-inv-top'
+-                          ( ( map-family-family-with-descent-data-pushout Q s) ∘
++                          ( ( map-family-family-with-descent-data-pushout R s) ∘
+                             ( tA (left-map-span-diagram 𝒮 s)))
+                           ( tB (right-map-span-diagram 𝒮 s))
+                           ( equiv-family-family-with-descent-data-pushout P s)))
+@@ -268,14 +271,14 @@ module _
+   hom-descent-data-map-family-cocone-span-diagram :
+     ( (x : X) →
+       family-cocone-family-with-descent-data-pushout P x →
+-      family-cocone-family-with-descent-data-pushout Q x) →
++      family-cocone-family-with-descent-data-pushout R x) →
+     hom-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+-      ( descent-data-family-with-descent-data-pushout Q)
++      ( descent-data-family-with-descent-data-pushout R)
+   hom-descent-data-map-family-cocone-span-diagram =
+     ( hom-section-descent-data-pushout-function-family) ∘
+     ( section-descent-data-section-family-cocone-span-diagram
+-      ( family-with-descent-data-pushout-function-family P Q))
++      ( family-with-descent-data-pushout-function-family P R))
+ 
+   abstract
+     is-equiv-hom-descent-data-map-family-cocone-span-diagram :
+@@ -288,19 +291,19 @@ module _
+         ( is-equiv-hom-section-descent-data-pushout-function-family)
+ ```
+ 
+-As a corollary, given a morphism `(hA, hB, hS) : (PA, PB, PS) → (QA, QB, QS)`,
+-there is a unique family of maps `h : (x : X) → P x → Q x` such that its induced
++As a corollary, given a morphism `(hA, hB, hS) : (PA, PB, PS) → (RA, RB, RS)`,
++there is a unique family of maps `h : (x : X) → P x → R x` such that its induced
+ morphism is homotopic to `(hA, hB, hS)`. The homotopy provides us in particular
+ with the component-wise [homotopies](foundation-core.homotopies.md)
+ 
+ ```text
+                  hA a                               hB a
+-          PA a --------> QA a                PB b --------> QB b
++          PA a --------> RA a                PB b --------> RB b
+             |              ∧                   |              ∧
+-  (eᴾA a)⁻¹ |              | eꟴA a   (eᴾB b)⁻¹ |              | eꟴB b
++  (eᴾA a)⁻¹ |              | eᴿA a   (eᴾB b)⁻¹ |              | eᴿB b
+             |              |                   |              |
+             ∨              |                   ∨              |
+-         P (ia) ------> Q (ia)              P (jb) ------> Q (jb)
++         P (ia) ------> R (ia)              P (jb) ------> R (jb)
+                 h (ia)                             h (jb)
+ ```
+ 
+@@ -313,8 +316,8 @@ which we can turn into the computation rules
+   h (ia) |              | hA a    h (jb) |              | hB b
+          |              |                |              |
+          ∨              ∨                ∨              ∨
+-      Q (ia) -------> QA a            Q (jb) -------> QB b
+-              eꟴA a                           eꟴB b
++      R (ia) -------> RA a            R (jb) -------> RB b
++              eᴿA a                           eᴿB b
+ ```
+ 
+ by inverting the inverted equivalences.
+@@ -325,11 +328,11 @@ module _
+   {X : UU l4} {c : cocone-span-diagram 𝒮 X}
+   (up-c : universal-property-pushout _ _ c)
+   (P : family-with-descent-data-pushout c l5)
+-  (Q : family-with-descent-data-pushout c l6)
++  (R : family-with-descent-data-pushout c l6)
+   (m :
+     hom-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+-      ( descent-data-family-with-descent-data-pushout Q))
++      ( descent-data-family-with-descent-data-pushout R))
+   where
+ 
+   abstract
+@@ -337,26 +340,26 @@ module _
+       is-contr
+         ( Σ ( (x : X) →
+               family-cocone-family-with-descent-data-pushout P x →
+-              family-cocone-family-with-descent-data-pushout Q x)
++              family-cocone-family-with-descent-data-pushout R x)
+             ( λ h →
+               htpy-hom-descent-data-pushout
+                 ( descent-data-family-with-descent-data-pushout P)
+-                ( descent-data-family-with-descent-data-pushout Q)
+-                ( hom-descent-data-map-family-cocone-span-diagram P Q h)
++                ( descent-data-family-with-descent-data-pushout R)
++                ( hom-descent-data-map-family-cocone-span-diagram P R h)
+                 ( m)))
+     uniqueness-map-hom-descent-data-pushout =
+       is-contr-equiv'
+-        ( fiber (hom-descent-data-map-family-cocone-span-diagram P Q) m)
++        ( fiber (hom-descent-data-map-family-cocone-span-diagram P R) m)
+         ( equiv-tot
+           ( λ h → extensionality-hom-descent-data-pushout _ _ _ m))
+         ( is-contr-map-is-equiv
+-          ( is-equiv-hom-descent-data-map-family-cocone-span-diagram P Q up-c)
++          ( is-equiv-hom-descent-data-map-family-cocone-span-diagram P R up-c)
+           ( m))
+ 
+   map-hom-descent-data-pushout :
+     (x : X) →
+     family-cocone-family-with-descent-data-pushout P x →
+-    family-cocone-family-with-descent-data-pushout Q x
++    family-cocone-family-with-descent-data-pushout R x
+   map-hom-descent-data-pushout =
+     pr1 (center uniqueness-map-hom-descent-data-pushout)
+ 
+@@ -367,18 +370,18 @@ module _
+       ( map-hom-descent-data-pushout (horizontal-map-cocone _ _ c a))
+       ( left-map-hom-descent-data-pushout
+         ( descent-data-family-with-descent-data-pushout P)
+-        ( descent-data-family-with-descent-data-pushout Q)
++        ( descent-data-family-with-descent-data-pushout R)
+         ( m)
+         ( a))
+-      ( left-map-family-with-descent-data-pushout Q a)
++      ( left-map-family-with-descent-data-pushout R a)
+   compute-left-map-map-hom-descent-data-pushout a =
+     map-inv-equiv
+       ( equiv-coherence-triangle-maps-inv-top'
+-        ( left-map-family-with-descent-data-pushout Q a ∘
++        ( left-map-family-with-descent-data-pushout R a ∘
+           map-hom-descent-data-pushout (horizontal-map-cocone _ _ c a))
+         ( left-map-hom-descent-data-pushout
+           ( descent-data-family-with-descent-data-pushout P)
+-          ( descent-data-family-with-descent-data-pushout Q)
++          ( descent-data-family-with-descent-data-pushout R)
+           ( m)
+           ( a))
+         ( left-equiv-family-with-descent-data-pushout P a))
+@@ -391,18 +394,18 @@ module _
+       ( map-hom-descent-data-pushout (vertical-map-cocone _ _ c b))
+       ( right-map-hom-descent-data-pushout
+         ( descent-data-family-with-descent-data-pushout P)
+-        ( descent-data-family-with-descent-data-pushout Q)
++        ( descent-data-family-with-descent-data-pushout R)
+         ( m)
+         ( b))
+-      ( right-map-family-with-descent-data-pushout Q b)
++      ( right-map-family-with-descent-data-pushout R b)
+   compute-right-map-map-hom-descent-data-pushout b =
+     map-inv-equiv
+       ( equiv-coherence-triangle-maps-inv-top'
+-        ( right-map-family-with-descent-data-pushout Q b ∘
++        ( right-map-family-with-descent-data-pushout R b ∘
+           map-hom-descent-data-pushout (vertical-map-cocone _ _ c b))
+         ( right-map-hom-descent-data-pushout
+           ( descent-data-family-with-descent-data-pushout P)
+-          ( descent-data-family-with-descent-data-pushout Q)
++          ( descent-data-family-with-descent-data-pushout R)
+           ( m)
+           ( b))
+         ( right-equiv-family-with-descent-data-pushout P b))
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md b/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
+index 408f22ed36..0b6a135216 100644
+--- a/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
+@@ -2,6 +2,7 @@
+ 
+ ```agda
+ {-# OPTIONS --lossy-unification #-}
++
+ module synthetic-homotopy-theory.descent-data-pushouts-identity-types where
+ ```
+ 
+@@ -39,14 +40,15 @@ Given a [cocone](synthetic-homotopy-theory.cocones-under-spans.md) under a
+ ```
+ 
+ and a point `x₀ : X`, the type family of
+-[identity types](foundation-core.identity-types.md) based at `x₀`, `x ↦ x₀ = x`,
+-is [characterized](synthetic-homotopy-theory.families-descent-data-pushouts.md)
+-by the [descent data](synthetic-homotopy-theory.descent-data-pushouts.md)
++[identity types](foundation-core.identity-types.md) based at `x₀`,
++`x ↦ (x₀ = x)`, is
++[characterized](synthetic-homotopy-theory.families-descent-data-pushouts.md) by
++the [descent data](synthetic-homotopy-theory.descent-data-pushouts.md)
+ `(IA, IB, IS)`, where `IA` and `IB` are families of identity types
+ 
+ ```text
+-  IA a := x₀ = ia
+-  IB b := x₀ = jb,
++  IA a := (x₀ = ia)
++  IB b := (x₀ = jb),
+ ```
+ 
+ and the gluing data `IS s : (x₀ = ifs) ≃ (x₀ = jgs)` is given by concatenation
+
+From dfc7157dc51f28394db1af7f70d205fee356fc1b Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 4 Jun 2024 14:14:59 +0200
+Subject: [PATCH 5/7] Rename files
+
+---
+ src/synthetic-homotopy-theory.lagda.md                      | 6 +++---
+ ...> descent-data-equivalence-types-over-pushouts.lagda.md} | 6 +++---
+ ...d => descent-data-function-types-over-pushouts.lagda.md} | 4 ++--
+ ...d => descent-data-identity-types-over-pushouts.lagda.md} | 4 ++--
+ 4 files changed, 10 insertions(+), 10 deletions(-)
+ rename src/synthetic-homotopy-theory/{descent-data-pushouts-equivalence-families.lagda.md => descent-data-equivalence-types-over-pushouts.lagda.md} (98%)
+ rename src/synthetic-homotopy-theory/{descent-data-pushouts-function-families.lagda.md => descent-data-function-types-over-pushouts.lagda.md} (99%)
+ rename src/synthetic-homotopy-theory/{descent-data-pushouts-identity-types.lagda.md => descent-data-identity-types-over-pushouts.lagda.md} (95%)
+
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index ad3c8fd71f..4717610eb4 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -47,10 +47,10 @@ open import synthetic-homotopy-theory.descent-circle-dependent-pair-types public
+ open import synthetic-homotopy-theory.descent-circle-equivalence-types public
+ open import synthetic-homotopy-theory.descent-circle-function-types public
+ open import synthetic-homotopy-theory.descent-circle-subtypes public
++open import synthetic-homotopy-theory.descent-data-equivalence-types-over-pushouts public
++open import synthetic-homotopy-theory.descent-data-function-types-over-pushouts public
++open import synthetic-homotopy-theory.descent-data-identity-types-over-pushouts public
+ open import synthetic-homotopy-theory.descent-data-pushouts public
+-open import synthetic-homotopy-theory.descent-data-pushouts-equivalence-families public
+-open import synthetic-homotopy-theory.descent-data-pushouts-function-families public
+-open import synthetic-homotopy-theory.descent-data-pushouts-identity-types public
+ open import synthetic-homotopy-theory.descent-data-sequential-colimits public
+ open import synthetic-homotopy-theory.descent-property-pushouts public
+ open import synthetic-homotopy-theory.descent-property-sequential-colimits public
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md b/src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md
+similarity index 98%
+rename from src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
+rename to src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md
+index 9baa8bd485..02e0746af8 100644
+--- a/src/synthetic-homotopy-theory/descent-data-pushouts-equivalence-families.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md
+@@ -1,9 +1,9 @@
+-# Descent data for families of equivalences over pushouts
++# Descent data for type families of equivalence types over pushouts
+ 
+ ```agda
+ {-# OPTIONS --lossy-unification #-}
+ 
+-module synthetic-homotopy-theory.descent-data-pushouts-equivalence-families where
++module synthetic-homotopy-theory.descent-data-equivalence-types-over-pushouts where
+ ```
+ 
+ <details><summary>Imports</summary>
+@@ -52,7 +52,7 @@ for [pushouts](synthetic-homotopy-theory.pushouts.md) `P ≈ (PA, PB, PS)` and
+ `(PA, PB, PS) ≃ (RA, RB, RS)`.
+ 
+ **Proof:** The proof follows exactly the same pattern as the one in
+-[`descent-data-pushouts-function-families`](synthetic-homotopy-theory.descent-data-pushouts-function-families.md).
++[`descent-data-function-types-over-pushouts`](synthetic-homotopy-theory.descent-data-function-types-over-pushouts.md).
+ 
+ ## Definitions
+ 
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md b/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+similarity index 99%
+rename from src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
+rename to src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+index 02da2fd37d..14d821b818 100644
+--- a/src/synthetic-homotopy-theory/descent-data-pushouts-function-families.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+@@ -1,9 +1,9 @@
+-# Descent data for families of functions over pushouts
++# Descent data for type families of function types over pushouts
+ 
+ ```agda
+ {-# OPTIONS --lossy-unification #-}
+ 
+-module synthetic-homotopy-theory.descent-data-pushouts-function-families where
++module synthetic-homotopy-theory.descent-data-function-types-over-pushouts where
+ ```
+ 
+ <details><summary>Imports</summary>
+diff --git a/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md b/src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md
+similarity index 95%
+rename from src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
+rename to src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md
+index 0b6a135216..46877d3ba5 100644
+--- a/src/synthetic-homotopy-theory/descent-data-pushouts-identity-types.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md
+@@ -1,9 +1,9 @@
+-# Descent data for families of identifications over pushouts
++# Descent data for type families of identity types over pushouts
+ 
+ ```agda
+ {-# OPTIONS --lossy-unification #-}
+ 
+-module synthetic-homotopy-theory.descent-data-pushouts-identity-types where
++module synthetic-homotopy-theory.descent-data-identity-types-over-pushouts where
+ ```
+ 
+ <details><summary>Imports</summary>
+
+From 41a0379d0ae68c75e6b46d28e8baeed23261cf91 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 4 Jun 2024 17:25:41 +0200
+Subject: [PATCH 6/7] Rename definitions
+
+---
+ ...a-equivalence-types-over-pushouts.lagda.md | 128 ++++++++---------
+ ...data-function-types-over-pushouts.lagda.md | 129 ++++++++----------
+ ...data-identity-types-over-pushouts.lagda.md |  39 +++---
+ 3 files changed, 132 insertions(+), 164 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md b/src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md
+index 02e0746af8..7095433e23 100644
+--- a/src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-equivalence-types-over-pushouts.lagda.md
+@@ -66,21 +66,19 @@ module _
+   (R : family-with-descent-data-pushout c l6)
+   where
+ 
+-  family-cocone-family-with-descent-data-pushout-equivalence-family :
+-    X → UU (l5 ⊔ l6)
+-  family-cocone-family-with-descent-data-pushout-equivalence-family x =
++  family-cocone-equivalence-type-pushout : X → UU (l5 ⊔ l6)
++  family-cocone-equivalence-type-pushout x =
+     family-cocone-family-with-descent-data-pushout P x ≃
+     family-cocone-family-with-descent-data-pushout R x
+ 
+-  descent-data-pushout-equivalence-family :
+-    descent-data-pushout 𝒮 (l5 ⊔ l6)
+-  pr1 descent-data-pushout-equivalence-family a =
++  descent-data-equivalence-type-pushout : descent-data-pushout 𝒮 (l5 ⊔ l6)
++  pr1 descent-data-equivalence-type-pushout a =
+     left-family-family-with-descent-data-pushout P a ≃
+     left-family-family-with-descent-data-pushout R a
+-  pr1 (pr2 descent-data-pushout-equivalence-family) b =
++  pr1 (pr2 descent-data-equivalence-type-pushout) b =
+     right-family-family-with-descent-data-pushout P b ≃
+     right-family-family-with-descent-data-pushout R b
+-  pr2 (pr2 descent-data-pushout-equivalence-family) s =
++  pr2 (pr2 descent-data-equivalence-type-pushout) s =
+     ( equiv-postcomp-equiv
+       ( equiv-family-family-with-descent-data-pushout R s)
+       ( _)) ∘e
+@@ -88,7 +86,7 @@ module _
+       ( inv-equiv (equiv-family-family-with-descent-data-pushout P s))
+       ( _))
+ 
+-  left-equiv-equiv-descent-data-pushout-equivalence-family :
++  left-equiv-equiv-descent-data-equivalence-type-pushout :
+     (a : domain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( horizontal-map-cocone _ _ c a) ≃
+@@ -96,7 +94,7 @@ module _
+         ( horizontal-map-cocone _ _ c a)) ≃
+     ( left-family-family-with-descent-data-pushout P a ≃
+       left-family-family-with-descent-data-pushout R a)
+-  left-equiv-equiv-descent-data-pushout-equivalence-family a =
++  left-equiv-equiv-descent-data-equivalence-type-pushout a =
+     ( equiv-postcomp-equiv
+       ( left-equiv-family-with-descent-data-pushout R a)
+       ( _)) ∘e
+@@ -104,7 +102,7 @@ module _
+       ( inv-equiv (left-equiv-family-with-descent-data-pushout P a))
+       ( _))
+ 
+-  right-equiv-equiv-descent-data-pushout-equivalence-family :
++  right-equiv-equiv-descent-data-equivalence-type-pushout :
+     (b : codomain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( vertical-map-cocone _ _ c b) ≃
+@@ -112,7 +110,7 @@ module _
+         ( vertical-map-cocone _ _ c b)) ≃
+     ( right-family-family-with-descent-data-pushout P b ≃
+       right-family-family-with-descent-data-pushout R b)
+-  right-equiv-equiv-descent-data-pushout-equivalence-family b =
++  right-equiv-equiv-descent-data-equivalence-type-pushout b =
+     ( equiv-postcomp-equiv
+       ( right-equiv-family-with-descent-data-pushout R b)
+       ( _)) ∘e
+@@ -120,24 +118,24 @@ module _
+       ( inv-equiv (right-equiv-family-with-descent-data-pushout P b))
+       ( _))
+ 
+-  coherence-equiv-descent-data-pushout-equivalence-family :
++  coherence-equiv-descent-data-equivalence-type-pushout :
+     (s : spanning-type-span-diagram 𝒮) →
+     coherence-square-maps
+       ( map-equiv
+-        ( left-equiv-equiv-descent-data-pushout-equivalence-family
++        ( left-equiv-equiv-descent-data-equivalence-type-pushout
+           ( left-map-span-diagram 𝒮 s)))
+       ( tr
+-        ( family-cocone-family-with-descent-data-pushout-equivalence-family)
++        ( family-cocone-equivalence-type-pushout)
+         ( coherence-square-cocone _ _ c s))
+       ( map-family-descent-data-pushout
+-        ( descent-data-pushout-equivalence-family)
++        ( descent-data-equivalence-type-pushout)
+         ( s))
+       ( map-equiv
+-        ( right-equiv-equiv-descent-data-pushout-equivalence-family
++        ( right-equiv-equiv-descent-data-equivalence-type-pushout
+           ( right-map-span-diagram 𝒮 s)))
+-  coherence-equiv-descent-data-pushout-equivalence-family s =
++  coherence-equiv-descent-data-equivalence-type-pushout s =
+     ( ( map-equiv
+-      ( right-equiv-equiv-descent-data-pushout-equivalence-family
++      ( right-equiv-equiv-descent-data-equivalence-type-pushout
+         ( right-map-span-diagram 𝒮 s))) ·l
+       ( tr-equiv-type
+         ( family-cocone-family-with-descent-data-pushout P)
+@@ -158,26 +156,26 @@ module _
+             ( equiv-family-family-with-descent-data-pushout P s)
+             ( inv-htpy (coherence-family-with-descent-data-pushout P s)))))
+ 
+-  equiv-descent-data-pushout-equivalence-family :
++  equiv-descent-data-equivalence-type-pushout :
+     equiv-descent-data-pushout
+       ( descent-data-family-cocone-span-diagram c
+-        ( family-cocone-family-with-descent-data-pushout-equivalence-family))
+-      ( descent-data-pushout-equivalence-family)
+-  pr1 equiv-descent-data-pushout-equivalence-family =
+-    left-equiv-equiv-descent-data-pushout-equivalence-family
+-  pr1 (pr2 equiv-descent-data-pushout-equivalence-family) =
+-    right-equiv-equiv-descent-data-pushout-equivalence-family
+-  pr2 (pr2 equiv-descent-data-pushout-equivalence-family) =
+-    coherence-equiv-descent-data-pushout-equivalence-family
+-
+-  family-with-descent-data-pushout-equivalence-family :
++        ( family-cocone-equivalence-type-pushout))
++      ( descent-data-equivalence-type-pushout)
++  pr1 equiv-descent-data-equivalence-type-pushout =
++    left-equiv-equiv-descent-data-equivalence-type-pushout
++  pr1 (pr2 equiv-descent-data-equivalence-type-pushout) =
++    right-equiv-equiv-descent-data-equivalence-type-pushout
++  pr2 (pr2 equiv-descent-data-equivalence-type-pushout) =
++    coherence-equiv-descent-data-equivalence-type-pushout
++
++  family-with-descent-data-equivalence-type-pushout :
+     family-with-descent-data-pushout c (l5 ⊔ l6)
+-  pr1 family-with-descent-data-pushout-equivalence-family =
+-    family-cocone-family-with-descent-data-pushout-equivalence-family
+-  pr1 (pr2 family-with-descent-data-pushout-equivalence-family) =
+-    descent-data-pushout-equivalence-family
+-  pr2 (pr2 family-with-descent-data-pushout-equivalence-family) =
+-    equiv-descent-data-pushout-equivalence-family
++  pr1 family-with-descent-data-equivalence-type-pushout =
++    family-cocone-equivalence-type-pushout
++  pr1 (pr2 family-with-descent-data-equivalence-type-pushout) =
++    descent-data-equivalence-type-pushout
++  pr2 (pr2 family-with-descent-data-equivalence-type-pushout) =
++    equiv-descent-data-equivalence-type-pushout
+ ```
+ 
+ ## Properties
+@@ -192,46 +190,30 @@ module _
+   (R : family-with-descent-data-pushout c l6)
+   where
+ 
+-  equiv-section-descent-data-pushout-equivalence-family :
++  equiv-section-descent-data-equivalence-type-pushout :
+     section-descent-data-pushout
+-      ( descent-data-pushout-equivalence-family P R) →
++      ( descent-data-equivalence-type-pushout P R) →
+     equiv-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+       ( descent-data-family-with-descent-data-pushout R)
+-  pr1 (equiv-section-descent-data-pushout-equivalence-family t) =
+-    left-map-section-descent-data-pushout
+-      ( descent-data-pushout-equivalence-family P R)
+-      ( t)
+-  pr1 (pr2 (equiv-section-descent-data-pushout-equivalence-family t)) =
+-    right-map-section-descent-data-pushout
+-      ( descent-data-pushout-equivalence-family P R)
+-      ( t)
+-  pr2 (pr2 (equiv-section-descent-data-pushout-equivalence-family t)) s =
+-    inv-htpy
+-      ( map-inv-equiv
+-        ( equiv-coherence-triangle-maps-inv-top'
+-          ( ( map-family-family-with-descent-data-pushout R s) ∘
+-            ( map-equiv
+-              ( left-map-section-descent-data-pushout
+-                ( descent-data-pushout-equivalence-family P R)
+-                ( t)
+-                ( left-map-span-diagram 𝒮 s))))
+-          ( map-equiv
+-            ( right-map-section-descent-data-pushout
+-              ( descent-data-pushout-equivalence-family P R)
+-              ( t)
+-              ( right-map-span-diagram 𝒮 s)))
+-          ( equiv-family-family-with-descent-data-pushout P s))
+-        ( htpy-eq-equiv
+-          ( coherence-section-descent-data-pushout
+-            ( descent-data-pushout-equivalence-family P R)
+-            ( t)
+-            ( s))))
++  equiv-section-descent-data-equivalence-type-pushout =
++    tot
++      ( λ tA →
++        tot
++          ( λ tB tS s →
++            inv-htpy
++              ( map-inv-equiv
++                ( equiv-coherence-triangle-maps-inv-top'
++                  ( ( map-family-family-with-descent-data-pushout R s) ∘
++                    ( map-equiv (tA (left-map-span-diagram 𝒮 s))))
++                  ( map-equiv (tB (right-map-span-diagram 𝒮 s)))
++                  ( equiv-family-family-with-descent-data-pushout P s))
++                ( htpy-eq-equiv (tS s)))))
+ 
+   abstract
+-    is-equiv-equiv-section-descent-data-pushout-equivalence-family :
+-      is-equiv equiv-section-descent-data-pushout-equivalence-family
+-    is-equiv-equiv-section-descent-data-pushout-equivalence-family =
++    is-equiv-equiv-section-descent-data-equivalence-type-pushout :
++      is-equiv equiv-section-descent-data-equivalence-type-pushout
++    is-equiv-equiv-section-descent-data-equivalence-type-pushout =
+       is-equiv-tot-is-fiberwise-equiv
+         ( λ tA →
+           is-equiv-tot-is-fiberwise-equiv
+@@ -257,9 +239,9 @@ module _
+       ( descent-data-family-with-descent-data-pushout P)
+       ( descent-data-family-with-descent-data-pushout R)
+   equiv-descent-data-equiv-family-cocone-span-diagram =
+-    ( equiv-section-descent-data-pushout-equivalence-family) ∘
++    ( equiv-section-descent-data-equivalence-type-pushout) ∘
+     ( section-descent-data-section-family-cocone-span-diagram
+-      ( family-with-descent-data-pushout-equivalence-family P R))
++      ( family-with-descent-data-equivalence-type-pushout P R))
+ 
+   abstract
+     is-equiv-equiv-descent-data-equiv-family-cocone-span-diagram :
+@@ -269,7 +251,7 @@ module _
+       is-equiv-comp _ _
+         ( is-equiv-section-descent-data-section-family-cocone-span-diagram _
+           ( up-c))
+-        ( is-equiv-equiv-section-descent-data-pushout-equivalence-family)
++        ( is-equiv-equiv-section-descent-data-equivalence-type-pushout)
+ ```
+ 
+ As a corollary, given an equivalence
+diff --git a/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md b/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+index 14d821b818..5e76d9f3d6 100644
+--- a/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+@@ -93,28 +93,26 @@ module _
+   (R : family-with-descent-data-pushout c l6)
+   where
+ 
+-  family-cocone-family-with-descent-data-pushout-function-family :
+-    X → UU (l5 ⊔ l6)
+-  family-cocone-family-with-descent-data-pushout-function-family x =
++  family-cocone-function-type-pushout : X → UU (l5 ⊔ l6)
++  family-cocone-function-type-pushout x =
+     family-cocone-family-with-descent-data-pushout P x →
+     family-cocone-family-with-descent-data-pushout R x
+ 
+-  descent-data-pushout-function-family :
+-    descent-data-pushout 𝒮 (l5 ⊔ l6)
+-  pr1 descent-data-pushout-function-family a =
++  descent-data-function-type-pushout : descent-data-pushout 𝒮 (l5 ⊔ l6)
++  pr1 descent-data-function-type-pushout a =
+     left-family-family-with-descent-data-pushout P a →
+     left-family-family-with-descent-data-pushout R a
+-  pr1 (pr2 descent-data-pushout-function-family) b =
++  pr1 (pr2 descent-data-function-type-pushout) b =
+     right-family-family-with-descent-data-pushout P b →
+     right-family-family-with-descent-data-pushout R b
+-  pr2 (pr2 descent-data-pushout-function-family) s =
++  pr2 (pr2 descent-data-function-type-pushout) s =
+     ( equiv-postcomp _
+       ( equiv-family-family-with-descent-data-pushout R s)) ∘e
+     ( equiv-precomp
+       ( inv-equiv (equiv-family-family-with-descent-data-pushout P s))
+       ( _))
+ 
+-  left-equiv-equiv-descent-data-pushout-function-family :
++  left-equiv-equiv-descent-data-function-type-pushout :
+     (a : domain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( horizontal-map-cocone _ _ c a) →
+@@ -122,14 +120,14 @@ module _
+         ( horizontal-map-cocone _ _ c a)) ≃
+     ( left-family-family-with-descent-data-pushout P a →
+       left-family-family-with-descent-data-pushout R a)
+-  left-equiv-equiv-descent-data-pushout-function-family a =
++  left-equiv-equiv-descent-data-function-type-pushout a =
+     ( equiv-postcomp _
+       ( left-equiv-family-with-descent-data-pushout R a)) ∘e
+     ( equiv-precomp
+       ( inv-equiv (left-equiv-family-with-descent-data-pushout P a))
+       ( _))
+ 
+-  right-equiv-equiv-descent-data-pushout-function-family :
++  right-equiv-equiv-descent-data-function-type-pushout :
+     (b : codomain-span-diagram 𝒮) →
+     ( family-cocone-family-with-descent-data-pushout P
+         ( vertical-map-cocone _ _ c b) →
+@@ -137,29 +135,31 @@ module _
+         ( vertical-map-cocone _ _ c b)) ≃
+     ( right-family-family-with-descent-data-pushout P b →
+       right-family-family-with-descent-data-pushout R b)
+-  right-equiv-equiv-descent-data-pushout-function-family b =
++  right-equiv-equiv-descent-data-function-type-pushout b =
+     ( equiv-postcomp _
+       ( right-equiv-family-with-descent-data-pushout R b)) ∘e
+     ( equiv-precomp
+       ( inv-equiv (right-equiv-family-with-descent-data-pushout P b))
+       ( _))
+ 
+-  coherence-equiv-descent-data-pushout-function-family :
++  coherence-equiv-descent-data-function-type-pushout :
+     (s : spanning-type-span-diagram 𝒮) →
+     coherence-square-maps
+       ( map-equiv
+-        ( left-equiv-equiv-descent-data-pushout-function-family
++        ( left-equiv-equiv-descent-data-function-type-pushout
+           ( left-map-span-diagram 𝒮 s)))
+       ( tr
+-        ( family-cocone-family-with-descent-data-pushout-function-family)
++        ( family-cocone-function-type-pushout)
+         ( coherence-square-cocone _ _ c s))
+-      ( map-family-descent-data-pushout descent-data-pushout-function-family s)
++      ( map-family-descent-data-pushout
++        ( descent-data-function-type-pushout)
++        ( s))
+       ( map-equiv
+-        ( right-equiv-equiv-descent-data-pushout-function-family
++        ( right-equiv-equiv-descent-data-function-type-pushout
+           ( right-map-span-diagram 𝒮 s)))
+-  coherence-equiv-descent-data-pushout-function-family s =
++  coherence-equiv-descent-data-function-type-pushout s =
+     ( ( map-equiv
+-        ( right-equiv-equiv-descent-data-pushout-function-family
++        ( right-equiv-equiv-descent-data-function-type-pushout
+           ( right-map-span-diagram 𝒮 s))) ·l
+       ( tr-function-type
+         ( family-cocone-family-with-descent-data-pushout P)
+@@ -180,26 +180,26 @@ module _
+             ( equiv-family-family-with-descent-data-pushout P s)
+             ( inv-htpy (coherence-family-with-descent-data-pushout P s)))))
+ 
+-  equiv-descent-data-pushout-function-family :
++  equiv-descent-data-function-type-pushout :
+     equiv-descent-data-pushout
+       ( descent-data-family-cocone-span-diagram c
+-        ( family-cocone-family-with-descent-data-pushout-function-family))
+-      ( descent-data-pushout-function-family)
+-  pr1 equiv-descent-data-pushout-function-family =
+-    left-equiv-equiv-descent-data-pushout-function-family
+-  pr1 (pr2 equiv-descent-data-pushout-function-family) =
+-    right-equiv-equiv-descent-data-pushout-function-family
+-  pr2 (pr2 equiv-descent-data-pushout-function-family) =
+-    coherence-equiv-descent-data-pushout-function-family
+-
+-  family-with-descent-data-pushout-function-family :
++        ( family-cocone-function-type-pushout))
++      ( descent-data-function-type-pushout)
++  pr1 equiv-descent-data-function-type-pushout =
++    left-equiv-equiv-descent-data-function-type-pushout
++  pr1 (pr2 equiv-descent-data-function-type-pushout) =
++    right-equiv-equiv-descent-data-function-type-pushout
++  pr2 (pr2 equiv-descent-data-function-type-pushout) =
++    coherence-equiv-descent-data-function-type-pushout
++
++  family-with-descent-data-function-type-pushout :
+     family-with-descent-data-pushout c (l5 ⊔ l6)
+-  pr1 family-with-descent-data-pushout-function-family =
+-    family-cocone-family-with-descent-data-pushout-function-family
+-  pr1 (pr2 family-with-descent-data-pushout-function-family) =
+-    descent-data-pushout-function-family
+-  pr2 (pr2 family-with-descent-data-pushout-function-family) =
+-    equiv-descent-data-pushout-function-family
++  pr1 family-with-descent-data-function-type-pushout =
++    family-cocone-function-type-pushout
++  pr1 (pr2 family-with-descent-data-function-type-pushout) =
++    descent-data-function-type-pushout
++  pr2 (pr2 family-with-descent-data-function-type-pushout) =
++    equiv-descent-data-function-type-pushout
+ ```
+ 
+ ## Properties
+@@ -214,43 +214,30 @@ module _
+   (R : family-with-descent-data-pushout c l6)
+   where
+ 
+-  hom-section-descent-data-pushout-function-family :
+-    section-descent-data-pushout (descent-data-pushout-function-family P R) →
++  hom-section-descent-data-function-type-pushout :
++    section-descent-data-pushout (descent-data-function-type-pushout P R) →
+     hom-descent-data-pushout
+       ( descent-data-family-with-descent-data-pushout P)
+       ( descent-data-family-with-descent-data-pushout R)
+-  pr1 (hom-section-descent-data-pushout-function-family t) =
+-    left-map-section-descent-data-pushout
+-      ( descent-data-pushout-function-family P R)
+-      ( t)
+-  pr1 (pr2 (hom-section-descent-data-pushout-function-family t)) =
+-    right-map-section-descent-data-pushout
+-      ( descent-data-pushout-function-family P R)
+-      ( t)
+-  pr2 (pr2 (hom-section-descent-data-pushout-function-family t)) s =
+-    inv-htpy
+-      ( map-inv-equiv
+-        ( equiv-coherence-triangle-maps-inv-top'
+-          ( ( map-family-family-with-descent-data-pushout R s) ∘
+-            ( left-map-section-descent-data-pushout
+-              ( descent-data-pushout-function-family P R)
+-              ( t)
+-              ( left-map-span-diagram 𝒮 s)))
+-          ( right-map-section-descent-data-pushout
+-            ( descent-data-pushout-function-family P R)
+-            ( t)
+-            ( right-map-span-diagram 𝒮 s))
+-          ( equiv-family-family-with-descent-data-pushout P s))
+-        ( htpy-eq
+-          ( coherence-section-descent-data-pushout
+-            ( descent-data-pushout-function-family P R)
+-            ( t)
+-            ( s))))
++  hom-section-descent-data-function-type-pushout =
++    tot
++      ( λ tA →
++        tot
++        ( λ tB tS s →
++          inv-htpy
++            ( map-inv-equiv
++              ( equiv-coherence-triangle-maps-inv-top'
++                ( ( map-family-family-with-descent-data-pushout R s) ∘
++                  ( tA (left-map-span-diagram 𝒮 s)))
++                ( tB (right-map-span-diagram 𝒮 s))
++                ( equiv-family-family-with-descent-data-pushout P s))
++              ( htpy-eq (tS s)))))
+ 
+   abstract
+-    is-equiv-hom-section-descent-data-pushout-function-family :
+-      is-equiv hom-section-descent-data-pushout-function-family
+-    is-equiv-hom-section-descent-data-pushout-function-family =
++    is-equiv-hom-section-descent-data-function-type-pushout :
++      is-equiv
++        ( hom-section-descent-data-function-type-pushout)
++    is-equiv-hom-section-descent-data-function-type-pushout =
+       is-equiv-tot-is-fiberwise-equiv
+         ( λ tA →
+           is-equiv-tot-is-fiberwise-equiv
+@@ -276,9 +263,9 @@ module _
+       ( descent-data-family-with-descent-data-pushout P)
+       ( descent-data-family-with-descent-data-pushout R)
+   hom-descent-data-map-family-cocone-span-diagram =
+-    ( hom-section-descent-data-pushout-function-family) ∘
++    ( hom-section-descent-data-function-type-pushout) ∘
+     ( section-descent-data-section-family-cocone-span-diagram
+-      ( family-with-descent-data-pushout-function-family P R))
++      ( family-with-descent-data-function-type-pushout P R))
+ 
+   abstract
+     is-equiv-hom-descent-data-map-family-cocone-span-diagram :
+@@ -288,7 +275,7 @@ module _
+       is-equiv-comp _ _
+         ( is-equiv-section-descent-data-section-family-cocone-span-diagram _
+           ( up-c))
+-        ( is-equiv-hom-section-descent-data-pushout-function-family)
++        ( is-equiv-hom-section-descent-data-function-type-pushout)
+ ```
+ 
+ As a corollary, given a morphism `(hA, hB, hS) : (PA, PB, PS) → (RA, RB, RS)`,
+diff --git a/src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md b/src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md
+index 46877d3ba5..6244d587ce 100644
+--- a/src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-identity-types-over-pushouts.lagda.md
+@@ -63,34 +63,33 @@ module _
+   (x₀ : X)
+   where
+ 
+-  family-cocone-family-with-descent-data-pushout-identity-type : X → UU l4
+-  family-cocone-family-with-descent-data-pushout-identity-type x =
+-    x₀ ＝ x
++  family-cocone-identity-type-pushout : X → UU l4
++  family-cocone-identity-type-pushout x = x₀ ＝ x
+ 
+-  descent-data-pushout-identity-type : descent-data-pushout 𝒮 l4
+-  pr1 descent-data-pushout-identity-type a =
++  descent-data-identity-type-pushout : descent-data-pushout 𝒮 l4
++  pr1 descent-data-identity-type-pushout a =
+     x₀ ＝ horizontal-map-cocone _ _ c a
+-  pr1 (pr2 descent-data-pushout-identity-type) b =
++  pr1 (pr2 descent-data-identity-type-pushout) b =
+     x₀ ＝ vertical-map-cocone _ _ c b
+-  pr2 (pr2 descent-data-pushout-identity-type) s =
++  pr2 (pr2 descent-data-identity-type-pushout) s =
+     equiv-concat' x₀ (coherence-square-cocone _ _ c s)
+ 
+-  equiv-descent-data-pushout-identity-type :
++  equiv-descent-data-identity-type-pushout :
+     equiv-descent-data-pushout
+       ( descent-data-family-cocone-span-diagram c
+-        ( family-cocone-family-with-descent-data-pushout-identity-type))
+-      ( descent-data-pushout-identity-type)
+-  pr1 equiv-descent-data-pushout-identity-type a = id-equiv
+-  pr1 (pr2 equiv-descent-data-pushout-identity-type) b = id-equiv
+-  pr2 (pr2 equiv-descent-data-pushout-identity-type) s =
++        ( family-cocone-identity-type-pushout))
++      ( descent-data-identity-type-pushout)
++  pr1 equiv-descent-data-identity-type-pushout a = id-equiv
++  pr1 (pr2 equiv-descent-data-identity-type-pushout) b = id-equiv
++  pr2 (pr2 equiv-descent-data-identity-type-pushout) s =
+     tr-Id-right (coherence-square-cocone _ _ c s)
+ 
+-  family-with-descent-data-pushout-identity-type :
++  family-with-descent-data-identity-type-pushout :
+     family-with-descent-data-pushout c l4
+-  pr1 family-with-descent-data-pushout-identity-type =
+-    family-cocone-family-with-descent-data-pushout-identity-type
+-  pr1 (pr2 family-with-descent-data-pushout-identity-type) =
+-    descent-data-pushout-identity-type
+-  pr2 (pr2 family-with-descent-data-pushout-identity-type) =
+-    equiv-descent-data-pushout-identity-type
++  pr1 family-with-descent-data-identity-type-pushout =
++    family-cocone-identity-type-pushout
++  pr1 (pr2 family-with-descent-data-identity-type-pushout) =
++    descent-data-identity-type-pushout
++  pr2 (pr2 family-with-descent-data-identity-type-pushout) =
++    equiv-descent-data-identity-type-pushout
+ ```
+
+From 2b7da8c7114159c033d765696852fe999da0c203 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 4 Jun 2024 17:45:15 +0200
+Subject: [PATCH 7/7] Add a note on the difference between function types and
+ functions
+
+---
+ ...data-function-types-over-pushouts.lagda.md | 23 +++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md b/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+index 5e76d9f3d6..ac284b320a 100644
+--- a/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/descent-data-function-types-over-pushouts.lagda.md
+@@ -63,10 +63,25 @@ consists of the type families
+ and the gluing data sending `h : PA (fs) → RA (fs)` to
+ `(RS s ∘ h ∘ (PS s)⁻¹) : PB (gs) → RB (gs)`.
+ 
+-The fiberwise families then correspond to
+-[sections](synthetic-homotopy-theory.sections-descent-data-pushouts.md) of this
+-descent data, and it suffices to show that those correspond to morphisms. The
+-coherence datum of such a section has the type
++**Note:** It is important to differentiate between families of _function types_,
++i.e. a type family that to every `x : X` assigns the _type_ `P x → R x`, and
++families of _functions_, i.e. a family that to every `x : X` assigns a
++_function_ from `P x` to R x`. Descent data plays the role of a family of types,
++so it makes sense to talk about "descent data corresponding to a family of
++function types", but it doesn't make sense to talk about "descent data
++corresponding to a family of functions". The kind of data that corresponds to
++families of functions are the _sections_ of the descent data of a family of
++function types.
++
++It suffices to show that the sections correspond to morphisms. The first two
++components of a section and a morphism agree, namely they are
++
++```text
++  sA : (a : A) → PA a → RA a
++  sB : (b : B) → PB b → RB b,
++```
++
++respectively. The coherence datum of a section has the type
+ 
+ ```text
+   (s : S) → RS s ∘ sA (fs) ∘ (RS s)⁻¹ = sB (gs),

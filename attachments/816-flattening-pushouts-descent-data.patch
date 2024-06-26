@@ -1,0 +1,1875 @@
+From b3de0efa0758673fd3fe2455bfa87ff61e8a0e01 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Fri, 6 Oct 2023 14:27:01 +0200
+Subject: [PATCH 01/12] Induced cube of function spaces
+
+---
+ .../commuting-triangles-of-maps.lagda.md      |  30 +-
+ .../functoriality-function-types.lagda.md     |  14 +
+ src/foundation-core/homotopies.lagda.md       |  35 +++
+ .../commuting-cubes-of-maps.lagda.md          | 281 +++++++++++++++++-
+ ...uting-hexagons-of-identifications.lagda.md |  18 ++
+ .../commuting-squares-of-maps.lagda.md        | 258 +++++++++++++++-
+ 6 files changed, 629 insertions(+), 7 deletions(-)
+
+diff --git a/src/foundation-core/commuting-triangles-of-maps.lagda.md b/src/foundation-core/commuting-triangles-of-maps.lagda.md
+index 4b49392399..30a6c78e5f 100644
+--- a/src/foundation-core/commuting-triangles-of-maps.lagda.md
++++ b/src/foundation-core/commuting-triangles-of-maps.lagda.md
+@@ -10,6 +10,7 @@ module foundation-core.commuting-triangles-of-maps where
+ open import foundation.universe-levels
+ 
+ open import foundation-core.function-types
++open import foundation-core.functoriality-function-types
+ open import foundation-core.homotopies
+ open import foundation-core.whiskering-homotopies
+ ```
+@@ -31,7 +32,7 @@ A triangle of maps
+ is said to commute if there is a homotopy between the map on the left and the
+ composite map.
+ 
+-## Definition
++## Definitions
+ 
+ ### Commuting triangles of maps
+ 
+@@ -64,3 +65,30 @@ module _
+   concat-coherence-triangle-maps H K =
+     H ∙h (K ·r i)
+ ```
++
++### Any commuting triangle of maps induces a commuting triangle of function spaces
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
++  ( left : A → X) (right : B → X) (top : A → B)
++  where
++
++  precomp-coherence-triangle-maps :
++    coherence-triangle-maps left right top →
++    ( W : UU l4) →
++    coherence-triangle-maps
++      ( precomp left W)
++      ( precomp top W)
++      ( precomp right W)
++  precomp-coherence-triangle-maps H W = htpy-precomp H W
++
++  precomp-coherence-triangle-maps' :
++    coherence-triangle-maps' left right top →
++    ( W : UU l4) →
++    coherence-triangle-maps'
++      ( precomp left W)
++      ( precomp top W)
++      ( precomp right W)
++  precomp-coherence-triangle-maps' H W = htpy-precomp H W
++```
+diff --git a/src/foundation-core/functoriality-function-types.lagda.md b/src/foundation-core/functoriality-function-types.lagda.md
+index f300037a71..09a3767e33 100644
+--- a/src/foundation-core/functoriality-function-types.lagda.md
++++ b/src/foundation-core/functoriality-function-types.lagda.md
+@@ -73,6 +73,20 @@ compute-htpy-precomp-refl-htpy :
+ compute-htpy-precomp-refl-htpy f C h = eq-htpy-refl-htpy (h ∘ f)
+ ```
+ 
++### Precomposition preserves composition of homotopies
++
++```agda
++compute-comp-htpy-precomp :
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2}
++  { f g h : A → B} (H : f ~ g) (K : g ~ h) (C : UU l3) →
++  htpy-precomp (H ∙h K) C ~ (htpy-precomp H C ∙h htpy-precomp K C)
++compute-comp-htpy-precomp H K C k =
++  ( ap
++    ( eq-htpy)
++    ( eq-htpy (distributive-left-whisk-concat-htpy k H K))) ∙
++  ( eq-htpy-concat-htpy (k ·l H) (k ·l K))
++```
++
+ ### Postcomposition and equivalences
+ 
+ #### A map `f` is an equivalence if and only if postcomposing by `f` is an equivalence
+diff --git a/src/foundation-core/homotopies.lagda.md b/src/foundation-core/homotopies.lagda.md
+index a8a2adcfe1..961891ffca 100644
+--- a/src/foundation-core/homotopies.lagda.md
++++ b/src/foundation-core/homotopies.lagda.md
+@@ -7,6 +7,7 @@ module foundation-core.homotopies where
+ <details><summary>Imports</summary>
+ 
+ ```agda
++open import foundation.action-on-identifications-binary-functions
+ open import foundation.action-on-identifications-dependent-functions
+ open import foundation.action-on-identifications-functions
+ open import foundation.commuting-squares-of-identifications
+@@ -299,6 +300,40 @@ module _
+   ap-inv-htpy K x = ap inv (K x)
+ ```
+ 
++### Concatenations of homotopic homotopies are homotopic
++
++```agda
++module _
++  { l1 l2 : Level} {A : UU l1} {B : A → UU l2} {f g h : (a : A) → B a}
++  where
++
++  ap-concat-htpies :
++    { H H' : f ~ g} → H ~ H' →
++    { K K' : g ~ h} → K ~ K' →
++    ( H ∙h K) ~ (H' ∙h K')
++  ap-concat-htpies α β x = ap-binary (_∙_) (α x) (β x)
++
++module _
++  { l1 l2 : Level} {A : UU l1} {B : A → UU l2} {f g h k : (a : A) → B a}
++  where
++
++  ap-concat-three-htpies :
++    { H H' : f ~ g} → H ~ H' →
++    { K K' : g ~ h} → K ~ K' →
++    { L L' : h ~ k} → L ~ L' →
++    ( H ∙h K ∙h L) ~ (H' ∙h K' ∙h L')
++  ap-concat-three-htpies α β γ x =
++    ap-binary (_∙_) (ap-concat-htpies α β x) (γ x)
++
++  ap-concat-three-htpies' :
++    { H H' : f ~ g} → H ~ H' →
++    { K K' : g ~ h} → K ~ K' →
++    { L L' : h ~ k} → L ~ L' →
++    ( H ∙h (K ∙h L)) ~ (H' ∙h (K' ∙h L'))
++  ap-concat-three-htpies' α β γ x =
++    ap-binary (_∙_) (α x) (ap-concat-htpies β γ x)
++```
++
+ ## Reasoning with homotopies
+ 
+ Homotopies can be constructed by equational reasoning in the following way:
+diff --git a/src/foundation/commuting-cubes-of-maps.lagda.md b/src/foundation/commuting-cubes-of-maps.lagda.md
+index 0d236aab08..3397da6085 100644
+--- a/src/foundation/commuting-cubes-of-maps.lagda.md
++++ b/src/foundation/commuting-cubes-of-maps.lagda.md
+@@ -12,6 +12,7 @@ open import foundation.commuting-hexagons-of-identifications
+ open import foundation.commuting-squares-of-maps
+ open import foundation.cones-over-cospans
+ open import foundation.dependent-pair-types
++open import foundation.function-extensionality
+ open import foundation.universe-levels
+ 
+ open import foundation-core.function-types
+@@ -28,19 +29,19 @@ We specify the type of the homotopy witnessing that a cube commutes. Imagine
+ that the cube is presented as a lattice
+ 
+ ```text
+-            *
++            A'
+           / | \
+          /  |  \
+         /   |   \
+-       *    *    *
++       B'   A    C'
+        |\ /   \ /|
+        | \     ‌/ |
+        |/ \   / \|
+-       *    *    *
++       B    D'   C'
+         \   |   /
+          \  |  /
+           \ | /
+-            *
++            D
+ ```
+ 
+ with all maps pointing in the downwards direction. Presented in this way, a cube
+@@ -372,3 +373,275 @@ module _
+                 ( (assoc-htpy (bottom ·r hA) _ _) ∙h (inv-htpy c))))) ∙h
+           ( ap-concat-htpy (bottom ·r hA) _ _ inv-htpy-right-unit-htpy))))
+ ```
++
++### Any commuting cube of maps induces a commuting cube of function spaces
++
++```agda
++module _
++  { l1 l2 l3 l4 l1' l2' l3' l4' l5 : Level}
++  { A : UU l1} {B : UU l2} {C : UU l3} {D : UU l4}
++  ( f : A → B) (g : A → C) (h : B → D) (k : C → D)
++  { A' : UU l1'} {B' : UU l2'} {C' : UU l3'} {D' : UU l4'}
++  ( f' : A' → B') (g' : A' → C') (h' : B' → D') (k' : C' → D')
++  ( hA : A' → A) (hB : B' → B) (hC : C' → C) (hD : D' → D)
++  ( top : coherence-square-maps g' f' k' h')
++  ( back-left : coherence-square-maps f' hA hB f)
++  ( back-right : coherence-square-maps g' hA hC g)
++  ( front-left : coherence-square-maps h' hB hD h)
++  ( front-right : coherence-square-maps k' hC hD k)
++  ( bottom : coherence-square-maps g f k h)
++  where
++
++  precomp-coherence-cube-maps :
++    coherence-cube-maps f g h k f' g' h' k' hA hB hC hD
++      ( top)
++      ( back-left)
++      ( back-right)
++      ( front-left)
++      ( front-right)
++      ( bottom) →
++    ( W : UU l5) →
++    coherence-cube-maps
++      ( precomp h' W)
++      ( precomp k' W)
++      ( precomp f' W)
++      ( precomp g' W)
++      ( precomp h W)
++      ( precomp k W)
++      ( precomp f W)
++      ( precomp g W)
++      ( precomp hD W)
++      ( precomp hB W)
++      ( precomp hC W)
++      ( precomp hA W)
++      ( precomp-coherence-square-maps g f k h bottom W)
++      ( precomp-coherence-square-maps hB h' h hD (inv-htpy front-left) W)
++      ( precomp-coherence-square-maps hC k' k hD (inv-htpy front-right) W)
++      ( precomp-coherence-square-maps hA f' f hB (inv-htpy back-left) W)
++      ( precomp-coherence-square-maps hA g' g hC (inv-htpy back-right) W)
++      ( precomp-coherence-square-maps g' f' k' h' top W)
++  precomp-coherence-cube-maps c W =
++    homotopy-reasoning
++      ( (precomp f' W) ·l precomp-front-left-inv) ∙h
++      ( precomp-back-left-inv ·r (precomp h W)) ∙h
++      ( (precomp hA W) ·l precomp-bottom)
++      ~ ( precomp-front-left-inv-whisk-f') ∙h
++        ( precomp-h-whisk-back-left-inv) ∙h
++        ( precomp-bottom-whisk-hA)
++        by
++        inv-htpy
++          ( ap-concat-three-htpies
++            ( distributive-precomp-right-whisk-coherence-square-maps W hB h' h
++              ( hD)
++              ( inv-htpy front-left)
++              ( f'))
++            ( distributive-precomp-left-whisk-coherence-square-maps W hA f' f hB
++              ( inv-htpy back-left)
++              ( h))
++            ( distributive-precomp-right-whisk-coherence-square-maps W g f k h
++              ( bottom)
++              ( hA)))
++      ~ precomp-coherence-square-maps hA
++          ( h' ∘ f')
++          ( k ∘ g)
++          ( hD)
++          ( ( inv-htpy front-left ·r f') ∙h
++            ( h ·l inv-htpy back-left) ∙h
++            ( bottom ·r hA))
++          ( W)
++        by
++        inv-htpy
++          ( distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps
++            ( W)
++            ( hA)
++            ( h' ∘ f')
++            ( k ∘ g)
++            ( hD)
++            ( h ·l inv-htpy back-left)
++            ( inv-htpy front-left ·r f')
++            ( bottom ·r hA))
++      ~ precomp-coherence-square-maps hA
++          ( h' ∘ f')
++          ( k ∘ g)
++          ( hD)
++          ( ( hD ·l top) ∙h
++            ( ( inv-htpy front-right ·r g') ∙h
++              ( k ·l inv-htpy back-right)))
++          ( W)
++        by
++        ( λ x →
++          ap
++            ( λ square →
++              precomp-coherence-square-maps hA (h' ∘ f') (k ∘ g) hD square W x)
++            ( eq-htpy
++              ( λ a' →
++                inv-hexagon
++                  ( ap hD (top a'))
++                  ( inv (front-right (g' a')))
++                  ( ap k (inv (back-right a')))
++                  ( inv (front-left (f' a')))
++                  ( ap h (inv (back-left a')))
++                  ( bottom (hA a'))
++                  ( coherence-cube-maps-rotate-240 f g h k f' g' h' k' hA hB hC
++                    ( hD)
++                    ( top)
++                    ( back-left)
++                    ( back-right)
++                    ( front-left)
++                    ( front-right)
++                    ( bottom)
++                    ( c)
++                    ( a')))))
++      ~ ( precomp-hD-whisk-top) ∙h
++        ( ( precomp-front-right-inv-whisk-g') ∙h
++          ( precomp-k-whisk-back-right-inv))
++        by
++        distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps'
++          ( W)
++          ( hA)
++          ( h' ∘ f')
++          ( k ∘ g)
++          ( hD)
++          ( inv-htpy front-right ·r g')
++          ( hD ·l top)
++          ( k ·l inv-htpy back-right)
++      ~ ( precomp-top ·r (precomp hD W)) ∙h
++        ( ( (precomp g' W) ·l precomp-front-right-inv) ∙h
++          ( precomp-back-right-inv ·r (precomp k W)))
++        by
++        ap-concat-three-htpies'
++          ( distributive-precomp-left-whisk-coherence-square-maps W g' f' k' h'
++            ( top)
++            ( hD))
++          ( distributive-precomp-right-whisk-coherence-square-maps W hC k' k hD
++            ( inv-htpy front-right)
++            ( g'))
++          ( distributive-precomp-left-whisk-coherence-square-maps W hA g' g hC
++            ( inv-htpy back-right)
++            ( k))
++    where
++    precomp-top :
++      coherence-square-maps
++        ( precomp k' W)
++        ( precomp h' W)
++        ( precomp g' W)
++        ( precomp f' W)
++    precomp-top = precomp-coherence-square-maps g' f' k' h' top W
++    precomp-back-left-inv :
++      coherence-square-maps
++        ( precomp f W)
++        ( precomp hB W)
++        ( precomp hA W)
++        ( precomp f' W)
++    precomp-back-left-inv =
++      precomp-coherence-square-maps hA f' f hB (inv-htpy back-left) W
++    precomp-back-right-inv :
++      coherence-square-maps
++        ( precomp g W)
++        ( precomp hC W)
++        ( precomp hA W)
++        ( precomp g' W)
++    precomp-back-right-inv =
++      precomp-coherence-square-maps hA g' g hC (inv-htpy back-right) W
++    precomp-front-left-inv :
++      coherence-square-maps
++        ( precomp h W)
++        ( precomp hD W)
++        ( precomp hB W)
++        ( precomp h' W)
++    precomp-front-left-inv =
++      precomp-coherence-square-maps hB h' h hD (inv-htpy front-left) W
++    precomp-front-right-inv :
++      coherence-square-maps
++        ( precomp k W)
++        ( precomp hD W)
++        ( precomp hC W)
++        ( precomp k' W)
++    precomp-front-right-inv =
++      precomp-coherence-square-maps hC k' k hD (inv-htpy front-right) W
++    precomp-bottom :
++      coherence-square-maps
++        ( precomp k W)
++        ( precomp h W)
++        ( precomp g W)
++        ( precomp f W)
++    precomp-bottom = precomp-coherence-square-maps g f k h bottom W
++    precomp-front-left-inv-whisk-f' :
++      coherence-square-maps
++        ( precomp h W)
++        ( precomp hD W)
++        ( precomp f' W ∘ precomp hB W)
++        ( precomp f' W ∘ precomp h' W)
++    precomp-front-left-inv-whisk-f' =
++      precomp-coherence-square-maps
++        ( hB ∘ f')
++        ( h' ∘ f')
++        ( h)
++        ( hD)
++        ( inv-htpy front-left ·r f')
++        ( W)
++    precomp-h-whisk-back-left-inv :
++      coherence-square-maps
++        ( precomp f W ∘ precomp h W)
++        ( precomp hB W ∘ precomp h W)
++        ( precomp hA W)
++        ( precomp f' W)
++    precomp-h-whisk-back-left-inv =
++      precomp-coherence-square-maps hA f'
++        ( h ∘ f)
++        ( h ∘ hB)
++        ( h ·l inv-htpy back-left)
++        ( W)
++    precomp-bottom-whisk-hA :
++      coherence-square-maps
++        ( precomp k W)
++        ( precomp h W)
++        ( precomp hA W ∘ precomp g W)
++        ( precomp hA W ∘ precomp f W)
++    precomp-bottom-whisk-hA =
++      precomp-coherence-square-maps
++        ( g ∘ hA)
++        ( f ∘ hA)
++        ( k)
++        ( h)
++        ( bottom ·r hA)
++        ( W)
++    precomp-hD-whisk-top :
++      coherence-square-maps
++        ( precomp k' W ∘ precomp hD W)
++        ( precomp h' W ∘ precomp hD W)
++        ( precomp g' W)
++        ( precomp f' W)
++    precomp-hD-whisk-top =
++      precomp-coherence-square-maps g' f'
++        ( hD ∘ k')
++        ( hD ∘ h')
++        ( hD ·l top)
++        ( W)
++    precomp-front-right-inv-whisk-g' :
++      coherence-square-maps
++        ( precomp k W)
++        ( precomp hD W)
++        ( precomp g' W ∘ precomp hC W)
++        ( precomp g' W ∘ precomp k' W)
++    precomp-front-right-inv-whisk-g' =
++      precomp-coherence-square-maps
++        ( hC ∘ g')
++        ( k' ∘ g')
++        ( k)
++        ( hD)
++        ( inv-htpy front-right ·r g')
++        ( W)
++    precomp-k-whisk-back-right-inv :
++      coherence-square-maps
++        ( precomp g W ∘ precomp k W)
++        ( precomp hC W ∘ precomp k W)
++        ( precomp hA W)
++        ( precomp g' W)
++    precomp-k-whisk-back-right-inv =
++      precomp-coherence-square-maps hA g'
++        ( k ∘ g)
++        ( k ∘ hC)
++        ( k ·l inv-htpy back-right)
++        ( W)
++```
+diff --git a/src/foundation/commuting-hexagons-of-identifications.lagda.md b/src/foundation/commuting-hexagons-of-identifications.lagda.md
+index d7b0dc191f..98dd4b4318 100644
+--- a/src/foundation/commuting-hexagons-of-identifications.lagda.md
++++ b/src/foundation/commuting-hexagons-of-identifications.lagda.md
+@@ -73,3 +73,21 @@ module _
+     coherence-hexagon (inv γ) (inv β) (inv α) (inv ζ) (inv ε) (inv δ)
+   hexagon-mirror-C refl refl refl refl refl .refl refl = refl
+ ```
++
++### Inversion of a hexagon
++
++The definition of a hexagon has an explicit asymmetrical choice of association,
++so `inv` only gives the correct identification up to reassociation.
++
++```agda
++module _
++  { l : Level} {A : UU l} {x u u' v v' y : A}
++  where
++
++  inv-hexagon :
++    ( α : x ＝ u) (β : u ＝ u') (γ : u' ＝ y) →
++    ( δ : x ＝ v) (ε : v ＝ v') (ζ : v' ＝ y) →
++    coherence-hexagon α β γ δ ε ζ →
++    coherence-hexagon δ ε ζ α β γ
++  inv-hexagon refl refl refl refl refl .refl refl = refl
++```
+diff --git a/src/foundation/commuting-squares-of-maps.lagda.md b/src/foundation/commuting-squares-of-maps.lagda.md
+index 302faea3f1..ef6fc87e7c 100644
+--- a/src/foundation/commuting-squares-of-maps.lagda.md
++++ b/src/foundation/commuting-squares-of-maps.lagda.md
+@@ -16,6 +16,7 @@ open import foundation.function-extensionality
+ open import foundation.universe-levels
+ open import foundation.whiskering-homotopies
+ 
++open import foundation-core.commuting-triangles-of-maps
+ open import foundation-core.function-types
+ open import foundation-core.functoriality-function-types
+ open import foundation-core.homotopies
+@@ -24,7 +25,69 @@ open import foundation-core.identity-types
+ 
+ </details>
+ 
+-## Properties
++## Definitions
++
++### Pasting commuting triangles into commuting squares along homotopic diagonals
++
++Two commuting triangles
++
++```text
++A        A ---> X
++| \       \  K  |
++|   \   L   \   |
++|  H  \       \ |
++v      v        v
++B ---> Y        Y
++```
++
++with a homotopic diagonal may be pasted into a commuting square
++
++```text
++A -----> X
++|        |
++|        |
++v        v
++B -----> Y
++```
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} {X : UU l3} {Y : UU l4}
++  ( top : A → X) (left : A → B) (right : X → Y) (bottom : B → Y)
++  where
++
++  coherence-square-htpy-coherence-triangles-maps :
++    { diagonal-left diagonal-right : A → Y} →
++    diagonal-left ~ diagonal-right →
++    coherence-triangle-maps' diagonal-left bottom left →
++    coherence-triangle-maps diagonal-right right top →
++    coherence-square-maps top left right bottom
++  coherence-square-htpy-coherence-triangles-maps L H K = (H ∙h L) ∙h K
++
++  coherence-square-htpy-coherence-triangles-maps' :
++    { diagonal-left diagonal-right : A → Y} →
++    diagonal-left ~ diagonal-right →
++    coherence-triangle-maps' diagonal-left bottom left →
++    coherence-triangle-maps diagonal-right right top →
++    coherence-square-maps top left right bottom
++  coherence-square-htpy-coherence-triangles-maps' L H K = H ∙h (L ∙h K)
++
++  coherence-square-coherence-triangles-maps :
++    ( diagonal : A → Y) →
++    coherence-triangle-maps' diagonal bottom left →
++    coherence-triangle-maps diagonal right top →
++    coherence-square-maps top left right bottom
++  coherence-square-coherence-triangles-maps diagonal H K = H ∙h K
++
++  compute-coherence-square-refl-htpy-coherence-triangles-maps :
++    ( diagonal : A → Y) →
++    ( H : coherence-triangle-maps' diagonal bottom left) →
++    ( K : coherence-triangle-maps diagonal right top) →
++    ( coherence-square-htpy-coherence-triangles-maps refl-htpy H K) ~
++    ( coherence-square-coherence-triangles-maps diagonal H K)
++  compute-coherence-square-refl-htpy-coherence-triangles-maps diagonal H K x =
++    ap (_∙ K x) right-unit
++```
+ 
+ ### Composing and inverting squares horizontally and vertically
+ 
+@@ -92,10 +155,12 @@ precomp-coherence-square-maps :
+     ( precomp bottom X)
+     ( precomp top X)
+     ( precomp left X)
+-precomp-coherence-square-maps top leeft right bottom H X =
++precomp-coherence-square-maps top left right bottom H X =
+   htpy-precomp H X
+ ```
+ 
++## Properties
++
+ ### Distributivity of pasting squares and transposing by precomposition
+ 
+ Given two commuting squares which can be composed horizontally (vertically), we
+@@ -313,3 +378,192 @@ module _
+           ( compute-eq-htpy-right-whisk left-top (h ·l K))
+           ( eq-htpy (associative-left-whisk-comp h right-bottom H))
+ ```
++
++### Transposing by precomposition of whiskered squares
++
++Taking a square of the form
++
++```text
++    f        top
++X -----> A -----> B
++         |        |
++    left |   H    | right
++         v        v
++         C -----> D
++           bottom
++```
++
++and transposing it by precomposition results in the square
++
++```text
++
++W^D -----> W^B
++ |          |
++ |   W^H    |
++ v          v   -∘f
++W^C -----> W^A -----> W^X
++```
++
++This fact can be written as distribution of right whiskering over transposition:
++`W^(H ·r f) = W^f ·l W^H`
++
++```agda
++module _
++  { l1 l2 l3 l4 l5 l6 : Level}
++  { A : UU l1} {B : UU l2} {C : UU l3} {D : UU l4} {X : UU l5} (W : UU l6)
++  ( top : A → B) (left : A → C) (right : B → D) (bottom : C → D)
++  ( H : coherence-square-maps top left right bottom)
++  where
++
++  distributive-precomp-right-whisk-coherence-square-maps :
++    ( f : X → A) →
++    precomp-coherence-square-maps
++      ( top ∘ f)
++      ( left ∘ f)
++      ( right)
++      ( bottom)
++      ( H ·r f)
++      ( W) ~
++    ( ( precomp f W) ·l
++      ( precomp-coherence-square-maps top left right bottom H W))
++  distributive-precomp-right-whisk-coherence-square-maps f g =
++    compute-eq-htpy-right-whisk f (g ·l H)
++```
++
++Similarly, we can calculate transpositions of left-whiskered squares with the
++formula `W^(f ·l H) = W^H ·r W^f`.
++
++```agda
++  distributive-precomp-left-whisk-coherence-square-maps :
++    ( f : D → X) →
++    precomp-coherence-square-maps
++      ( top)
++      ( left)
++      ( f ∘ right)
++      ( f ∘ bottom)
++      ( f ·l H)
++      ( W) ~
++    ( ( precomp-coherence-square-maps top left right bottom H W) ·r
++      ( precomp f W))
++  distributive-precomp-left-whisk-coherence-square-maps f g =
++    ap eq-htpy (eq-htpy (λ a → inv (ap-comp g f (H a))))
++```
++
++### The square of function spaces induces by a composition of triangles is homotopic to the composition of induced triangles of function spaces
++
++```agda
++module _
++  { l1 l2 l3 l4 l5 : Level}
++  { A : UU l1} {B : UU l2} {X : UU l3} {Y : UU l4} (W : UU l5)
++  ( top : A → X) (left : A → B) (right : X → Y) (bottom : B → Y)
++  where
++
++  distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps :
++    { diagonal-left diagonal-right : A → Y} →
++    ( L : diagonal-left ~ diagonal-right) →
++    ( H : coherence-triangle-maps' diagonal-left bottom left) →
++    ( K : coherence-triangle-maps diagonal-right right top) →
++    ( precomp-coherence-square-maps
++      ( top)
++      ( left)
++      ( right)
++      ( bottom)
++      ( coherence-square-htpy-coherence-triangles-maps
++        ( top)
++        ( left)
++        ( right)
++        ( bottom)
++        ( L)
++        ( H)
++        ( K))
++      ( W)) ~
++    ( coherence-square-htpy-coherence-triangles-maps
++      ( precomp right W)
++      ( precomp bottom W)
++      ( precomp top W)
++      ( precomp left W)
++      ( htpy-precomp L W)
++      ( precomp-coherence-triangle-maps' diagonal-left bottom left H W)
++      ( precomp-coherence-triangle-maps diagonal-right right top K W))
++  distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps
++    { diagonal-right = diagonal-right}
++    ( L)
++    ( H)
++    ( K)
++    ( h) =
++    ( compute-comp-htpy-precomp (H ∙h L) K W h) ∙
++    ( ap
++      ( _∙ precomp-coherence-triangle-maps diagonal-right right top K W h)
++      ( compute-comp-htpy-precomp H L W h))
++
++  distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps' :
++    { diagonal-left diagonal-right : A → Y} →
++    ( L : diagonal-left ~ diagonal-right) →
++    ( H : coherence-triangle-maps' diagonal-left bottom left) →
++    ( K : coherence-triangle-maps diagonal-right right top) →
++    ( precomp-coherence-square-maps
++      ( top)
++      ( left)
++      ( right)
++      ( bottom)
++      ( coherence-square-htpy-coherence-triangles-maps'
++        ( top)
++        ( left)
++        ( right)
++        ( bottom)
++        ( L)
++        ( H)
++        ( K))
++      ( W)) ~
++    ( coherence-square-htpy-coherence-triangles-maps'
++      ( precomp right W)
++      ( precomp bottom W)
++      ( precomp top W)
++      ( precomp left W)
++      ( htpy-precomp L W)
++      ( precomp-coherence-triangle-maps' diagonal-left bottom left H W)
++      ( precomp-coherence-triangle-maps diagonal-right right top K W))
++  distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps'
++    { diagonal-left = diagonal-left}
++    ( L)
++    ( H)
++    ( K)
++    ( h) =
++    ( compute-comp-htpy-precomp H (L ∙h K) W h) ∙
++    ( ap
++      ( precomp-coherence-triangle-maps' diagonal-left bottom left H W h ∙_)
++      ( compute-comp-htpy-precomp L K W h))
++
++  distributive-precomp-coherence-square-comp-coherence-triangles-maps :
++    ( diagonal : A → Y) →
++    ( H : coherence-triangle-maps' diagonal bottom left) →
++    ( K : coherence-triangle-maps diagonal right top) →
++    ( precomp-coherence-square-maps
++      ( top)
++      ( left)
++      ( right)
++      ( bottom)
++      ( coherence-square-coherence-triangles-maps
++        ( top)
++        ( left)
++        ( right)
++        ( bottom)
++        ( diagonal)
++        ( H)
++        ( K))
++      ( W)) ~
++    ( coherence-square-coherence-triangles-maps
++      ( precomp right W)
++      ( precomp bottom W)
++      ( precomp top W)
++      ( precomp left W)
++      ( precomp diagonal W)
++      ( precomp-coherence-triangle-maps' diagonal bottom left H W)
++      ( precomp-coherence-triangle-maps diagonal right top K W))
++  distributive-precomp-coherence-square-comp-coherence-triangles-maps
++    ( diagonal)
++    ( H)
++    ( K)
++    ( h) =
++    compute-comp-htpy-precomp H K W h
++```
+
+From fd9cf49c76dcc7a3e27c52e26be3002b8e9dff00 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Fri, 6 Oct 2023 17:10:32 +0200
+Subject: [PATCH 02/12] Top and bottom pushout in commuting cubes with vertical
+ equivalences
+
+---
+ .../universal-property-pushouts.lagda.md      | 126 ++++++++++++++++++
+ 1 file changed, 126 insertions(+)
+
+diff --git a/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md b/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
+index c8c212807b..a83c85cf16 100644
+--- a/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
+@@ -8,6 +8,7 @@ module synthetic-homotopy-theory.universal-property-pushouts where
+ 
+ ```agda
+ open import foundation.action-on-identifications-functions
++open import foundation.commuting-cubes-of-maps
+ open import foundation.commuting-squares-of-maps
+ open import foundation.cones-over-cospans
+ open import foundation.contractible-maps
+@@ -704,3 +705,128 @@ module _
+               ( up-r)
+               ( W))))
+ ```
++
++### In a commuting cube where the vertical maps are equivalences, the bottom square is a pushout if and only if the top square is a pushout
++
++```agda
++module _
++  { l1 l2 l3 l4 l1' l2' l3' l4' : Level}
++  { A : UU l1} {B : UU l2} {C : UU l3} {D : UU l4}
++  ( f : A → B) (g : A → C) (h : B → D) (k : C → D)
++  { A' : UU l1'} {B' : UU l2'} {C' : UU l3'} {D' : UU l4'}
++  ( f' : A' → B') (g' : A' → C') (h' : B' → D') (k' : C' → D')
++  ( hA : A' → A) (hB : B' → B) (hC : C' → C) (hD : D' → D)
++  ( top : coherence-square-maps g' f' k' h')
++  ( back-left : coherence-square-maps f' hA hB f)
++  ( back-right : coherence-square-maps g' hA hC g)
++  ( front-left : coherence-square-maps h' hB hD h)
++  ( front-right : coherence-square-maps k' hC hD k)
++  ( bottom : coherence-square-maps g f k h)
++  ( c :
++    coherence-cube-maps f g h k f' g' h' k' hA hB hC hD
++      ( top)
++      ( back-left)
++      ( back-right)
++      ( front-left)
++      ( front-right)
++      ( bottom))
++  ( is-equiv-hA : is-equiv hA) (is-equiv-hB : is-equiv hB)
++  ( is-equiv-hC : is-equiv hC) (is-equiv-hD : is-equiv hD)
++  where
++
++  universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv :
++    ( {l : Level} →
++      universal-property-pushout l f g (h , k , bottom)) →
++    ( {l : Level} →
++      universal-property-pushout l f' g' (h' , k' , top))
++  universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
++    ( up-bottom)
++    { l = l} =
++    universal-property-pushout-pullback-property-pushout l f' g'
++      ( h' , k' , top)
++      ( λ W →
++        is-pullback-bottom-is-pullback-top-cube-is-equiv
++          ( precomp h' W)
++          ( precomp k' W)
++          ( precomp f' W)
++          ( precomp g' W)
++          ( precomp h W)
++          ( precomp k W)
++          ( precomp f W)
++          ( precomp g W)
++          ( precomp hD W)
++          ( precomp hB W)
++          ( precomp hC W)
++          ( precomp hA W)
++          ( precomp-coherence-square-maps g f k h bottom W)
++          ( precomp-coherence-square-maps hB h' h hD (inv-htpy front-left) W)
++          ( precomp-coherence-square-maps hC k' k hD (inv-htpy front-right) W)
++          ( precomp-coherence-square-maps hA f' f hB (inv-htpy back-left) W)
++          ( precomp-coherence-square-maps hA g' g hC (inv-htpy back-right) W)
++          ( precomp-coherence-square-maps g' f' k' h' top W)
++          ( precomp-coherence-cube-maps f g h k f' g' h' k' hA hB hC hD
++            ( top)
++            ( back-left)
++            ( back-right)
++            ( front-left)
++            ( front-right)
++            ( bottom)
++            ( c)
++            ( W))
++          ( is-equiv-precomp-is-equiv hD is-equiv-hD W)
++          ( is-equiv-precomp-is-equiv hB is-equiv-hB W)
++          ( is-equiv-precomp-is-equiv hC is-equiv-hC W)
++          ( is-equiv-precomp-is-equiv hA is-equiv-hA W)
++          ( pullback-property-pushout-universal-property-pushout l f g
++            ( h , k , bottom)
++            ( up-bottom)
++            ( W)))
++
++  universal-property-pushout-bottom-universal-property-pushout-top-cube-is-equiv :
++    ( {l : Level} →
++      universal-property-pushout l f' g' (h' , k' , top)) →
++    ( {l : Level} →
++      universal-property-pushout l f g (h , k , bottom))
++  universal-property-pushout-bottom-universal-property-pushout-top-cube-is-equiv
++    ( up-top)
++    { l = l} =
++    universal-property-pushout-pullback-property-pushout l f g
++      ( h , k , bottom)
++      ( λ W →
++       is-pullback-top-is-pullback-bottom-cube-is-equiv
++          ( precomp h' W)
++          ( precomp k' W)
++          ( precomp f' W)
++          ( precomp g' W)
++          ( precomp h W)
++          ( precomp k W)
++          ( precomp f W)
++          ( precomp g W)
++          ( precomp hD W)
++          ( precomp hB W)
++          ( precomp hC W)
++          ( precomp hA W)
++          ( precomp-coherence-square-maps g f k h bottom W)
++          ( precomp-coherence-square-maps hB h' h hD (inv-htpy front-left) W)
++          ( precomp-coherence-square-maps hC k' k hD (inv-htpy front-right) W)
++          ( precomp-coherence-square-maps hA f' f hB (inv-htpy back-left) W)
++          ( precomp-coherence-square-maps hA g' g hC (inv-htpy back-right) W)
++          ( precomp-coherence-square-maps g' f' k' h' top W)
++          ( precomp-coherence-cube-maps f g h k f' g' h' k' hA hB hC hD
++            ( top)
++            ( back-left)
++            ( back-right)
++            ( front-left)
++            ( front-right)
++            ( bottom)
++            ( c)
++            ( W))
++          ( is-equiv-precomp-is-equiv hD is-equiv-hD W)
++          ( is-equiv-precomp-is-equiv hB is-equiv-hB W)
++          ( is-equiv-precomp-is-equiv hC is-equiv-hC W)
++          ( is-equiv-precomp-is-equiv hA is-equiv-hA W)
++          ( pullback-property-pushout-universal-property-pushout l f' g'
++            ( h' , k' , top)
++            ( up-top)
++            ( W)))
++```
+
+From 25cca1322901838f64963719765b59124aeaab4c Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Fri, 6 Oct 2023 17:12:57 +0200
+Subject: [PATCH 03/12] Fix typo
+
+---
+ src/foundation/function-types.lagda.md               | 12 ++++++------
+ .../flattening-lemma-coequalizers.lagda.md           |  4 ++--
+ .../flattening-lemma-pushouts.lagda.md               |  4 ++--
+ 3 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/src/foundation/function-types.lagda.md b/src/foundation/function-types.lagda.md
+index 0cebce6437..5f17839864 100644
+--- a/src/foundation/function-types.lagda.md
++++ b/src/foundation/function-types.lagda.md
+@@ -81,7 +81,7 @@ module _
+   { i : S → X}
+   where
+ 
+-  equiv-htpy-dependent-fuction-dependent-identification-function-type :
++  equiv-htpy-dependent-function-dependent-identification-function-type :
+     { j : S → X} (H : i ~ j) →
+     ( k : (s : S) → P (i s) → Y)
+     ( l : (s : S) → P (j s) → Y) →
+@@ -92,7 +92,7 @@ module _
+       ( H s)
+       ( k s)
+       ( l s))
+-  equiv-htpy-dependent-fuction-dependent-identification-function-type =
++  equiv-htpy-dependent-function-dependent-identification-function-type =
+     ind-htpy i
+       ( λ j H →
+         ( k : (s : S) → P (i s) → Y) →
+@@ -106,24 +106,24 @@ module _
+           ( l s)))
+       ( λ k l s → inv-equiv (equiv-funext))
+ 
+-  compute-equiv-htpy-dependent-fuction-dependent-identification-function-type :
++  compute-equiv-htpy-dependent-function-dependent-identification-function-type :
+     { j : S → X} (H : i ~ j) →
+     ( h : (x : X) → P x → Y) →
+     ( s : S) →
+     ( map-equiv
+-      ( equiv-htpy-dependent-fuction-dependent-identification-function-type H
++      ( equiv-htpy-dependent-function-dependent-identification-function-type H
+         ( h ∘ i)
+         ( h ∘ j)
+         ( s))
+       ( λ t → ap (ind-Σ h) (eq-pair-Σ (H s) refl))) ＝
+     ( apd h (H s))
+-  compute-equiv-htpy-dependent-fuction-dependent-identification-function-type =
++  compute-equiv-htpy-dependent-function-dependent-identification-function-type =
+     ind-htpy i
+       ( λ j H →
+         ( h : (x : X) → P x → Y) →
+         ( s : S) →
+         ( map-equiv
+-          ( equiv-htpy-dependent-fuction-dependent-identification-function-type
++          ( equiv-htpy-dependent-function-dependent-identification-function-type
+             ( H)
+             ( h ∘ i)
+             ( h ∘ j)
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+index d39acc6304..0b8d958fda 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -124,7 +124,7 @@ module _
+     equiv-tot
+       ( λ k →
+         equiv-Π-equiv-family
+-          ( equiv-htpy-dependent-fuction-dependent-identification-function-type
++          ( equiv-htpy-dependent-function-dependent-identification-function-type
+             ( Y)
+             ( coherence-cofork f g e)
+             ( k ∘ f)
+@@ -141,7 +141,7 @@ module _
+       ( refl)
+       ( eq-htpy
+         ( inv-htpy
+-          ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
++          ( compute-equiv-htpy-dependent-function-dependent-identification-function-type
+             ( Y)
+             ( coherence-cofork f g e)
+             ( h))))
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index 55df1bf9f1..5fc031beff 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -174,7 +174,7 @@ module _
+         equiv-tot
+           ( λ l →
+             equiv-Π-equiv-family
+-              ( equiv-htpy-dependent-fuction-dependent-identification-function-type
++              ( equiv-htpy-dependent-function-dependent-identification-function-type
+                 ( Y)
+                 ( coherence-square-cocone f g c)
+                 ( k ∘ f)
+@@ -193,7 +193,7 @@ module _
+         ( refl)
+         ( eq-htpy
+           ( inv-htpy
+-            ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
++            ( compute-equiv-htpy-dependent-function-dependent-identification-function-type
+               ( Y)
+               ( coherence-square-cocone f g c)
+               ( h)))))
+
+From 3f5c5445d2286203a081e7a5326ea39b0d1f5ff5 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Fri, 6 Oct 2023 17:45:01 +0200
+Subject: [PATCH 04/12] Statement of the flattening lemma for pushouts using
+ descent data
+
+---
+ .../flattening-lemma-pushouts.lagda.md        | 64 ++++++++++++++++++-
+ 1 file changed, 63 insertions(+), 1 deletion(-)
+
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index 5fc031beff..06542295a2 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -22,6 +22,7 @@ open import foundation.transport-along-identifications
+ open import foundation.universal-property-dependent-pair-types
+ open import foundation.universe-levels
+ 
++open import synthetic-homotopy-theory.26-descent
+ open import synthetic-homotopy-theory.cocones-under-spans
+ open import synthetic-homotopy-theory.dependent-cocones-under-spans
+ open import synthetic-homotopy-theory.dependent-universal-property-pushouts
+@@ -113,7 +114,7 @@ module _
+ 
+   flattening-lemma-pushout-statement : UUω
+   flattening-lemma-pushout-statement =
+-    ( { l : Level} → dependent-universal-property-pushout l f g c) →
++    ( {l : Level} → dependent-universal-property-pushout l f g c) →
+     { l : Level} →
+     universal-property-pushout l
+       ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
+@@ -124,6 +125,67 @@ module _
+       ( cocone-flattening-pushout)
+ ```
+ 
++### The statement of the flattening lemma for pushouts, phrased using descent data
++
++In the above statement, bla bla
++
++```agda
++module _
++  { l1 l2 l3 l4 l5 : Level} {S : UU l1} {A : UU l2} {B : UU l3} {X : UU l4}
++  ( f : S → A) (g : S → B) (c : cocone f g X)
++  ( P : Fam-pushout l5 f g)
++  ( Q : X → UU l5)
++  ( e : equiv-Fam-pushout P (desc-fam c Q))
++  where
++
++  horizontal-map-cocone-flattening-descent-data-pushout :
++    Σ A (pr1 P) → Σ X Q
++  horizontal-map-cocone-flattening-descent-data-pushout =
++    map-Σ Q
++      ( horizontal-map-cocone f g c)
++      ( λ a → map-equiv (pr1 e a))
++
++  vertical-map-cocone-flattening-descent-data-pushout :
++    Σ B (pr1 (pr2 P)) → Σ X Q
++  vertical-map-cocone-flattening-descent-data-pushout =
++    map-Σ Q
++      ( vertical-map-cocone f g c)
++      ( λ b → map-equiv (pr1 (pr2 e) b))
++
++  coherence-square-cocone-flattening-descent-data-pushout :
++    coherence-square-maps
++      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( map-Σ (pr1 P) f (λ s → id))
++      ( vertical-map-cocone-flattening-descent-data-pushout)
++      ( horizontal-map-cocone-flattening-descent-data-pushout)
++  coherence-square-cocone-flattening-descent-data-pushout =
++    htpy-map-Σ Q
++      ( coherence-square-cocone f g c)
++      ( λ s → map-equiv (pr1 e (f s)))
++      ( λ s → inv-htpy (pr2 (pr2 e) s))
++
++  cocone-flattening-descent-data-pushout :
++    cocone
++      ( map-Σ (pr1 P) f (λ s → id))
++      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( Σ X Q)
++  pr1 cocone-flattening-descent-data-pushout =
++    horizontal-map-cocone-flattening-descent-data-pushout
++  pr1 (pr2 cocone-flattening-descent-data-pushout) =
++    vertical-map-cocone-flattening-descent-data-pushout
++  pr2 (pr2 cocone-flattening-descent-data-pushout) =
++    coherence-square-cocone-flattening-descent-data-pushout
++
++  flattening-lemma-descent-data-pushout-statement : UUω
++  flattening-lemma-descent-data-pushout-statement =
++    ( {l : Level} → dependent-universal-property-pushout l f g c) →
++    { l : Level} →
++    universal-property-pushout l
++      ( map-Σ (pr1 P) f (λ s → id))
++      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( cocone-flattening-descent-data-pushout)
++```
++
+ ## Properties
+ 
+ ### Proof of the flattening lemma for pushouts
+
+From 50c50b721d1873cdfda3ab3269f7c701c5a8c417 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Fri, 6 Oct 2023 17:57:48 +0200
+Subject: [PATCH 05/12] pre-commit
+
+---
+ src/foundation/commuting-squares-of-maps.lagda.md               | 1 -
+ .../universal-property-pushouts.lagda.md                        | 2 +-
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/foundation/commuting-squares-of-maps.lagda.md b/src/foundation/commuting-squares-of-maps.lagda.md
+index ef6fc87e7c..40bd9a6857 100644
+--- a/src/foundation/commuting-squares-of-maps.lagda.md
++++ b/src/foundation/commuting-squares-of-maps.lagda.md
+@@ -396,7 +396,6 @@ X -----> A -----> B
+ and transposing it by precomposition results in the square
+ 
+ ```text
+-
+ W^D -----> W^B
+  |          |
+  |   W^H    |
+diff --git a/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md b/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
+index a83c85cf16..516f34c480 100644
+--- a/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-pushouts.lagda.md
+@@ -793,7 +793,7 @@ module _
+     universal-property-pushout-pullback-property-pushout l f g
+       ( h , k , bottom)
+       ( λ W →
+-       is-pullback-top-is-pullback-bottom-cube-is-equiv
++        is-pullback-top-is-pullback-bottom-cube-is-equiv
+           ( precomp h' W)
+           ( precomp k' W)
+           ( precomp f' W)
+
+From 24e54eab6858ce12c048ce434bdbcd38a120aab5 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Sat, 7 Oct 2023 18:28:05 +0200
+Subject: [PATCH 06/12] Flattening lemma for descent data for pushouts
+
+---
+ .../equality-dependent-pair-types.lagda.md    |  18 ++-
+ ...unctoriality-dependent-pair-types.lagda.md |  18 ++-
+ .../flattening-lemma-pushouts.lagda.md        | 124 +++++++++++++++++-
+ 3 files changed, 155 insertions(+), 5 deletions(-)
+
+diff --git a/src/foundation/equality-dependent-pair-types.lagda.md b/src/foundation/equality-dependent-pair-types.lagda.md
+index 68770562f6..ea47b8a1b7 100644
+--- a/src/foundation/equality-dependent-pair-types.lagda.md
++++ b/src/foundation/equality-dependent-pair-types.lagda.md
+@@ -116,11 +116,25 @@ module _
+   { l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {Y : UU l3} (f : Σ A B → Y)
+   where
+ 
+-  ap-eq-pair-Σ :
++  compute-ap-eq-pair-Σ :
+     { x y : A} (p : x ＝ y) {b : B x} {b' : B y} →
+     ( q : dependent-identification B p b b') →
+     ap f (eq-pair-Σ p q) ＝ (ap f (eq-pair-Σ p refl) ∙ ap (ev-pair f y) q)
+-  ap-eq-pair-Σ refl refl = refl
++  compute-ap-eq-pair-Σ refl refl = refl
++```
++
++### Equality of dependent pair types consists of two orthogonal components
++
++```agda
++module _
++  { l1 l2 : Level} {A : UU l1} (B : A → UU l2)
++  where
++
++  orthogonal-eq-pair-Σ :
++    { a a' : A} (p : a ＝ a') →
++    { b : B a} {b' : B a'} (q : dependent-identification B p b b') →
++    eq-pair-Σ p q ＝ (eq-pair-Σ p refl ∙ eq-pair-Σ refl q)
++  orthogonal-eq-pair-Σ refl q = refl
+ ```
+ 
+ ## See also
+diff --git a/src/foundation/functoriality-dependent-pair-types.lagda.md b/src/foundation/functoriality-dependent-pair-types.lagda.md
+index 321df44322..4c68002608 100644
+--- a/src/foundation/functoriality-dependent-pair-types.lagda.md
++++ b/src/foundation/functoriality-dependent-pair-types.lagda.md
+@@ -9,8 +9,10 @@ open import foundation-core.functoriality-dependent-pair-types public
+ <details><summary>Imports</summary>
+ 
+ ```agda
++open import foundation.action-on-identifications-functions
+ open import foundation.cones-over-cospans
+ open import foundation.dependent-pair-types
++open import foundation.transport-along-identifications
+ open import foundation.type-arithmetic-dependent-pair-types
+ open import foundation.universe-levels
+ 
+@@ -22,7 +24,6 @@ open import foundation-core.function-types
+ open import foundation-core.homotopies
+ open import foundation-core.identity-types
+ open import foundation-core.pullbacks
+-open import foundation-core.transport-along-identifications
+ ```
+ 
+ </details>
+@@ -264,6 +265,21 @@ module _
+   coherence-square-maps-map-Σ-map-base H (a , p) = eq-pair-Σ (H a) refl
+ ```
+ 
++### The action of `map-Σ-map-base` on identifications of the form `eq-pair-Σ` is given by the action on the base
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3)
++  where
++
++  compute-ap-map-Σ-map-base-eq-pair-Σ :
++    { s s' : A} (p : s ＝ s') {t : C (f s)} {t' : C (f s')}
++    ( q : tr (C ∘ f) p t ＝ t') →
++    ap (map-Σ-map-base f C) (eq-pair-Σ p q) ＝
++    eq-pair-Σ (ap f p) (substitution-law-tr C f p ∙ q)
++  compute-ap-map-Σ-map-base-eq-pair-Σ refl refl = refl
++```
++
+ ## See also
+ 
+ - Arithmetical laws involving dependent pair types are recorded in
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index 06542295a2..d71888f573 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -7,6 +7,8 @@ module synthetic-homotopy-theory.flattening-lemma-pushouts where
+ <details><summary>Imports</summary>
+ 
+ ```agda
++open import foundation.action-on-identifications-functions
++open import foundation.commuting-cubes-of-maps
+ open import foundation.commuting-squares-of-maps
+ open import foundation.commuting-triangles-of-maps
+ open import foundation.dependent-pair-types
+@@ -155,7 +157,7 @@ module _
+   coherence-square-cocone-flattening-descent-data-pushout :
+     coherence-square-maps
+       ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
+-      ( map-Σ (pr1 P) f (λ s → id))
++      ( map-Σ-map-base f (pr1 P))
+       ( vertical-map-cocone-flattening-descent-data-pushout)
+       ( horizontal-map-cocone-flattening-descent-data-pushout)
+   coherence-square-cocone-flattening-descent-data-pushout =
+@@ -166,7 +168,7 @@ module _
+ 
+   cocone-flattening-descent-data-pushout :
+     cocone
+-      ( map-Σ (pr1 P) f (λ s → id))
++      ( map-Σ-map-base f (pr1 P))
+       ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
+       ( Σ X Q)
+   pr1 cocone-flattening-descent-data-pushout =
+@@ -279,3 +281,121 @@ module _
+           ( dup-pushout (λ x → P x → Y))))
+       ( is-equiv-ind-Σ)
+ ```
++
++### Proof of the descent data statement of the flattening lemma
++
++The proof is carried out by constructing a commuting cube, which has
++equivalences for vertical maps, the `cocone-flattening-pushout` square for the
++bottom, and the `cocone-flattening-descent-data-pushout` square for the top.
++
++The bottom is a pushout by the above flattening lemma, which implies that the
++top is also a pushout.
++
++The other parts of the cube are defined naturally, and come from the following
++map of spans:
++
++```text
++  Σ (a : A) (PA a) <------- Σ (s : S) (PA (f s)) -----> Σ (b : B) (PB b)
++         |                           |                         |
++         |                           |                         |
++         v                           v                         v
++Σ (a : A) (P (i a)) <---- Σ (s : S) (P (i (f s))) ---> Σ (b : B) (P (j b))
++```
++
++where the vertical maps are equivalences given fiberwise by the equivalence of
++descent data.
++
++```agda
++module _
++  { l1 l2 l3 l4 l5 : Level} {S : UU l1} {A : UU l2} {B : UU l3} {X : UU l4}
++  ( f : S → A) (g : S → B) (c : cocone f g X)
++  ( P : Fam-pushout l5 f g)
++  ( Q : X → UU l5)
++  ( e : equiv-Fam-pushout P (desc-fam c Q))
++  where
++
++  coherence-cube-flattening-lemma-descent-data-pushout :
++    coherence-cube-maps
++      ( map-Σ-map-base f (Q ∘ horizontal-map-cocone f g c))
++      ( map-Σ
++        ( Q ∘ vertical-map-cocone f g c)
++        ( g)
++        ( λ s → tr Q (coherence-square-cocone f g c s)))
++      ( horizontal-map-cocone-flattening-pushout Q f g c)
++      ( vertical-map-cocone-flattening-pushout Q f g c)
++      ( map-Σ-map-base f (pr1 P))
++      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
++      ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
++      ( tot (λ s → map-equiv (pr1 e (f s))))
++      ( tot (λ a → map-equiv (pr1 e a)))
++      ( tot (λ b → map-equiv (pr1 (pr2 e) b)))
++      ( id)
++      ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e)
++      ( refl-htpy)
++      ( htpy-map-Σ
++        ( Q ∘ vertical-map-cocone f g c)
++        ( refl-htpy)
++        ( λ s →
++          tr Q (coherence-square-cocone f g c s) ∘ (map-equiv (pr1 e (f s))))
++        ( λ s → inv-htpy (pr2 (pr2 e) s)))
++      ( refl-htpy)
++      ( refl-htpy)
++      ( coherence-square-cocone-flattening-pushout Q f g c)
++  coherence-cube-flattening-lemma-descent-data-pushout (s , t) =
++    ( ap-id
++      ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e
++        ( s , t))) ∙
++    ( orthogonal-eq-pair-Σ Q
++      ( coherence-square-cocone f g c s)
++      ( inv (pr2 (pr2 e) s t))) ∙
++    ( ap
++      ( eq-pair-Σ (coherence-square-cocone f g c s) refl ∙_)
++      ( inv
++        ( ( right-unit) ∙
++          ( compute-ap-map-Σ-map-base-eq-pair-Σ
++            ( vertical-map-cocone f g c)
++            ( Q)
++            ( refl)
++            ( inv (pr2 (pr2 e) s t))))))
++
++  flattening-lemma-descent-data-pushout :
++    flattening-lemma-descent-data-pushout-statement f g c P Q e
++  flattening-lemma-descent-data-pushout dup-pushout =
++    universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
++      ( map-Σ-map-base f (Q ∘ horizontal-map-cocone f g c))
++      ( map-Σ
++        ( Q ∘ vertical-map-cocone f g c)
++        ( g)
++        ( λ s → tr Q (coherence-square-cocone f g c s)))
++      ( horizontal-map-cocone-flattening-pushout Q f g c)
++      ( vertical-map-cocone-flattening-pushout Q f g c)
++      ( map-Σ-map-base f (pr1 P))
++      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
++      ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
++      ( tot (λ s → map-equiv (pr1 e (f s))))
++      ( tot (λ a → map-equiv (pr1 e a)))
++      ( tot (λ b → map-equiv (pr1 (pr2 e) b)))
++      ( id)
++      ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e)
++      ( refl-htpy)
++      ( htpy-map-Σ
++        ( Q ∘ vertical-map-cocone f g c)
++        ( refl-htpy)
++        ( λ s →
++          tr Q (coherence-square-cocone f g c s) ∘ (map-equiv (pr1 e (f s))))
++        ( λ s → inv-htpy (pr2 (pr2 e) s)))
++      ( refl-htpy)
++      ( refl-htpy)
++      ( coherence-square-cocone-flattening-pushout Q f g c)
++      ( coherence-cube-flattening-lemma-descent-data-pushout)
++      ( is-equiv-tot-is-fiberwise-equiv
++        ( λ s → is-equiv-map-equiv (pr1 e (f s))))
++      ( is-equiv-tot-is-fiberwise-equiv
++        ( λ a → is-equiv-map-equiv (pr1 e a)))
++      ( is-equiv-tot-is-fiberwise-equiv
++        ( λ b → is-equiv-map-equiv (pr1 (pr2 e) b)))
++      ( is-equiv-id)
++      ( flattening-lemma-pushout Q f g c dup-pushout)
++```
+
+From ac9f2aa45ff503fa7326f308a59bb11fdbd28334 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Sat, 7 Oct 2023 18:49:48 +0200
+Subject: [PATCH 07/12] Punctuation
+
+---
+ src/foundation/commuting-squares-of-maps.lagda.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/foundation/commuting-squares-of-maps.lagda.md b/src/foundation/commuting-squares-of-maps.lagda.md
+index 40bd9a6857..37204c8c65 100644
+--- a/src/foundation/commuting-squares-of-maps.lagda.md
++++ b/src/foundation/commuting-squares-of-maps.lagda.md
+@@ -404,7 +404,7 @@ W^C -----> W^A -----> W^X
+ ```
+ 
+ This fact can be written as distribution of right whiskering over transposition:
+-`W^(H ·r f) = W^f ·l W^H`
++`W^(H ·r f) = W^f ·l W^H`.
+ 
+ ```agda
+ module _
+
+From e85f0b7dda8fcce68c5aa701fe6abee8d920d2e0 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Mon, 9 Oct 2023 21:35:10 +0200
+Subject: [PATCH 08/12] Less ad-hoc definition of horizontal homotopy
+ composition
+
+---
+ src/foundation-core/homotopies.lagda.md       | 34 ------------------
+ .../commuting-cubes-of-maps.lagda.md          | 36 ++++++++++---------
+ src/foundation/homotopies.lagda.md            | 14 ++++++++
+ 3 files changed, 34 insertions(+), 50 deletions(-)
+
+diff --git a/src/foundation-core/homotopies.lagda.md b/src/foundation-core/homotopies.lagda.md
+index 961891ffca..4e09b01772 100644
+--- a/src/foundation-core/homotopies.lagda.md
++++ b/src/foundation-core/homotopies.lagda.md
+@@ -300,40 +300,6 @@ module _
+   ap-inv-htpy K x = ap inv (K x)
+ ```
+ 
+-### Concatenations of homotopic homotopies are homotopic
+-
+-```agda
+-module _
+-  { l1 l2 : Level} {A : UU l1} {B : A → UU l2} {f g h : (a : A) → B a}
+-  where
+-
+-  ap-concat-htpies :
+-    { H H' : f ~ g} → H ~ H' →
+-    { K K' : g ~ h} → K ~ K' →
+-    ( H ∙h K) ~ (H' ∙h K')
+-  ap-concat-htpies α β x = ap-binary (_∙_) (α x) (β x)
+-
+-module _
+-  { l1 l2 : Level} {A : UU l1} {B : A → UU l2} {f g h k : (a : A) → B a}
+-  where
+-
+-  ap-concat-three-htpies :
+-    { H H' : f ~ g} → H ~ H' →
+-    { K K' : g ~ h} → K ~ K' →
+-    { L L' : h ~ k} → L ~ L' →
+-    ( H ∙h K ∙h L) ~ (H' ∙h K' ∙h L')
+-  ap-concat-three-htpies α β γ x =
+-    ap-binary (_∙_) (ap-concat-htpies α β x) (γ x)
+-
+-  ap-concat-three-htpies' :
+-    { H H' : f ~ g} → H ~ H' →
+-    { K K' : g ~ h} → K ~ K' →
+-    { L L' : h ~ k} → L ~ L' →
+-    ( H ∙h (K ∙h L)) ~ (H' ∙h (K' ∙h L'))
+-  ap-concat-three-htpies' α β γ x =
+-    ap-binary (_∙_) (α x) (ap-concat-htpies β γ x)
+-```
+-
+ ## Reasoning with homotopies
+ 
+ Homotopies can be constructed by equational reasoning in the following way:
+diff --git a/src/foundation/commuting-cubes-of-maps.lagda.md b/src/foundation/commuting-cubes-of-maps.lagda.md
+index 3397da6085..ed1a9c34e7 100644
+--- a/src/foundation/commuting-cubes-of-maps.lagda.md
++++ b/src/foundation/commuting-cubes-of-maps.lagda.md
+@@ -13,10 +13,10 @@ open import foundation.commuting-squares-of-maps
+ open import foundation.cones-over-cospans
+ open import foundation.dependent-pair-types
+ open import foundation.function-extensionality
++open import foundation.homotopies
+ open import foundation.universe-levels
+ 
+ open import foundation-core.function-types
+-open import foundation-core.homotopies
+ open import foundation-core.identity-types
+ open import foundation-core.whiskering-homotopies
+ ```
+@@ -430,14 +430,16 @@ module _
+         ( precomp-bottom-whisk-hA)
+         by
+         inv-htpy
+-          ( ap-concat-three-htpies
+-            ( distributive-precomp-right-whisk-coherence-square-maps W hB h' h
+-              ( hD)
+-              ( inv-htpy front-left)
+-              ( f'))
+-            ( distributive-precomp-left-whisk-coherence-square-maps W hA f' f hB
+-              ( inv-htpy back-left)
+-              ( h))
++          ( horizontal-concat-htpy
++            ( horizontal-concat-htpy
++              ( distributive-precomp-right-whisk-coherence-square-maps W hB h' h
++                ( hD)
++                ( inv-htpy front-left)
++                ( f'))
++              ( distributive-precomp-left-whisk-coherence-square-maps W hA f' f
++                ( hB)
++                ( inv-htpy back-left)
++                ( h)))
+             ( distributive-precomp-right-whisk-coherence-square-maps W g f k h
+               ( bottom)
+               ( hA)))
+@@ -509,16 +511,18 @@ module _
+         ( ( (precomp g' W) ·l precomp-front-right-inv) ∙h
+           ( precomp-back-right-inv ·r (precomp k W)))
+         by
+-        ap-concat-three-htpies'
++        horizontal-concat-htpy
+           ( distributive-precomp-left-whisk-coherence-square-maps W g' f' k' h'
+             ( top)
+             ( hD))
+-          ( distributive-precomp-right-whisk-coherence-square-maps W hC k' k hD
+-            ( inv-htpy front-right)
+-            ( g'))
+-          ( distributive-precomp-left-whisk-coherence-square-maps W hA g' g hC
+-            ( inv-htpy back-right)
+-            ( k))
++          ( horizontal-concat-htpy
++            ( distributive-precomp-right-whisk-coherence-square-maps W hC k' k
++              ( hD)
++              ( inv-htpy front-right)
++              ( g'))
++            ( distributive-precomp-left-whisk-coherence-square-maps W hA g' g hC
++              ( inv-htpy back-right)
++              ( k)))
+     where
+     precomp-top :
+       coherence-square-maps
+diff --git a/src/foundation/homotopies.lagda.md b/src/foundation/homotopies.lagda.md
+index 3307f3166b..b465a0ea03 100644
+--- a/src/foundation/homotopies.lagda.md
++++ b/src/foundation/homotopies.lagda.md
+@@ -128,6 +128,20 @@ module _
+   equiv-binary-concat-htpy H K = equiv-concat-htpy' f K ∘e equiv-concat-htpy H h
+ ```
+ 
++### Horizontal composition of homotopies
++
++```agda
++module _
++  { l1 l2 : Level} {A : UU l1} {B : A → UU l2} {f g h : (a : A) → B a}
++  where
++
++  horizontal-concat-htpy :
++    { H H' : f ~ g} → H ~ H' →
++    { K K' : g ~ h} → K ~ K' →
++    ( H ∙h K) ~ (H' ∙h K')
++  horizontal-concat-htpy α β x = horizontal-concat-Id² (α x) (β x)
++```
++
+ ### Transposing homotopies is an equivalence
+ 
+ ```agda
+
+From ec6efd31db3697b0b7fb25b04a4a598c59565f39 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Mon, 9 Oct 2023 21:40:38 +0200
+Subject: [PATCH 09/12] Prose
+
+---
+ .../flattening-lemma-pushouts.lagda.md                      | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index d71888f573..33d92629b8 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -129,7 +129,9 @@ module _
+ 
+ ### The statement of the flattening lemma for pushouts, phrased using descent data
+ 
+-In the above statement, bla bla
++The above statement of the flattening lemma works with a provided type family
++over the pushout. We can instead accept a definition of this family via descent
++data for the pushout.
+ 
+ ```agda
+ module _
+@@ -183,7 +185,7 @@ module _
+     ( {l : Level} → dependent-universal-property-pushout l f g c) →
+     { l : Level} →
+     universal-property-pushout l
+-      ( map-Σ (pr1 P) f (λ s → id))
++      ( map-Σ-map-base f (pr1 P))
+       ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
+       ( cocone-flattening-descent-data-pushout)
+ ```
+
+From 66735c6b8689f23fca8c7c7f0bafd330fb808cd1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Vojt=C4=9Bch=20=C5=A0t=C4=9Bpan=C4=8D=C3=ADk?=
+ <vojtechstepancik@outlook.com>
+Date: Tue, 10 Oct 2023 16:10:25 +0200
+Subject: [PATCH 10/12] Update
+ src/foundation-core/functoriality-function-types.lagda.md
+
+Co-authored-by: Egbert Rijke <e.m.rijke@gmail.com>
+---
+ src/foundation-core/functoriality-function-types.lagda.md | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/foundation-core/functoriality-function-types.lagda.md b/src/foundation-core/functoriality-function-types.lagda.md
+index 09a3767e33..7f14cbd657 100644
+--- a/src/foundation-core/functoriality-function-types.lagda.md
++++ b/src/foundation-core/functoriality-function-types.lagda.md
+@@ -73,14 +73,14 @@ compute-htpy-precomp-refl-htpy :
+ compute-htpy-precomp-refl-htpy f C h = eq-htpy-refl-htpy (h ∘ f)
+ ```
+ 
+-### Precomposition preserves composition of homotopies
++### Precomposition preserves concatenation of homotopies
+ 
+ ```agda
+-compute-comp-htpy-precomp :
++compute-concat-htpy-precomp :
+   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2}
+   { f g h : A → B} (H : f ~ g) (K : g ~ h) (C : UU l3) →
+   htpy-precomp (H ∙h K) C ~ (htpy-precomp H C ∙h htpy-precomp K C)
+-compute-comp-htpy-precomp H K C k =
++compute-concat-htpy-precomp H K C k =
+   ( ap
+     ( eq-htpy)
+     ( eq-htpy (distributive-left-whisk-concat-htpy k H K))) ∙
+
+From 3eab010c67de48795b5480a25be3dd0323d412e0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Vojt=C4=9Bch=20=C5=A0t=C4=9Bpan=C4=8D=C3=ADk?=
+ <vojtechstepancik@outlook.com>
+Date: Tue, 10 Oct 2023 16:41:05 +0200
+Subject: [PATCH 11/12] Apply suggestions from code review
+
+Co-authored-by: Egbert Rijke <e.m.rijke@gmail.com>
+---
+ .../commuting-squares-of-maps.lagda.md        | 48 +++++++++----------
+ 1 file changed, 24 insertions(+), 24 deletions(-)
+
+diff --git a/src/foundation/commuting-squares-of-maps.lagda.md b/src/foundation/commuting-squares-of-maps.lagda.md
+index 37204c8c65..8e6a21e2d6 100644
+--- a/src/foundation/commuting-squares-of-maps.lagda.md
++++ b/src/foundation/commuting-squares-of-maps.lagda.md
+@@ -32,22 +32,22 @@ open import foundation-core.identity-types
+ Two commuting triangles
+ 
+ ```text
+-A        A ---> X
+-| \       \  K  |
+-|   \   L   \   |
+-|  H  \       \ |
+-v      v        v
+-B ---> Y        Y
++  A        A ---> X
++  | \       \  K  |
++  |   \   L   \   |
++  |  H  \       \ |
++  v      v        v
++  B ---> Y        Y
+ ```
+ 
+ with a homotopic diagonal may be pasted into a commuting square
+ 
+ ```text
+-A -----> X
+-|        |
+-|        |
+-v        v
+-B -----> Y
++  A -----> X
++  |        |
++  |        |
++  v        v
++  B -----> Y.
+ ```
+ 
+ ```agda
+@@ -384,23 +384,23 @@ module _
+ Taking a square of the form
+ 
+ ```text
+-    f        top
+-X -----> A -----> B
+-         |        |
+-    left |   H    | right
+-         v        v
+-         C -----> D
+-           bottom
++      f        top
++  X -----> A -----> B
++           |        |
++      left |   H    | right
++           v        v
++           C -----> D
++             bottom
+ ```
+ 
+ and transposing it by precomposition results in the square
+ 
+ ```text
+-W^D -----> W^B
+- |          |
+- |   W^H    |
+- v          v   -∘f
+-W^C -----> W^A -----> W^X
++  W^D -----> W^B
++   |          |
++   |   W^H    |
++   v          v   -∘f
++  W^C -----> W^A -----> W^X
+ ```
+ 
+ This fact can be written as distribution of right whiskering over transposition:
+@@ -448,7 +448,7 @@ formula `W^(f ·l H) = W^H ·r W^f`.
+     ap eq-htpy (eq-htpy (λ a → inv (ap-comp g f (H a))))
+ ```
+ 
+-### The square of function spaces induces by a composition of triangles is homotopic to the composition of induced triangles of function spaces
++### The square of function spaces induced by a composition of triangles is homotopic to the composition of induced triangles of function spaces
+ 
+ ```agda
+ module _
+
+From 4b517a0992a592bf292de0801b1270eb0af7053b Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 10 Oct 2023 16:51:38 +0200
+Subject: [PATCH 12/12] Code review cleanup
+
+---
+ src/foundation/commuting-cubes-of-maps.lagda.md        |  8 ++++----
+ src/foundation/commuting-squares-of-maps.lagda.md      | 10 +++++-----
+ src/foundation/equality-dependent-pair-types.lagda.md  |  4 ++--
+ src/foundation/homotopies.lagda.md                     |  4 ++--
+ .../flattening-lemma-pushouts.lagda.md                 |  2 +-
+ 5 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/src/foundation/commuting-cubes-of-maps.lagda.md b/src/foundation/commuting-cubes-of-maps.lagda.md
+index ed1a9c34e7..8f3fc76293 100644
+--- a/src/foundation/commuting-cubes-of-maps.lagda.md
++++ b/src/foundation/commuting-cubes-of-maps.lagda.md
+@@ -430,8 +430,8 @@ module _
+         ( precomp-bottom-whisk-hA)
+         by
+         inv-htpy
+-          ( horizontal-concat-htpy
+-            ( horizontal-concat-htpy
++          ( horizontal-concat-htpy²
++            ( horizontal-concat-htpy²
+               ( distributive-precomp-right-whisk-coherence-square-maps W hB h' h
+                 ( hD)
+                 ( inv-htpy front-left)
+@@ -511,11 +511,11 @@ module _
+         ( ( (precomp g' W) ·l precomp-front-right-inv) ∙h
+           ( precomp-back-right-inv ·r (precomp k W)))
+         by
+-        horizontal-concat-htpy
++        horizontal-concat-htpy²
+           ( distributive-precomp-left-whisk-coherence-square-maps W g' f' k' h'
+             ( top)
+             ( hD))
+-          ( horizontal-concat-htpy
++          ( horizontal-concat-htpy²
+             ( distributive-precomp-right-whisk-coherence-square-maps W hC k' k
+               ( hD)
+               ( inv-htpy front-right)
+diff --git a/src/foundation/commuting-squares-of-maps.lagda.md b/src/foundation/commuting-squares-of-maps.lagda.md
+index 8e6a21e2d6..165d11cbc9 100644
+--- a/src/foundation/commuting-squares-of-maps.lagda.md
++++ b/src/foundation/commuting-squares-of-maps.lagda.md
+@@ -490,10 +490,10 @@ module _
+     ( H)
+     ( K)
+     ( h) =
+-    ( compute-comp-htpy-precomp (H ∙h L) K W h) ∙
++    ( compute-concat-htpy-precomp (H ∙h L) K W h) ∙
+     ( ap
+       ( _∙ precomp-coherence-triangle-maps diagonal-right right top K W h)
+-      ( compute-comp-htpy-precomp H L W h))
++      ( compute-concat-htpy-precomp H L W h))
+ 
+   distributive-precomp-coherence-square-comp-htpy-coherence-triangle-maps' :
+     { diagonal-left diagonal-right : A → Y} →
+@@ -528,10 +528,10 @@ module _
+     ( H)
+     ( K)
+     ( h) =
+-    ( compute-comp-htpy-precomp H (L ∙h K) W h) ∙
++    ( compute-concat-htpy-precomp H (L ∙h K) W h) ∙
+     ( ap
+       ( precomp-coherence-triangle-maps' diagonal-left bottom left H W h ∙_)
+-      ( compute-comp-htpy-precomp L K W h))
++      ( compute-concat-htpy-precomp L K W h))
+ 
+   distributive-precomp-coherence-square-comp-coherence-triangles-maps :
+     ( diagonal : A → Y) →
+@@ -564,5 +564,5 @@ module _
+     ( H)
+     ( K)
+     ( h) =
+-    compute-comp-htpy-precomp H K W h
++    compute-concat-htpy-precomp H K W h
+ ```
+diff --git a/src/foundation/equality-dependent-pair-types.lagda.md b/src/foundation/equality-dependent-pair-types.lagda.md
+index ea47b8a1b7..b6f577eadc 100644
+--- a/src/foundation/equality-dependent-pair-types.lagda.md
++++ b/src/foundation/equality-dependent-pair-types.lagda.md
+@@ -130,11 +130,11 @@ module _
+   { l1 l2 : Level} {A : UU l1} (B : A → UU l2)
+   where
+ 
+-  orthogonal-eq-pair-Σ :
++  triangle-eq-pair-Σ :
+     { a a' : A} (p : a ＝ a') →
+     { b : B a} {b' : B a'} (q : dependent-identification B p b b') →
+     eq-pair-Σ p q ＝ (eq-pair-Σ p refl ∙ eq-pair-Σ refl q)
+-  orthogonal-eq-pair-Σ refl q = refl
++  triangle-eq-pair-Σ refl q = refl
+ ```
+ 
+ ## See also
+diff --git a/src/foundation/homotopies.lagda.md b/src/foundation/homotopies.lagda.md
+index b465a0ea03..8a633d18f8 100644
+--- a/src/foundation/homotopies.lagda.md
++++ b/src/foundation/homotopies.lagda.md
+@@ -135,11 +135,11 @@ module _
+   { l1 l2 : Level} {A : UU l1} {B : A → UU l2} {f g h : (a : A) → B a}
+   where
+ 
+-  horizontal-concat-htpy :
++  horizontal-concat-htpy² :
+     { H H' : f ~ g} → H ~ H' →
+     { K K' : g ~ h} → K ~ K' →
+     ( H ∙h K) ~ (H' ∙h K')
+-  horizontal-concat-htpy α β x = horizontal-concat-Id² (α x) (β x)
++  horizontal-concat-htpy² α β x = horizontal-concat-Id² (α x) (β x)
+ ```
+ 
+ ### Transposing homotopies is an equivalence
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index 33d92629b8..ac45412aa7 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -348,7 +348,7 @@ module _
+     ( ap-id
+       ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e
+         ( s , t))) ∙
+-    ( orthogonal-eq-pair-Σ Q
++    ( triangle-eq-pair-Σ Q
+       ( coherence-square-cocone f g c s)
+       ( inv (pr2 (pr2 e) s t))) ∙
+     ( ap

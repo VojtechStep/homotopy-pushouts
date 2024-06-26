@@ -1,0 +1,2865 @@
+From 546791b3654f930d12e88ecc2f330a39576f8360 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 19 Sep 2023 00:56:41 +0200
+Subject: [PATCH 01/10] Add coequalizers of types
+
+---
+ src/foundation-core.lagda.md                  |   1 +
+ .../codiagonal-maps-of-types.lagda.md         |  32 +++
+ src/foundation.lagda.md                       |   1 +
+ .../codiagonal-maps-of-types.lagda.md         |  14 ++
+ src/synthetic-homotopy-theory.lagda.md        |   3 +
+ .../coequalizers.lagda.md                     | 185 ++++++++++++++++++
+ .../coforks.lagda.md                          | 183 +++++++++++++++++
+ .../universal-property-coequalizers.lagda.md  |  94 +++++++++
+ 8 files changed, 513 insertions(+)
+ create mode 100644 src/foundation-core/codiagonal-maps-of-types.lagda.md
+ create mode 100644 src/foundation/codiagonal-maps-of-types.lagda.md
+ create mode 100644 src/synthetic-homotopy-theory/coequalizers.lagda.md
+ create mode 100644 src/synthetic-homotopy-theory/coforks.lagda.md
+ create mode 100644 src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+
+diff --git a/src/foundation-core.lagda.md b/src/foundation-core.lagda.md
+index cd39ca220d..983c564c21 100644
+--- a/src/foundation-core.lagda.md
++++ b/src/foundation-core.lagda.md
+@@ -7,6 +7,7 @@ module foundation-core where
+ 
+ open import foundation-core.1-types public
+ open import foundation-core.cartesian-product-types public
++open import foundation-core.codiagonal-maps-of-types public
+ open import foundation-core.coherently-invertible-maps public
+ open import foundation-core.commuting-squares-of-maps public
+ open import foundation-core.commuting-triangles-of-maps public
+diff --git a/src/foundation-core/codiagonal-maps-of-types.lagda.md b/src/foundation-core/codiagonal-maps-of-types.lagda.md
+new file mode 100644
+index 0000000000..83f4e30ee9
+--- /dev/null
++++ b/src/foundation-core/codiagonal-maps-of-types.lagda.md
+@@ -0,0 +1,32 @@
++# Codiagonal maps of types
++
++```agda
++module foundation-core.codiagonal-maps-of-types where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.universe-levels
++
++open import foundation-core.coproduct-types
++```
++
++</details>
++
++## Idea
++
++The codiagonal map `∇ : A + A → A` of `A` is the map that projects `A + A` onto
++`A`.
++
++## Definitions
++
++```agda
++module _
++  { l1 : Level} (A : UU l1)
++  where
++
++  ∇ : A + A → A
++  ∇ (inl a) = a
++  ∇ (inr a) = a
++```
+diff --git a/src/foundation.lagda.md b/src/foundation.lagda.md
+index 20e65d33ce..208ba766ff 100644
+--- a/src/foundation.lagda.md
++++ b/src/foundation.lagda.md
+@@ -40,6 +40,7 @@ open import foundation.cartesian-product-types public
+ open import foundation.cartesian-products-set-quotients public
+ open import foundation.category-of-sets public
+ open import foundation.choice-of-representatives-equivalence-relation public
++open import foundation.codiagonal-maps-of-types public
+ open import foundation.coherently-invertible-maps public
+ open import foundation.commuting-3-simplices-of-homotopies public
+ open import foundation.commuting-3-simplices-of-maps public
+diff --git a/src/foundation/codiagonal-maps-of-types.lagda.md b/src/foundation/codiagonal-maps-of-types.lagda.md
+new file mode 100644
+index 0000000000..9177343e12
+--- /dev/null
++++ b/src/foundation/codiagonal-maps-of-types.lagda.md
+@@ -0,0 +1,14 @@
++# Codiagonal maps of types
++
++```agda
++module foundation.codiagonal-maps-of-types where
++
++open import foundation-core.codiagonal-maps-of-types public
++```
++
++<details><summary>Imports</summary>
++
++```agda
++```
++
++</details>
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index dc5d8f089d..3b508db9c1 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -14,7 +14,9 @@ open import synthetic-homotopy-theory.cavallos-trick public
+ open import synthetic-homotopy-theory.circle public
+ open import synthetic-homotopy-theory.cocones-under-spans public
+ open import synthetic-homotopy-theory.cocones-under-spans-of-pointed-types public
++open import synthetic-homotopy-theory.coequalizers public
+ open import synthetic-homotopy-theory.cofibers public
++open import synthetic-homotopy-theory.coforks public
+ open import synthetic-homotopy-theory.conjugation-loops public
+ open import synthetic-homotopy-theory.dependent-cocones-under-spans public
+ open import synthetic-homotopy-theory.dependent-pullback-property-pushouts public
+@@ -58,6 +60,7 @@ open import synthetic-homotopy-theory.suspensions-of-types public
+ open import synthetic-homotopy-theory.triple-loop-spaces public
+ open import synthetic-homotopy-theory.universal-cover-circle public
+ open import synthetic-homotopy-theory.universal-property-circle public
++open import synthetic-homotopy-theory.universal-property-coequalizers public
+ open import synthetic-homotopy-theory.universal-property-pushouts public
+ open import synthetic-homotopy-theory.universal-property-suspensions public
+ open import synthetic-homotopy-theory.universal-property-suspensions-of-pointed-types public
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+new file mode 100644
+index 0000000000..7f80319749
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -0,0 +1,185 @@
++# Coequalizers
++
++```agda
++module synthetic-homotopy-theory.coequalizers where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.action-on-identifications-functions
++open import foundation.codiagonal-maps-of-types
++open import foundation.commuting-triangles-of-maps
++open import foundation.coproduct-types
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.homotopies
++open import foundation.identity-types
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies
++
++open import synthetic-homotopy-theory.cocones-under-spans
++open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.pushouts
++open import synthetic-homotopy-theory.universal-property-coequalizers
++```
++
++</details>
++
++## Idea
++
++The **coequalizer** of a parallel pair `f, g : A → B` is the colimiting
++[cofork](synthetic-homotopy-theory.coforks.md), i.e. a cofork with the
++[universal property of coequalizers](synthetic-homotopy-theory.universal-property-coequalizers.md).
++
++## Definitions
++
++## Properties
++
++### All parallel pairs admit a coequalizer
++
++The **canonical coequalizer** may be obtained as a pushout of the span
++
++```text
++     ∇         [f,g]
++A <----- A + A -----> B
++```
++
++where the left map is the codiagonal map, sending `inl(a)` and `inr(a)` to `a`,
++and the right map is defined by the universal property of coproducts to send
++`inl(a)` to `f(a)` and `inr(a)` to `g(a)`.
++
++The pushout thus constructed will consist of a copy of `B`, a copy of `A`, and
++for every point `a` of `A` there will be a path from `f(a)` to `a` and to
++`g(a)`, which corresponds to having a copy of `B` with paths connecting every
++`f(a)` to `g(a)`.
++
++```agda
++module _
++  { l1 l2 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
++  where
++
++  cofork-cocone-codiagonal :
++    { l3 : Level} {X : UU l3} →
++    cocone (∇ A) (ind-coprod (λ _ → B) f g) X →
++    cofork f g X
++  pr1 (cofork-cocone-codiagonal c) =
++    vertical-map-cocone (∇ A) (ind-coprod (λ _ → B) f g) c
++  pr2 (cofork-cocone-codiagonal c) =
++      ( ( inv-htpy
++          ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c)) ·r
++        ( inr)) ∙h
++      ( ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c) ·r inl)
++
++  cocone-codiagonal-cofork :
++    { l3 : Level} {X : UU l3} →
++    cofork f g X →
++    cocone (∇ A) (ind-coprod (λ _ → B) f g) X
++  pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ g
++  pr1 (pr2 (cocone-codiagonal-cofork e)) = map-cofork f g e
++  pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = coherence-cofork f g e a
++  pr2 (pr2 (cocone-codiagonal-cofork e)) (inr a) = refl
++
++  is-equiv-cofork-cocone-codiagonal :
++    { l3 : Level} {X : UU l3} →
++    is-equiv (cofork-cocone-codiagonal {X = X})
++  is-equiv-cofork-cocone-codiagonal =
++    is-equiv-is-invertible
++      cocone-codiagonal-cofork
++        ( λ e →
++          eq-htpy-cofork f g
++            ( cofork-cocone-codiagonal (cocone-codiagonal-cofork e))
++            ( e)
++            ( refl-htpy , right-unit-htpy))
++        ( λ c →
++          eq-htpy-cocone
++            ( ∇ A)
++            ( ind-coprod (λ _ → B) f g)
++            ( cocone-codiagonal-cofork (cofork-cocone-codiagonal c))
++            ( c)
++            ( ( inv-htpy
++                ( ( coherence-square-cocone
++                    ( ∇ A)
++                    ( ind-coprod (λ _ → B) f g)
++                    ( c)) ·r
++                  ( inr))) ,
++              ( refl-htpy) ,
++              ( λ { (inl a) → right-unit
++                  ; (inr a) →
++                    inv
++                      ( left-inv
++                        ( coherence-square-cocone
++                          ( ∇ A)
++                          ( ind-coprod (λ _ → B) f g)
++                          ( c)
++                          ( inr a)))})))
++
++  triangle-cofork-cocone :
++    { l3 l4 : Level} {X : UU l3} {Y : UU l4} →
++    ( c : cocone (∇ A) (ind-coprod (λ _ → B) f g) X) →
++    coherence-triangle-maps
++      ( cofork-map f g (cofork-cocone-codiagonal c) {Y = Y})
++      ( cofork-cocone-codiagonal)
++      ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c)
++  triangle-cofork-cocone c h =
++    eq-htpy-cofork f g
++      ( cofork-map f g (cofork-cocone-codiagonal c) h)
++      ( cofork-cocone-codiagonal
++        ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c h))
++      ( refl-htpy ,
++        right-unit-htpy ∙h
++          ( λ a →
++            ( ap-concat h
++              ( inv
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c)
++                  ( inr a)))
++              ( coherence-square-cocone
++                ( ∇ A)
++                ( ind-coprod (λ _ → B) f g)
++                ( c)
++                ( inl a))) ∙
++            ( ap
++              ( _∙
++                ap h
++                  ( coherence-square-cocone
++                    ( ∇ A)
++                    ( ind-coprod (λ _ → B) f g)
++                    ( c)
++                    ( inl a)))
++              ( ap-inv h
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c)
++                  ( inr a))))))
++
++  abstract
++    canonical-coequalizer : UU (l1 ⊔ l2)
++    canonical-coequalizer =
++      pushout (∇ A) (ind-coprod (λ _ → B) f g)
++
++    cofork-canonical-coequalizer : cofork f g canonical-coequalizer
++    cofork-canonical-coequalizer =
++      cofork-cocone-codiagonal
++        ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g))
++
++    up-canonical-coequalizer :
++      { l : Level} →
++      universal-property-coequalizer l f g cofork-canonical-coequalizer
++    up-canonical-coequalizer Y =
++      is-equiv-comp-htpy
++        ( cofork-map f g cofork-canonical-coequalizer)
++        ( cofork-cocone-codiagonal)
++        ( cocone-map
++          ( ∇ A)
++          ( ind-coprod (λ _ → B) f g)
++          ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g)))
++        ( triangle-cofork-cocone
++          ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g)))
++        ( up-pushout (∇ A) (ind-coprod (λ _ → B) f g) Y)
++        ( is-equiv-cofork-cocone-codiagonal)
++```
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+new file mode 100644
+index 0000000000..f409974e79
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -0,0 +1,183 @@
++# Coforks
++
++```agda
++module synthetic-homotopy-theory.coforks where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.action-on-identifications-functions
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equality-dependent-pair-types
++open import foundation.equivalences
++open import foundation.functoriality-dependent-pair-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.function-types
++open import foundation.structure-identity-principle
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies
++```
++
++</details>
++
++## Idea
++
++A **cofork** of a parallel pair `f, g : A → B` with vertext `X` is a map
++`e : B → X` together with a [homotopy](foundation.homotopies.md)
++`e ∘ g ~ e ∘ f`. The name comes from the diagram
++
++```text
++     f
++   ----->     e
++ A -----> B -----> X
++     g
++```
++
++which looks like a fork if you flip the arrows, hence a cofork.
++
++
++## Definitions
++
++### Coforks
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
++  where
++
++  cofork : UU l3 → UU (l1 ⊔ l2 ⊔ l3)
++  cofork X = Σ (B → X) (λ e → e ∘ g ~ e ∘ f)
++
++  module _
++    { X : UU l3} (e : cofork X)
++    where
++
++    map-cofork : B → X
++    map-cofork = pr1 e
++
++    coherence-cofork : map-cofork ∘ g ~ map-cofork ∘ f
++    coherence-cofork = pr2 e
++```
++
++### Homotopies of coforks
++
++A homotopy between coforks with the same vertex is given by a homotopy between
++the two maps, together with a coherence datum asserting that we may apply the
++given homotopy and the appropriate cofork homotopy in either order.
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  where
++
++  coherence-htpy-cofork :
++    ( e e' : cofork f g X) →
++    ( K : map-cofork f g e ~ map-cofork f g e') →
++    UU (l1 ⊔ l3)
++  coherence-htpy-cofork e e' K =
++    ( (coherence-cofork f g e) ∙h (K ·r f)) ~
++    ( (K ·r g) ∙h (coherence-cofork f g e'))
++
++  htpy-cofork : cofork f g X → cofork f g X → UU (l1 ⊔ l2 ⊔ l3)
++  htpy-cofork e e' =
++    Σ ( map-cofork f g e ~ map-cofork f g e')
++      ( coherence-htpy-cofork e e')
++```
++
++### Postcomposing coforks
++
++Given a cofork `e : B → X` and a map `h : X → Y`, we may compose the two to get
++a new cofork `h ∘ e`.
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
++  { X : UU l3} (e : cofork f g X)
++  where
++
++  cofork-map : {l : Level} {Y : UU l} → (X → Y) → cofork f g Y
++  pr1 (cofork-map h) = h ∘ map-cofork f g e
++  pr2 (cofork-map h) = h ·l (coherence-cofork f g e)
++```
++
++## Properties
++
++### Characterization of identity types of coforks
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  where
++
++  reflexive-htpy-cofork : (e : cofork f g X) → htpy-cofork f g e e
++  pr1 (reflexive-htpy-cofork e) = refl-htpy
++  pr2 (reflexive-htpy-cofork e) = right-unit-htpy
++
++  htpy-cofork-eq :
++    ( e e' : cofork f g X) → (e ＝ e') → htpy-cofork f g e e'
++  htpy-cofork-eq e .e refl = reflexive-htpy-cofork e
++
++  is-contr-total-htpy-cofork :
++    ( e : cofork f g X) → is-contr (Σ (cofork f g X) (htpy-cofork f g e))
++  is-contr-total-htpy-cofork e =
++    is-contr-total-Eq-structure
++      ( ev-pair (coherence-htpy-cofork f g e))
++      ( is-contr-total-htpy (map-cofork f g e))
++      ( (map-cofork f g e) , refl-htpy)
++      ( is-contr-is-equiv'
++        ( Σ ( map-cofork f g e ∘ g ~ map-cofork f g e ∘ f)
++            ( λ K → coherence-cofork f g e ~ K))
++        ( tot (λ K M → right-unit-htpy ∙h M))
++        ( is-equiv-tot-is-fiberwise-equiv
++          ( λ H → is-equiv-concat-htpy right-unit-htpy H))
++        ( is-contr-total-htpy (coherence-cofork f g e)))
++
++  is-equiv-htpy-cofork-eq :
++    ( e e' : cofork f g X) → is-equiv (htpy-cofork-eq e e')
++  is-equiv-htpy-cofork-eq e =
++    fundamental-theorem-id (is-contr-total-htpy-cofork e) (htpy-cofork-eq e)
++
++  eq-htpy-cofork :
++    ( e e' : cofork f g X) → htpy-cofork f g e e' → e ＝ e'
++  eq-htpy-cofork e e' = map-inv-is-equiv (is-equiv-htpy-cofork-eq e e')
++```
++
++### Postcomposing a cofork by identity is the identity
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X)
++  where
++
++  cofork-map-id : cofork-map f g e id ＝ e
++  cofork-map-id =
++    eq-htpy-cofork f g
++      ( cofork-map f g e id)
++      ( e)
++      (refl-htpy , (right-unit-htpy ∙h (ap-id ∘ coherence-cofork f g e)))
++```
++
++### Postcomposing coforks distributes over function composition
++
++```agda
++module _
++  { l1 l2 l3 l4 l5 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
++  { X : UU l3} {Y : UU l4} {Z : UU l5}
++  ( e : cofork f g X)
++  where
++
++  cofork-map-comp :
++    (h : X → Y) (k : Y → Z) →
++    cofork-map f g e (k ∘ h) ＝ cofork-map f g (cofork-map f g e h) k
++  cofork-map-comp h k =
++    eq-htpy-cofork f g
++      ( cofork-map f g e (k ∘ h))
++      ( cofork-map f g (cofork-map f g e h) k)
++      ( refl-htpy , (right-unit-htpy ∙h (ap-comp k h ∘ coherence-cofork f g e)))
++```
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+new file mode 100644
+index 0000000000..3aaf253ed6
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -0,0 +1,94 @@
++# The universal property of coequalizers
++
++```agda
++module synthetic-homotopy-theory.universal-property-coequalizers where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.functoriality-dependent-pair-types
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.coforks
++```
++
++</details>
++
++## Idea
++
++Given a parallel pair `f, g : A → B`, consider a
++[cofork](synthetic-homotopy-theory.coforks.md) `e : B → X` with vertex X. The
++**universal property of the coequalizer** asserts that the cofork
++postcomposition map
++
++```text
++cofork-map : (X → Y) → cofork Y
++```
++
++is an equivalence.
++
++## Definitions
++
++### The universal property of coequalizers
++
++```agda
++module _
++  { l1 l2 l3 : Level} (l : Level) {A : UU l1} {B : UU l2} (f g : A → B)
++  { X : UU l3} (e : cofork f g X)
++  where
++
++  universal-property-coequalizer : UU (l1 ⊔ l2 ⊔ l3 ⊔ lsuc l)
++  universal-property-coequalizer =
++    ( Y : UU l) → is-equiv (cofork-map f g e {Y = Y})
++
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X) {Y : UU l4}
++  ( up-coequalizer : universal-property-coequalizer l4 f g e)
++  ( e' : cofork f g Y)
++  where
++
++  map-universal-property-coequalizer : X → Y
++  map-universal-property-coequalizer = map-inv-is-equiv (up-coequalizer Y) e'
++```
++
++## Properties
++
++### The cofork obtained by the universal property is unique
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X) {Y : UU l4}
++  ( up-coequalizer : universal-property-coequalizer l4 f g e)
++  ( e' : cofork f g Y)
++  where
++
++  htpy-cofork-map-universal-property-coequalizer :
++    htpy-cofork f g
++      ( cofork-map f g e
++        ( map-universal-property-coequalizer f g e up-coequalizer e'))
++      ( e')
++  htpy-cofork-map-universal-property-coequalizer =
++    htpy-cofork-eq f g
++      ( cofork-map f g e
++        ( map-universal-property-coequalizer f g e up-coequalizer e'))
++      ( e')
++      ( is-section-map-inv-is-equiv (up-coequalizer Y) e')
++
++  uniqueness-map-universal-property-coequalizer :
++    is-contr (Σ (X → Y) (λ h → htpy-cofork f g (cofork-map f g e h) e'))
++  uniqueness-map-universal-property-coequalizer =
++    is-contr-is-equiv'
++      ( fiber (cofork-map f g e) e')
++      ( tot (λ h → htpy-cofork-eq f g (cofork-map f g e h) e'))
++      ( is-equiv-tot-is-fiberwise-equiv
++        ( λ h → is-equiv-htpy-cofork-eq f g (cofork-map f g e h) e'))
++      ( is-contr-map-is-equiv (up-coequalizer Y) e')
++```
+
+From bb7ae76f252c860f16fb05fda2a678be2818d081 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 19 Sep 2023 13:54:33 +0200
+Subject: [PATCH 02/10] More conventional cofork homotopy direction
+
+---
+ .../coequalizers.lagda.md                     | 48 +++++++++----------
+ .../coforks.lagda.md                          | 16 +++----
+ 2 files changed, 32 insertions(+), 32 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+index 7f80319749..dba8515fa4 100644
+--- a/src/synthetic-homotopy-theory/coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -16,6 +16,7 @@ open import foundation.equivalences
+ open import foundation.function-types
+ open import foundation.homotopies
+ open import foundation.identity-types
++open import foundation.path-algebra
+ open import foundation.universe-levels
+ open import foundation.whiskering-homotopies
+ 
+@@ -69,17 +70,17 @@ module _
+   pr2 (cofork-cocone-codiagonal c) =
+       ( ( inv-htpy
+           ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c)) ·r
+-        ( inr)) ∙h
+-      ( ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c) ·r inl)
++        ( inl)) ∙h
++      ( ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c) ·r inr)
+ 
+   cocone-codiagonal-cofork :
+     { l3 : Level} {X : UU l3} →
+     cofork f g X →
+     cocone (∇ A) (ind-coprod (λ _ → B) f g) X
+-  pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ g
++  pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ f
+   pr1 (pr2 (cocone-codiagonal-cofork e)) = map-cofork f g e
+-  pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = coherence-cofork f g e a
+-  pr2 (pr2 (cocone-codiagonal-cofork e)) (inr a) = refl
++  pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = refl
++  pr2 (pr2 (cocone-codiagonal-cofork e)) (inr a) = coherence-cofork f g e a
+ 
+   is-equiv-cofork-cocone-codiagonal :
+     { l3 : Level} {X : UU l3} →
+@@ -98,22 +99,22 @@ module _
+             ( ind-coprod (λ _ → B) f g)
+             ( cocone-codiagonal-cofork (cofork-cocone-codiagonal c))
+             ( c)
+-            ( ( inv-htpy
+-                ( ( coherence-square-cocone
++            ( ( ( inv-htpy
++                  ( coherence-square-cocone
+                     ( ∇ A)
+                     ( ind-coprod (λ _ → B) f g)
+-                    ( c)) ·r
+-                  ( inr))) ,
++                    ( c))) ·r
++                ( inl)) ,
+               ( refl-htpy) ,
+-              ( λ { (inl a) → right-unit
+-                  ; (inr a) →
++              ( λ { (inl a) →
+                     inv
+                       ( left-inv
+                         ( coherence-square-cocone
+                           ( ∇ A)
+                           ( ind-coprod (λ _ → B) f g)
+                           ( c)
+-                          ( inr a)))})))
++                          ( inl a)))
++                  ; (inr a) → right-unit })))
+ 
+   triangle-cofork-cocone :
+     { l3 l4 : Level} {X : UU l3} {Y : UU l4} →
+@@ -128,7 +129,7 @@ module _
+       ( cofork-cocone-codiagonal
+         ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c h))
+       ( refl-htpy ,
+-        right-unit-htpy ∙h
++        ( right-unit-htpy ∙h
+           ( λ a →
+             ( ap-concat h
+               ( inv
+@@ -136,26 +137,25 @@ module _
+                   ( ∇ A)
+                   ( ind-coprod (λ _ → B) f g)
+                   ( c)
+-                  ( inr a)))
++                  ( inl a)))
+               ( coherence-square-cocone
+                 ( ∇ A)
+                 ( ind-coprod (λ _ → B) f g)
+                 ( c)
+-                ( inl a))) ∙
+-            ( ap
+-              ( _∙
+-                ap h
+-                  ( coherence-square-cocone
+-                    ( ∇ A)
+-                    ( ind-coprod (λ _ → B) f g)
+-                    ( c)
+-                    ( inl a)))
++                ( inr a))) ∙
++            ( identification-right-whisk
+               ( ap-inv h
+                 ( coherence-square-cocone
+                   ( ∇ A)
+                   ( ind-coprod (λ _ → B) f g)
+                   ( c)
+-                  ( inr a))))))
++                  ( inl a)))
++              ( ap h
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c)
++                  ( inr a)))))))
+ 
+   abstract
+     canonical-coequalizer : UU (l1 ⊔ l2)
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index f409974e79..e15211abb1 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -29,13 +29,13 @@ open import foundation.whiskering-homotopies
+ 
+ A **cofork** of a parallel pair `f, g : A → B` with vertext `X` is a map
+ `e : B → X` together with a [homotopy](foundation.homotopies.md)
+-`e ∘ g ~ e ∘ f`. The name comes from the diagram
++`e ∘ f ~ e ∘ g`. The name comes from the diagram
+ 
+ ```text
+-     f
++     g
+    ----->     e
+  A -----> B -----> X
+-     g
++     f
+ ```
+ 
+ which looks like a fork if you flip the arrows, hence a cofork.
+@@ -51,7 +51,7 @@ module _
+   where
+ 
+   cofork : UU l3 → UU (l1 ⊔ l2 ⊔ l3)
+-  cofork X = Σ (B → X) (λ e → e ∘ g ~ e ∘ f)
++  cofork X = Σ (B → X) (λ e → e ∘ f ~ e ∘ g)
+ 
+   module _
+     { X : UU l3} (e : cofork X)
+@@ -60,7 +60,7 @@ module _
+     map-cofork : B → X
+     map-cofork = pr1 e
+ 
+-    coherence-cofork : map-cofork ∘ g ~ map-cofork ∘ f
++    coherence-cofork : map-cofork ∘ f ~ map-cofork ∘ g
+     coherence-cofork = pr2 e
+ ```
+ 
+@@ -80,8 +80,8 @@ module _
+     ( K : map-cofork f g e ~ map-cofork f g e') →
+     UU (l1 ⊔ l3)
+   coherence-htpy-cofork e e' K =
+-    ( (coherence-cofork f g e) ∙h (K ·r f)) ~
+-    ( (K ·r g) ∙h (coherence-cofork f g e'))
++    ( (coherence-cofork f g e) ∙h (K ·r g)) ~
++    ( (K ·r f) ∙h (coherence-cofork f g e'))
+ 
+   htpy-cofork : cofork f g X → cofork f g X → UU (l1 ⊔ l2 ⊔ l3)
+   htpy-cofork e e' =
+@@ -130,7 +130,7 @@ module _
+       ( is-contr-total-htpy (map-cofork f g e))
+       ( (map-cofork f g e) , refl-htpy)
+       ( is-contr-is-equiv'
+-        ( Σ ( map-cofork f g e ∘ g ~ map-cofork f g e ∘ f)
++        ( Σ ( map-cofork f g e ∘ f ~ map-cofork f g e ∘ g)
+             ( λ K → coherence-cofork f g e ~ K))
+         ( tot (λ K M → right-unit-htpy ∙h M))
+         ( is-equiv-tot-is-fiberwise-equiv
+
+From f8c203e2b2c12073e0ab3f5352cd92741b60e606 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 00:47:29 +0200
+Subject: [PATCH 03/10] Dependent universal property of coequalizers
+
+---
+ .../codiagonal-maps-of-types.lagda.md         |   1 +
+ src/synthetic-homotopy-theory.lagda.md        |   2 +
+ .../coequalizers.lagda.md                     | 169 ++-----
+ .../coforks.lagda.md                          | 195 +++++++-
+ .../dependent-coforks.lagda.md                | 445 ++++++++++++++++++
+ ...t-universal-property-coequalizers.lagda.md | 134 ++++++
+ .../universal-property-coequalizers.lagda.md  |  28 +-
+ 7 files changed, 820 insertions(+), 154 deletions(-)
+ create mode 100644 src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+ create mode 100644 src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+
+diff --git a/src/foundation/codiagonal-maps-of-types.lagda.md b/src/foundation/codiagonal-maps-of-types.lagda.md
+index 9177343e12..8cae8a6407 100644
+--- a/src/foundation/codiagonal-maps-of-types.lagda.md
++++ b/src/foundation/codiagonal-maps-of-types.lagda.md
+@@ -9,6 +9,7 @@ open import foundation-core.codiagonal-maps-of-types public
+ <details><summary>Imports</summary>
+ 
+ ```agda
++
+ ```
+ 
+ </details>
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index 3b508db9c1..9a4987bb67 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -19,8 +19,10 @@ open import synthetic-homotopy-theory.cofibers public
+ open import synthetic-homotopy-theory.coforks public
+ open import synthetic-homotopy-theory.conjugation-loops public
+ open import synthetic-homotopy-theory.dependent-cocones-under-spans public
++open import synthetic-homotopy-theory.dependent-coforks public
+ open import synthetic-homotopy-theory.dependent-pullback-property-pushouts public
+ open import synthetic-homotopy-theory.dependent-suspension-structures public
++open import synthetic-homotopy-theory.dependent-universal-property-coequalizers public
+ open import synthetic-homotopy-theory.dependent-universal-property-pushouts public
+ open import synthetic-homotopy-theory.dependent-universal-property-suspensions public
+ open import synthetic-homotopy-theory.descent-circle public
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+index dba8515fa4..d03175f1f0 100644
+--- a/src/synthetic-homotopy-theory/coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -7,21 +7,17 @@ module synthetic-homotopy-theory.coequalizers where
+ <details><summary>Imports</summary>
+ 
+ ```agda
+-open import foundation.action-on-identifications-functions
+ open import foundation.codiagonal-maps-of-types
+-open import foundation.commuting-triangles-of-maps
+ open import foundation.coproduct-types
+-open import foundation.dependent-pair-types
+ open import foundation.equivalences
+-open import foundation.function-types
+-open import foundation.homotopies
+ open import foundation.identity-types
+-open import foundation.path-algebra
++open import foundation.transport-along-identifications
+ open import foundation.universe-levels
+-open import foundation.whiskering-homotopies
+ 
+-open import synthetic-homotopy-theory.cocones-under-spans
+ open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.dependent-cocones-under-spans
++open import synthetic-homotopy-theory.dependent-coforks
++open import synthetic-homotopy-theory.dependent-universal-property-coequalizers
+ open import synthetic-homotopy-theory.pushouts
+ open import synthetic-homotopy-theory.universal-property-coequalizers
+ ```
+@@ -34,8 +30,6 @@ The **coequalizer** of a parallel pair `f, g : A → B` is the colimiting
+ [cofork](synthetic-homotopy-theory.coforks.md), i.e. a cofork with the
+ [universal property of coequalizers](synthetic-homotopy-theory.universal-property-coequalizers.md).
+ 
+-## Definitions
+-
+ ## Properties
+ 
+ ### All parallel pairs admit a coequalizer
+@@ -43,7 +37,7 @@ The **coequalizer** of a parallel pair `f, g : A → B` is the colimiting
+ The **canonical coequalizer** may be obtained as a pushout of the span
+ 
+ ```text
+-     ∇         [f,g]
++    ∇        [f,g]
+ A <----- A + A -----> B
+ ```
+ 
+@@ -56,107 +50,14 @@ for every point `a` of `A` there will be a path from `f(a)` to `a` and to
+ `g(a)`, which corresponds to having a copy of `B` with paths connecting every
+ `f(a)` to `g(a)`.
+ 
++The construction from pushouts itself is an implementation detail, which is why
++the definition is marked abstract.
++
+ ```agda
+ module _
+   { l1 l2 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
+   where
+ 
+-  cofork-cocone-codiagonal :
+-    { l3 : Level} {X : UU l3} →
+-    cocone (∇ A) (ind-coprod (λ _ → B) f g) X →
+-    cofork f g X
+-  pr1 (cofork-cocone-codiagonal c) =
+-    vertical-map-cocone (∇ A) (ind-coprod (λ _ → B) f g) c
+-  pr2 (cofork-cocone-codiagonal c) =
+-      ( ( inv-htpy
+-          ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c)) ·r
+-        ( inl)) ∙h
+-      ( ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c) ·r inr)
+-
+-  cocone-codiagonal-cofork :
+-    { l3 : Level} {X : UU l3} →
+-    cofork f g X →
+-    cocone (∇ A) (ind-coprod (λ _ → B) f g) X
+-  pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ f
+-  pr1 (pr2 (cocone-codiagonal-cofork e)) = map-cofork f g e
+-  pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = refl
+-  pr2 (pr2 (cocone-codiagonal-cofork e)) (inr a) = coherence-cofork f g e a
+-
+-  is-equiv-cofork-cocone-codiagonal :
+-    { l3 : Level} {X : UU l3} →
+-    is-equiv (cofork-cocone-codiagonal {X = X})
+-  is-equiv-cofork-cocone-codiagonal =
+-    is-equiv-is-invertible
+-      cocone-codiagonal-cofork
+-        ( λ e →
+-          eq-htpy-cofork f g
+-            ( cofork-cocone-codiagonal (cocone-codiagonal-cofork e))
+-            ( e)
+-            ( refl-htpy , right-unit-htpy))
+-        ( λ c →
+-          eq-htpy-cocone
+-            ( ∇ A)
+-            ( ind-coprod (λ _ → B) f g)
+-            ( cocone-codiagonal-cofork (cofork-cocone-codiagonal c))
+-            ( c)
+-            ( ( ( inv-htpy
+-                  ( coherence-square-cocone
+-                    ( ∇ A)
+-                    ( ind-coprod (λ _ → B) f g)
+-                    ( c))) ·r
+-                ( inl)) ,
+-              ( refl-htpy) ,
+-              ( λ { (inl a) →
+-                    inv
+-                      ( left-inv
+-                        ( coherence-square-cocone
+-                          ( ∇ A)
+-                          ( ind-coprod (λ _ → B) f g)
+-                          ( c)
+-                          ( inl a)))
+-                  ; (inr a) → right-unit })))
+-
+-  triangle-cofork-cocone :
+-    { l3 l4 : Level} {X : UU l3} {Y : UU l4} →
+-    ( c : cocone (∇ A) (ind-coprod (λ _ → B) f g) X) →
+-    coherence-triangle-maps
+-      ( cofork-map f g (cofork-cocone-codiagonal c) {Y = Y})
+-      ( cofork-cocone-codiagonal)
+-      ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c)
+-  triangle-cofork-cocone c h =
+-    eq-htpy-cofork f g
+-      ( cofork-map f g (cofork-cocone-codiagonal c) h)
+-      ( cofork-cocone-codiagonal
+-        ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c h))
+-      ( refl-htpy ,
+-        ( right-unit-htpy ∙h
+-          ( λ a →
+-            ( ap-concat h
+-              ( inv
+-                ( coherence-square-cocone
+-                  ( ∇ A)
+-                  ( ind-coprod (λ _ → B) f g)
+-                  ( c)
+-                  ( inl a)))
+-              ( coherence-square-cocone
+-                ( ∇ A)
+-                ( ind-coprod (λ _ → B) f g)
+-                ( c)
+-                ( inr a))) ∙
+-            ( identification-right-whisk
+-              ( ap-inv h
+-                ( coherence-square-cocone
+-                  ( ∇ A)
+-                  ( ind-coprod (λ _ → B) f g)
+-                  ( c)
+-                  ( inl a)))
+-              ( ap h
+-                ( coherence-square-cocone
+-                  ( ∇ A)
+-                  ( ind-coprod (λ _ → B) f g)
+-                  ( c)
+-                  ( inr a)))))))
+-
+   abstract
+     canonical-coequalizer : UU (l1 ⊔ l2)
+     canonical-coequalizer =
+@@ -164,22 +65,52 @@ module _
+ 
+     cofork-canonical-coequalizer : cofork f g canonical-coequalizer
+     cofork-canonical-coequalizer =
+-      cofork-cocone-codiagonal
++      cofork-cocone-codiagonal f g
+         ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g))
+ 
+-    up-canonical-coequalizer :
++    dup-canonical-coequalizer :
+       { l : Level} →
+-      universal-property-coequalizer l f g cofork-canonical-coequalizer
+-    up-canonical-coequalizer Y =
++      dependent-universal-property-coequalizer l f g
++        ( cofork-canonical-coequalizer)
++    dup-canonical-coequalizer P =
+       is-equiv-comp-htpy
+-        ( cofork-map f g cofork-canonical-coequalizer)
+-        ( cofork-cocone-codiagonal)
+-        ( cocone-map
++        ( dependent-cofork-map f g cofork-canonical-coequalizer)
++        ( dependent-cofork-dependent-cocone-codiagonal f g
++          ( cofork-canonical-coequalizer)
++          ( P))
++        ( dependent-cocone-map
+           ( ∇ A)
+           ( ind-coprod (λ _ → B) f g)
+-          ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g)))
+-        ( triangle-cofork-cocone
+-          ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g)))
+-        ( up-pushout (∇ A) (ind-coprod (λ _ → B) f g) Y)
+-        ( is-equiv-cofork-cocone-codiagonal)
++          ( cocone-codiagonal-cofork f g cofork-canonical-coequalizer)
++          ( P))
++        ( triangle-dependent-cofork-dependent-cocone-codiagonal f g
++          ( cofork-canonical-coequalizer)
++          ( P))
++        ( tr
++          ( λ c →
++            is-equiv
++              ( dependent-cocone-map
++                ( ∇ A)
++                ( ind-coprod (λ _ → B) f g)
++                ( c)
++                ( P)))
++          ( inv
++            ( is-retraction-map-inv-is-equiv
++              ( is-equiv-cofork-cocone-codiagonal f g)
++              ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g))))
++          ( dependent-up-pushout
++            ( ∇ A)
++            ( ind-coprod (λ _ → B) f g)
++            ( P)))
++        ( is-equiv-dependent-cofork-dependent-cocone-codiagonal f g
++          ( cofork-canonical-coequalizer)
++          ( P))
++
++    up-canonical-coequalizer :
++      { l : Level} →
++      universal-property-coequalizer l f g cofork-canonical-coequalizer
++    up-canonical-coequalizer =
++      universal-property-dependent-universal-property-coequalizer f g
++        ( cofork-canonical-coequalizer)
++        ( dup-canonical-coequalizer)
+ ```
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index e15211abb1..a0f1d77312 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -8,19 +8,25 @@ module synthetic-homotopy-theory.coforks where
+ 
+ ```agda
+ open import foundation.action-on-identifications-functions
++open import foundation.codiagonal-maps-of-types
++open import foundation.commuting-triangles-of-maps
+ open import foundation.contractible-types
++open import foundation.coproduct-types
+ open import foundation.dependent-pair-types
+ open import foundation.equality-dependent-pair-types
+ open import foundation.equivalences
++open import foundation.function-types
+ open import foundation.functoriality-dependent-pair-types
+ open import foundation.fundamental-theorem-of-identity-types
+ open import foundation.homotopies
+ open import foundation.homotopy-induction
+ open import foundation.identity-types
+-open import foundation.function-types
++open import foundation.path-algebra
+ open import foundation.structure-identity-principle
+ open import foundation.universe-levels
+ open import foundation.whiskering-homotopies
++
++open import synthetic-homotopy-theory.cocones-under-spans
+ ```
+ 
+ </details>
+@@ -29,7 +35,7 @@ open import foundation.whiskering-homotopies
+ 
+ A **cofork** of a parallel pair `f, g : A → B` with vertext `X` is a map
+ `e : B → X` together with a [homotopy](foundation.homotopies.md)
+-`e ∘ f ~ e ∘ g`. The name comes from the diagram
++`H : e ∘ f ~ e ∘ g`. The name comes from the diagram
+ 
+ ```text
+      g
+@@ -40,6 +46,10 @@ A **cofork** of a parallel pair `f, g : A → B` with vertext `X` is a map
+ 
+ which looks like a fork if you flip the arrows, hence a cofork.
+ 
++Coforks are an analogue of
++[cocones under spans](synthetic-homotopy-theory.cocones-under-spans) for
++parallel pairs. The universal cofork of a pair is their
++[coequalizer](synthetic-homotopy-theory.coequalizers).
+ 
+ ## Definitions
+ 
+@@ -94,6 +104,13 @@ module _
+ Given a cofork `e : B → X` and a map `h : X → Y`, we may compose the two to get
+ a new cofork `h ∘ e`.
+ 
++```text
++     g
++   ----->     e        h
++ A -----> B -----> X -----> Y
++     f
++```
++
+ ```agda
+ module _
+   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
+@@ -122,25 +139,26 @@ module _
+     ( e e' : cofork f g X) → (e ＝ e') → htpy-cofork f g e e'
+   htpy-cofork-eq e .e refl = reflexive-htpy-cofork e
+ 
+-  is-contr-total-htpy-cofork :
+-    ( e : cofork f g X) → is-contr (Σ (cofork f g X) (htpy-cofork f g e))
+-  is-contr-total-htpy-cofork e =
+-    is-contr-total-Eq-structure
+-      ( ev-pair (coherence-htpy-cofork f g e))
+-      ( is-contr-total-htpy (map-cofork f g e))
+-      ( (map-cofork f g e) , refl-htpy)
+-      ( is-contr-is-equiv'
+-        ( Σ ( map-cofork f g e ∘ f ~ map-cofork f g e ∘ g)
+-            ( λ K → coherence-cofork f g e ~ K))
+-        ( tot (λ K M → right-unit-htpy ∙h M))
+-        ( is-equiv-tot-is-fiberwise-equiv
+-          ( λ H → is-equiv-concat-htpy right-unit-htpy H))
+-        ( is-contr-total-htpy (coherence-cofork f g e)))
+-
+-  is-equiv-htpy-cofork-eq :
+-    ( e e' : cofork f g X) → is-equiv (htpy-cofork-eq e e')
+-  is-equiv-htpy-cofork-eq e =
+-    fundamental-theorem-id (is-contr-total-htpy-cofork e) (htpy-cofork-eq e)
++  abstract
++    is-contr-total-htpy-cofork :
++      ( e : cofork f g X) → is-contr (Σ (cofork f g X) (htpy-cofork f g e))
++    is-contr-total-htpy-cofork e =
++      is-contr-total-Eq-structure
++        ( ev-pair (coherence-htpy-cofork f g e))
++        ( is-contr-total-htpy (map-cofork f g e))
++        ( map-cofork f g e , refl-htpy)
++        ( is-contr-is-equiv'
++          ( Σ ( map-cofork f g e ∘ f ~ map-cofork f g e ∘ g)
++              ( λ K → coherence-cofork f g e ~ K))
++          ( tot (λ K M → right-unit-htpy ∙h M))
++          ( is-equiv-tot-is-fiberwise-equiv
++            ( is-equiv-concat-htpy right-unit-htpy))
++          ( is-contr-total-htpy (coherence-cofork f g e)))
++
++    is-equiv-htpy-cofork-eq :
++      ( e e' : cofork f g X) → is-equiv (htpy-cofork-eq e e')
++    is-equiv-htpy-cofork-eq e =
++      fundamental-theorem-id (is-contr-total-htpy-cofork e) (htpy-cofork-eq e)
+ 
+   eq-htpy-cofork :
+     ( e e' : cofork f g X) → htpy-cofork f g e e' → e ＝ e'
+@@ -165,6 +183,13 @@ module _
+ 
+ ### Postcomposing coforks distributes over function composition
+ 
++```text
++     g
++   ----->     e        h        k
++ A -----> B -----> X -----> Y -----> Z
++     f
++```
++
+ ```agda
+ module _
+   { l1 l2 l3 l4 l5 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
+@@ -181,3 +206,131 @@ module _
+       ( cofork-map f g (cofork-map f g e h) k)
+       ( refl-htpy , (right-unit-htpy ∙h (ap-comp k h ∘ coherence-cofork f g e)))
+ ```
++
++### Coforks are special cases of cocones under spans
++
++The type of coforks of parallel pairs is equivalent to the type of
++[cocones](synthetic-homotopy-theory.cocones-under-spans.md) under the span
++
++```text
++    ∇        [f,g]
++A <----- A + A -----> B.
++```
++
++```agda
++module _
++  { l1 l2 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
++  where
++
++  module _
++    { l3 : Level} {X : UU l3}
++    where
++
++    cofork-cocone-codiagonal :
++      cocone (∇ A) (ind-coprod (λ _ → B) f g) X →
++      cofork f g X
++    pr1 (cofork-cocone-codiagonal c) =
++      vertical-map-cocone (∇ A) (ind-coprod (λ _ → B) f g) c
++    pr2 (cofork-cocone-codiagonal c) =
++      ( ( inv-htpy
++          ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c)) ·r
++        ( inl)) ∙h
++      ( ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c) ·r inr)
++
++    cocone-codiagonal-cofork :
++      cofork f g X →
++      cocone (∇ A) (ind-coprod (λ _ → B) f g) X
++    pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ f
++    pr1 (pr2 (cocone-codiagonal-cofork e)) = map-cofork f g e
++    pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = refl
++    pr2 (pr2 (cocone-codiagonal-cofork e)) (inr a) = coherence-cofork f g e a
++
++    abstract
++      is-section-cocone-codiagonal-cofork :
++        cofork-cocone-codiagonal ∘ cocone-codiagonal-cofork ~ id
++      is-section-cocone-codiagonal-cofork e =
++        eq-htpy-cofork f g
++          ( cofork-cocone-codiagonal (cocone-codiagonal-cofork e))
++          ( e)
++          ( refl-htpy , right-unit-htpy)
++
++      is-retraction-cocone-codiagonal-fork :
++        cocone-codiagonal-cofork ∘ cofork-cocone-codiagonal ~ id
++      is-retraction-cocone-codiagonal-fork c =
++        eq-htpy-cocone
++          ( ∇ A)
++          ( ind-coprod (λ _ → B) f g)
++          ( cocone-codiagonal-cofork (cofork-cocone-codiagonal c))
++          ( c)
++          ( ( ( inv-htpy
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c))) ·r
++              ( inl)) ,
++            ( refl-htpy) ,
++            ( λ { (inl a) →
++                  inv
++                    ( left-inv
++                      ( coherence-square-cocone
++                        ( ∇ A)
++                        ( ind-coprod (λ _ → B) f g)
++                        ( c)
++                        ( inl a)))
++                ; (inr a) → right-unit}))
++
++    is-equiv-cofork-cocone-codiagonal :
++      is-equiv cofork-cocone-codiagonal
++    is-equiv-cofork-cocone-codiagonal =
++      is-equiv-is-invertible
++        ( cocone-codiagonal-cofork)
++        ( is-section-cocone-codiagonal-cofork)
++        ( is-retraction-cocone-codiagonal-fork)
++
++    equiv-cocone-codiagonal-cofork :
++      cocone (∇ A) (ind-coprod (λ _ → B) f g) X ≃
++      cofork f g X
++    pr1 equiv-cocone-codiagonal-cofork = cofork-cocone-codiagonal
++    pr2 equiv-cocone-codiagonal-cofork = is-equiv-cofork-cocone-codiagonal
++
++  triangle-cofork-cocone :
++    { l3 l4 : Level} {X : UU l3} {Y : UU l4} →
++    ( c : cocone (∇ A) (ind-coprod (λ _ → B) f g) X) →
++    coherence-triangle-maps
++      ( cofork-map f g (cofork-cocone-codiagonal c) {Y = Y})
++      ( cofork-cocone-codiagonal)
++      ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c)
++  triangle-cofork-cocone c h =
++    eq-htpy-cofork f g
++      ( cofork-map f g (cofork-cocone-codiagonal c) h)
++      ( cofork-cocone-codiagonal
++        ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c h))
++      ( refl-htpy ,
++        ( right-unit-htpy ∙h
++          ( λ a →
++            ( ap-concat h
++              ( inv
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c)
++                  ( inl a)))
++              ( coherence-square-cocone
++                ( ∇ A)
++                ( ind-coprod (λ _ → B) f g)
++                ( c)
++                ( inr a))) ∙
++            ( identification-right-whisk
++              ( ap-inv h
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c)
++                  ( inl a)))
++              ( ap h
++                ( coherence-square-cocone
++                  ( ∇ A)
++                  ( ind-coprod (λ _ → B) f g)
++                  ( c)
++                  ( inr a)))))))
++```
+diff --git a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+new file mode 100644
+index 0000000000..efe00f0fab
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+@@ -0,0 +1,445 @@
++# Dependent coforks
++
++```agda
++module synthetic-homotopy-theory.dependent-coforks where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.action-on-identifications-dependent-functions
++open import foundation.action-on-identifications-functions
++open import foundation.codiagonal-maps-of-types
++open import foundation.commuting-triangles-of-maps
++open import foundation.constant-type-families
++open import foundation.contractible-types
++open import foundation.coproduct-types
++open import foundation.dependent-identifications
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.functoriality-dependent-function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.structure-identity-principle
++open import foundation.transport-along-identifications
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies
++
++open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.dependent-cocones-under-spans
++```
++
++</details>
++
++## Idea
++
++Given a parallel pair `f, g : A → B`, a
++[cofork](synthetic-homotopy-theory.coforks.md) `e : B → X` with vertex `X`, and
++a type family `P : X → 𝓤` over `X`, we may construct _dependent_ coforks on `P`
++over `e`.
++
++A **dependent cofork** on `P` over `e` consists of a dependent map
++
++```text
++k : (b : B) → P (e b)
++```
++
++and a family of
++[dependent identifications](foundation.dependent-identifications.md) indexed by
++`A`
++
++```text
++(a : A) → dependent-identification P (H a) (k (f a)) (k (g a)).
++```
++
++Dependent coforks are an analogue of
++[dependent cocones under spans](synthetic-homotopy-theory.dependent-cocones-under-spans)
++for parallel pairs.
++
++## Definitions
++
++### Dependent coforks
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X) (P : X → UU l4)
++  where
++
++  dependent-cofork : UU (l1 ⊔ l2 ⊔ l4)
++  dependent-cofork =
++    Σ ( (b : B) → P (map-cofork f g e b))
++      ( λ k →
++        ( a : A) →
++          dependent-identification P
++            ( coherence-cofork f g e a)
++            ( k (f a))
++            ( k (g a)))
++
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  { e : cofork f g X} (P : X → UU l4)
++  ( k : dependent-cofork f g e P)
++  where
++
++  map-dependent-cofork : (b : B) → P (map-cofork f g e b)
++  map-dependent-cofork = pr1 k
++
++  coherence-dependent-cofork :
++    ( a : A) →
++    dependent-identification P
++      ( coherence-cofork f g e a)
++      ( map-dependent-cofork (f a))
++      ( map-dependent-cofork (g a))
++  coherence-dependent-cofork = pr2 k
++```
++
++### Homotopies of dependent coforks
++
++A homotopy between dependent coforks is a homotopy between the underlying maps,
++together with a coherence condition.
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  { e : cofork f g X} (P : X → UU l4)
++  where
++
++  coherence-htpy-dependent-cofork :
++    ( k k' : dependent-cofork f g e P) →
++    ( K : map-dependent-cofork f g P k ~ map-dependent-cofork f g P k') →
++    UU (l1 ⊔ l4)
++  coherence-htpy-dependent-cofork k k' K =
++    ( a : A) →
++    ( ( coherence-dependent-cofork f g P k a) ∙ (K (g a))) ＝
++    ( ( ap (tr P (coherence-cofork f g e a)) (K (f a))) ∙
++      ( coherence-dependent-cofork f g P k' a))
++
++  htpy-dependent-cofork :
++    ( k k' : dependent-cofork f g e P) →
++    UU (l1 ⊔ l2 ⊔ l4)
++  htpy-dependent-cofork k k' =
++    Σ ( map-dependent-cofork f g P k ~ map-dependent-cofork f g P k')
++      ( coherence-htpy-dependent-cofork k k')
++```
++
++### Obtaining dependent coforks as postcomposition of coforks with dependent maps
++
++One way to obtains dependent coforks is to postcompose the underlying cofork by
++a dependent map, according to the diagram
++
++```text
++     g
++   ----->     e              h
++ A -----> B -----> (x : X) -----> (P x)
++     f
++```
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X)
++  where
++
++  dependent-cofork-map :
++    { l : Level} {P : X → UU l} → ((x : X) → P x) → dependent-cofork f g e P
++  pr1 (dependent-cofork-map h) = h ∘ map-cofork f g e
++  pr2 (dependent-cofork-map h) = apd h ∘ coherence-cofork f g e
++```
++
++## Properties
++
++### Characterization of identity types of coforks
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  { e : cofork f g X} (P : X → UU l4)
++  where
++
++  reflexive-htpy-dependent-cofork :
++    ( k : dependent-cofork f g e P) →
++    htpy-dependent-cofork f g P k k
++  pr1 (reflexive-htpy-dependent-cofork k) = refl-htpy
++  pr2 (reflexive-htpy-dependent-cofork k) = right-unit-htpy
++
++  htpy-dependent-cofork-eq :
++    ( k k' : dependent-cofork f g e P) →
++    ( k ＝ k') → htpy-dependent-cofork f g P k k'
++  htpy-dependent-cofork-eq k .k refl = reflexive-htpy-dependent-cofork k
++
++  abstract
++    is-contr-total-htpy-dependent-cofork :
++      ( k : dependent-cofork f g e P) →
++      is-contr (Σ (dependent-cofork f g e P) (htpy-dependent-cofork f g P k))
++    is-contr-total-htpy-dependent-cofork k =
++      is-contr-total-Eq-structure
++        ( ev-pair (coherence-htpy-dependent-cofork f g P k))
++        ( is-contr-total-htpy (map-dependent-cofork f g P k))
++        ( map-dependent-cofork f g P k , refl-htpy)
++        ( is-contr-is-equiv'
++          ( Σ ( (a : A) →
++                dependent-identification P
++                  ( coherence-cofork f g e a)
++                  ( map-dependent-cofork f g P k (f a))
++                  ( map-dependent-cofork f g P k (g a)))
++              ( λ K → coherence-dependent-cofork f g P k ~ K))
++          ( tot (λ K M → right-unit-htpy ∙h M))
++          ( is-equiv-tot-is-fiberwise-equiv
++            ( is-equiv-concat-htpy right-unit-htpy))
++          ( is-contr-total-htpy (coherence-dependent-cofork f g P k)))
++
++    is-equiv-htpy-dependent-cofork-eq :
++      ( k k' : dependent-cofork f g e P) →
++      is-equiv (htpy-dependent-cofork-eq k k')
++    is-equiv-htpy-dependent-cofork-eq k =
++      fundamental-theorem-id
++        ( is-contr-total-htpy-dependent-cofork k)
++        ( htpy-dependent-cofork-eq k)
++
++  eq-htpy-dependent-cofork :
++    ( k k' : dependent-cofork f g e P) →
++    htpy-dependent-cofork f g P k k' → k ＝ k'
++  eq-htpy-dependent-cofork k k' =
++    map-inv-is-equiv (is-equiv-htpy-dependent-cofork-eq k k')
++```
++
++### Dependent coforks on constant type families are equivalent to regular coforks
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X) (Y : UU l4)
++  where
++
++  compute-dependent-cofork-constant-family :
++    dependent-cofork f g e (λ _ → Y) ≃ cofork f g Y
++  compute-dependent-cofork-constant-family =
++    equiv-tot
++      ( λ h →
++        equiv-Π-equiv-family
++          ( λ a →
++            equiv-concat
++              ( inv
++                ( tr-constant-type-family (coherence-cofork f g e a) (h (f a))))
++              ( h (g a))))
++
++  map-compute-dependent-cofork-constant-family :
++    dependent-cofork f g e (λ _ → Y) → cofork f g Y
++  map-compute-dependent-cofork-constant-family =
++    map-equiv compute-dependent-cofork-constant-family
++
++  triangle-compute-dependent-cofork-constant-family :
++    coherence-triangle-maps
++      ( cofork-map f g e)
++      ( map-compute-dependent-cofork-constant-family)
++      ( dependent-cofork-map f g e)
++  triangle-compute-dependent-cofork-constant-family h =
++    eq-htpy-cofork f g
++      ( cofork-map f g e h)
++      ( map-compute-dependent-cofork-constant-family
++        ( dependent-cofork-map f g e h))
++      ( ( refl-htpy) ,
++        ( right-unit-htpy ∙h
++          ( λ a →
++            left-transpose-eq-concat _ _ _
++              ( inv (apd-constant-type-family h (coherence-cofork f g e a))))))
++```
++
++### Dependent coforks are special cases of dependent cocones under spans
++
++The type of dependent coforks on `P` over `e` is equivalent to the type of
++[dependent cocones](synthetic-homotopy-theory.dependent-cocones-under-spans.md)
++on `P` over a cocone corresponding to `e` via `cocone-codiagonal-cofork`.
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X)
++  where
++
++  module _
++    { l4 : Level} (P : X → UU l4)
++    where
++
++    dependent-cofork-dependent-cocone-codiagonal :
++      dependent-cocone
++        ( ∇ A)
++        ( ind-coprod (λ _ → B) f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P) →
++      dependent-cofork f g e P
++    pr1 (dependent-cofork-dependent-cocone-codiagonal k) =
++      vertical-map-dependent-cocone
++        ( ∇ A)
++        ( ind-coprod (λ _ → B) f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P)
++        ( k)
++    pr2 (dependent-cofork-dependent-cocone-codiagonal k) a =
++      inv
++        ( ap
++          ( tr P (coherence-cofork f g e a))
++          ( coherence-square-dependent-cocone
++            ( ∇ A)
++            ( ind-coprod (λ _ → B) f g)
++            ( cocone-codiagonal-cofork f g e)
++            ( P)
++            ( k)
++            ( inl a))) ∙
++      coherence-square-dependent-cocone
++        ( ∇ A)
++        ( ind-coprod (λ _ → B) f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P)
++        ( k)
++        ( inr a)
++
++    dependent-cocone-codiagonal-dependent-cofork :
++      dependent-cofork f g e P →
++      dependent-cocone
++        ( ∇ A)
++        ( ind-coprod (λ _ → B) f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P)
++    pr1 (dependent-cocone-codiagonal-dependent-cofork k) =
++      map-dependent-cofork f g P k ∘ f
++    pr1 (pr2 (dependent-cocone-codiagonal-dependent-cofork k)) =
++      map-dependent-cofork f g P k
++    pr2 (pr2 (dependent-cocone-codiagonal-dependent-cofork k)) (inl a) =
++      refl
++    pr2 (pr2 (dependent-cocone-codiagonal-dependent-cofork k)) (inr a) =
++      coherence-dependent-cofork f g P k a
++
++    abstract
++      is-section-dependent-cocone-codiagonal-dependent-cofork :
++        ( ( dependent-cofork-dependent-cocone-codiagonal) ∘
++          ( dependent-cocone-codiagonal-dependent-cofork)) ~
++        ( id)
++      is-section-dependent-cocone-codiagonal-dependent-cofork k =
++        eq-htpy-dependent-cofork f g P
++          ( dependent-cofork-dependent-cocone-codiagonal
++            ( dependent-cocone-codiagonal-dependent-cofork k))
++          ( k)
++          ( refl-htpy , right-unit-htpy)
++
++      is-retraction-dependent-cocone-codiagonal-dependent-cofork :
++        ( ( dependent-cocone-codiagonal-dependent-cofork) ∘
++          ( dependent-cofork-dependent-cocone-codiagonal)) ~
++        ( id)
++      is-retraction-dependent-cocone-codiagonal-dependent-cofork d =
++        eq-htpy-dependent-cocone
++          ( ∇ A)
++          ( ind-coprod (λ _ → B) f g)
++          ( cocone-codiagonal-cofork f g e)
++          ( P)
++          ( dependent-cocone-codiagonal-dependent-cofork
++            ( dependent-cofork-dependent-cocone-codiagonal d))
++          ( d)
++          ( inv-htpy
++            ( ( coherence-square-dependent-cocone
++                ( ∇ A)
++                ( ind-coprod (λ _ → B) f g)
++                ( cocone-codiagonal-cofork f g e)
++                ( P)
++                ( d)) ∘
++              ( inl)) ,
++            ( refl-htpy) ,
++            ( right-unit-htpy ∙h
++              ( λ
++                { (inl a) →
++                  inv
++                    ( ( ap
++                        ( _∙
++                          coherence-square-dependent-cocone
++                            ( ∇ A)
++                            ( ind-coprod (λ _ → B) f g)
++                            ( cocone-codiagonal-cofork f g e)
++                            ( P)
++                            ( d)
++                            ( inl a))
++                        ( ap-id
++                          ( inv
++                            ( coherence-square-dependent-cocone
++                              ( ∇ A)
++                              ( ind-coprod (λ _ → B) f g)
++                              ( cocone-codiagonal-cofork f g e)
++                              ( P)
++                              ( d)
++                              ( inl a))))) ∙
++                      ( left-inv
++                        ( coherence-square-dependent-cocone
++                              ( ∇ A)
++                              ( ind-coprod (λ _ → B) f g)
++                              ( cocone-codiagonal-cofork f g e)
++                              ( P)
++                              ( d)
++                              ( inl a))))
++                ; (inr a) →
++                  ap
++                    ( _∙
++                      coherence-square-dependent-cocone
++                        ( ∇ A)
++                        ( ind-coprod (λ _ → B) f g)
++                        ( cocone-codiagonal-cofork f g e)
++                        ( P)
++                        ( d)
++                        ( inr a))
++                    ( inv
++                      ( ap-inv
++                        ( tr P (coherence-cofork f g e a))
++                        ( coherence-square-dependent-cocone
++                          ( ∇ A)
++                          ( ind-coprod (λ _ → B) f g)
++                          ( cocone-codiagonal-cofork f g e)
++                          ( P)
++                          ( d)
++                          ( inl a))))})))
++
++    is-equiv-dependent-cofork-dependent-cocone-codiagonal :
++      is-equiv dependent-cofork-dependent-cocone-codiagonal
++    is-equiv-dependent-cofork-dependent-cocone-codiagonal =
++      is-equiv-is-invertible
++        ( dependent-cocone-codiagonal-dependent-cofork)
++        ( is-section-dependent-cocone-codiagonal-dependent-cofork)
++        ( is-retraction-dependent-cocone-codiagonal-dependent-cofork)
++
++    equiv-dependent-cofork-dependent-cocone-codiagonal :
++      dependent-cocone
++        ( ∇ A)
++        ( ind-coprod (λ _ → B) f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P) ≃
++      dependent-cofork f g e P
++    pr1 equiv-dependent-cofork-dependent-cocone-codiagonal =
++      dependent-cofork-dependent-cocone-codiagonal
++    pr2 equiv-dependent-cofork-dependent-cocone-codiagonal =
++      is-equiv-dependent-cofork-dependent-cocone-codiagonal
++
++  triangle-dependent-cofork-dependent-cocone-codiagonal :
++    { l4 : Level} (P : X → UU l4) →
++    coherence-triangle-maps
++      ( dependent-cofork-map f g e)
++      ( dependent-cofork-dependent-cocone-codiagonal P)
++      ( dependent-cocone-map
++        ( ∇ A)
++        ( ind-coprod (λ _ → B) f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P))
++  triangle-dependent-cofork-dependent-cocone-codiagonal P h =
++    eq-htpy-dependent-cofork f g P
++      ( dependent-cofork-map f g e h)
++      ( dependent-cofork-dependent-cocone-codiagonal P
++        ( dependent-cocone-map
++          ( ∇ A)
++          ( ind-coprod (λ _ → B) f g)
++          ( cocone-codiagonal-cofork f g e)
++          ( P)
++          ( h)))
++      ( refl-htpy ,
++        right-unit-htpy)
++```
+diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+new file mode 100644
+index 0000000000..5901e2f055
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+@@ -0,0 +1,134 @@
++# The dependent universal property of coequalizers
++
++```agda
++module synthetic-homotopy-theory.dependent-universal-property-coequalizers where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.dependent-coforks
++open import synthetic-homotopy-theory.universal-property-coequalizers
++```
++
++</details>
++
++## Idea
++
++The **dependent universal property of coequalizers** is a property of
++[coequalizers](synthetic-homotopy-theory.coequalizers.md) of a parallel pair
++`f, g : A → B`, asserting that for any type family `P : X → 𝓤` over the
++coequalizer `e : B → X`, there is an equivalence between section of `P` and
++dependent cocones on `P` over `e`, given by the map
++
++```text
++dependent-cofork-map : ((x : X) → P x) → dependent-cocone e P.
++```
++
++## Definitions
++
++### The dependent universal property of coequalizers
++
++```agda
++module _
++  { l1 l2 l3 : Level} (l : Level) {A : UU l1} {B : UU l2} (f g : A → B)
++  { X : UU l3} (e : cofork f g X)
++  where
++
++  dependent-universal-property-coequalizer : UU (l1 ⊔ l2 ⊔ l3 ⊔ lsuc l)
++  dependent-universal-property-coequalizer =
++    (P : X → UU l) → is-equiv (dependent-cofork-map f g e {P = P})
++
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X) {P : X → UU l4}
++  ( dup-coequalizer : dependent-universal-property-coequalizer l4 f g e)
++  where
++
++  map-dependent-universal-property-coequalizers :
++    dependent-cofork f g e P →
++    (x : X) → P x
++  map-dependent-universal-property-coequalizers =
++    map-inv-is-equiv (dup-coequalizer P)
++```
++
++## Properties
++
++### The mediating dependent map obtained by the dependent universal property is unique
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X) {P : X → UU l4}
++  ( dup-coequalizer : dependent-universal-property-coequalizer l4 f g e)
++  ( k : dependent-cofork f g e P)
++  where
++
++  htpy-dependent-cofork-map-dependent-universal-property-coequalizer :
++    htpy-dependent-cofork f g P
++      ( dependent-cofork-map f g e
++        ( map-dependent-universal-property-coequalizers f g e
++          ( dup-coequalizer)
++          ( k)))
++      ( k)
++  htpy-dependent-cofork-map-dependent-universal-property-coequalizer =
++    htpy-dependent-cofork-eq f g P
++      ( dependent-cofork-map f g e
++        ( map-dependent-universal-property-coequalizers f g e
++          ( dup-coequalizer)
++          ( k)))
++      ( k)
++      ( is-section-map-inv-is-equiv (dup-coequalizer P) k)
++
++  abstract
++    uniqueness-dependent-universal-property-coequalizers :
++      is-contr
++        ( Σ ((x : X) → P x)
++          ( λ h → htpy-dependent-cofork f g P (dependent-cofork-map f g e h) k))
++    uniqueness-dependent-universal-property-coequalizers =
++      is-contr-is-equiv'
++        ( fiber (dependent-cofork-map f g e) k)
++        ( tot
++          ( λ h →
++            htpy-dependent-cofork-eq f g P (dependent-cofork-map f g e h) k))
++        ( is-equiv-tot-is-fiberwise-equiv
++          ( λ h →
++            is-equiv-htpy-dependent-cofork-eq f g P
++              ( dependent-cofork-map f g e h)
++              ( k)))
++        ( is-contr-map-is-equiv (dup-coequalizer P) k)
++```
++
++### The dependent universal property of coequializers implies the universal property of coequalizers
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X)
++  where
++
++  universal-property-dependent-universal-property-coequalizer :
++    ( {l : Level} → dependent-universal-property-coequalizer l f g e) →
++    ( {l : Level} → universal-property-coequalizer l f g e)
++  universal-property-dependent-universal-property-coequalizer
++    ( dup-coequalizer)
++    ( Y) =
++      is-equiv-comp-htpy
++        ( cofork-map f g e)
++        ( map-compute-dependent-cofork-constant-family f g e Y)
++        ( dependent-cofork-map f g e)
++        ( triangle-compute-dependent-cofork-constant-family f g e Y)
++        ( dup-coequalizer (λ _ → Y))
++        ( is-equiv-map-equiv
++          ( compute-dependent-cofork-constant-family f g e Y))
++```
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+index 3aaf253ed6..9671b76938 100644
+--- a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -24,7 +24,7 @@ open import synthetic-homotopy-theory.coforks
+ 
+ Given a parallel pair `f, g : A → B`, consider a
+ [cofork](synthetic-homotopy-theory.coforks.md) `e : B → X` with vertex X. The
+-**universal property of the coequalizer** asserts that the cofork
++**universal property of coequalizers** is the statement that the cofork
+ postcomposition map
+ 
+ ```text
+@@ -51,16 +51,15 @@ module _
+   { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
+   ( e : cofork f g X) {Y : UU l4}
+   ( up-coequalizer : universal-property-coequalizer l4 f g e)
+-  ( e' : cofork f g Y)
+   where
+ 
+-  map-universal-property-coequalizer : X → Y
+-  map-universal-property-coequalizer = map-inv-is-equiv (up-coequalizer Y) e'
++  map-universal-property-coequalizer : cofork f g Y → (X → Y)
++  map-universal-property-coequalizer = map-inv-is-equiv (up-coequalizer Y)
+ ```
+ 
+ ## Properties
+ 
+-### The cofork obtained by the universal property is unique
++### The mediating map obtained by the universal property is unique
+ 
+ ```agda
+ module _
+@@ -82,13 +81,14 @@ module _
+       ( e')
+       ( is-section-map-inv-is-equiv (up-coequalizer Y) e')
+ 
+-  uniqueness-map-universal-property-coequalizer :
+-    is-contr (Σ (X → Y) (λ h → htpy-cofork f g (cofork-map f g e h) e'))
+-  uniqueness-map-universal-property-coequalizer =
+-    is-contr-is-equiv'
+-      ( fiber (cofork-map f g e) e')
+-      ( tot (λ h → htpy-cofork-eq f g (cofork-map f g e h) e'))
+-      ( is-equiv-tot-is-fiberwise-equiv
+-        ( λ h → is-equiv-htpy-cofork-eq f g (cofork-map f g e h) e'))
+-      ( is-contr-map-is-equiv (up-coequalizer Y) e')
++  abstract
++    uniqueness-map-universal-property-coequalizer :
++      is-contr (Σ (X → Y) (λ h → htpy-cofork f g (cofork-map f g e h) e'))
++    uniqueness-map-universal-property-coequalizer =
++      is-contr-is-equiv'
++        ( fiber (cofork-map f g e) e')
++        ( tot (λ h → htpy-cofork-eq f g (cofork-map f g e h) e'))
++        ( is-equiv-tot-is-fiberwise-equiv
++          ( λ h → is-equiv-htpy-cofork-eq f g (cofork-map f g e h) e'))
++        ( is-contr-map-is-equiv (up-coequalizer Y) e')
+ ```
+
+From c8a5915496bac82a37cb2eab59a327c2da9f8179 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 01:04:48 +0200
+Subject: [PATCH 04/10] Fix links
+
+---
+ src/synthetic-homotopy-theory/coequalizers.lagda.md      | 2 +-
+ src/synthetic-homotopy-theory/coforks.lagda.md           | 4 ++--
+ src/synthetic-homotopy-theory/dependent-coforks.lagda.md | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+index d03175f1f0..694f9f2dd4 100644
+--- a/src/synthetic-homotopy-theory/coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -37,7 +37,7 @@ The **coequalizer** of a parallel pair `f, g : A → B` is the colimiting
+ The **canonical coequalizer** may be obtained as a pushout of the span
+ 
+ ```text
+-    ∇        [f,g]
++     ∇         [f,g]
+ A <----- A + A -----> B
+ ```
+ 
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index a0f1d77312..cfa9caf46b 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -47,9 +47,9 @@ A **cofork** of a parallel pair `f, g : A → B` with vertext `X` is a map
+ which looks like a fork if you flip the arrows, hence a cofork.
+ 
+ Coforks are an analogue of
+-[cocones under spans](synthetic-homotopy-theory.cocones-under-spans) for
++[cocones under spans](synthetic-homotopy-theory.cocones-under-spans.md) for
+ parallel pairs. The universal cofork of a pair is their
+-[coequalizer](synthetic-homotopy-theory.coequalizers).
++[coequalizer](synthetic-homotopy-theory.coequalizers.md).
+ 
+ ## Definitions
+ 
+diff --git a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+index efe00f0fab..15a852c49f 100644
+--- a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+@@ -57,7 +57,7 @@ and a family of
+ ```
+ 
+ Dependent coforks are an analogue of
+-[dependent cocones under spans](synthetic-homotopy-theory.dependent-cocones-under-spans)
++[dependent cocones under spans](synthetic-homotopy-theory.dependent-cocones-under-spans.md)
+ for parallel pairs.
+ 
+ ## Definitions
+
+From 05545cfc78ca8a67f80a4906c198f795ec545e7b Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 02:11:11 +0200
+Subject: [PATCH 05/10] Flattening lemma for coequalizers
+
+---
+ src/synthetic-homotopy-theory.lagda.md        |   1 +
+ .../flattening-lemma-coequalizers.lagda.md    | 172 ++++++++++++++++++
+ .../flattening-lemma-pushouts.lagda.md        |   9 +-
+ 3 files changed, 177 insertions(+), 5 deletions(-)
+ create mode 100644 src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index 9a4987bb67..3eb5a75f12 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -32,6 +32,7 @@ open import synthetic-homotopy-theory.descent-circle-equivalence-types public
+ open import synthetic-homotopy-theory.descent-circle-function-types public
+ open import synthetic-homotopy-theory.descent-circle-subtypes public
+ open import synthetic-homotopy-theory.double-loop-spaces public
++open import synthetic-homotopy-theory.flattening-lemma-coequalizers public
+ open import synthetic-homotopy-theory.flattening-lemma-pushouts public
+ open import synthetic-homotopy-theory.free-loops public
+ open import synthetic-homotopy-theory.functoriality-loop-spaces public
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+new file mode 100644
+index 0000000000..a4115427f1
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -0,0 +1,172 @@
++# The flattening lemma for coequalizers
++
++```agda
++module synthetic-homotopy-theory.flattening-lemma-coequalizers where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++-- open import foundation.commuting-squares-of-maps
++open import foundation.commuting-triangles-of-maps
++open import foundation.dependent-pair-types
++open import foundation.equality-dependent-pair-types
++open import foundation.equivalences
++open import foundation.function-extensionality
++open import foundation.function-types
++open import foundation.functoriality-dependent-function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.identity-types
++open import foundation.transport-along-identifications
++open import foundation.universal-property-dependent-pair-types
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.dependent-coforks
++-- open import synthetic-homotopy-theory.cocones-under-spans
++-- open import synthetic-homotopy-theory.dependent-cocones-under-spans
++open import synthetic-homotopy-theory.dependent-universal-property-coequalizers
++open import synthetic-homotopy-theory.universal-property-coequalizers
++```
++
++</details>
++
++## Idea
++
++The **flattening lemma** for
++[coequalizers](synthetic-homotopy-theory.coequalizers.md) states that
++coequalizers commute with
++[dependent pair types](foundation.dependent-pair-types.md). More precisely,
++given a coequalizer
++
++```text
++     g
++   ----->     e
++ A -----> B -----> X
++     f
++```
++
++with homotopy `H : e ∘ f ~ e ∘ g`, and a type family `P : X → 𝓤` over `X`, the
++cofork
++
++```text
++                 ----->
++Σ (a : A) P(efa) -----> Σ (b : B) P(eb) ---> Σ (x : X) P(x)
++```
++
++is again a coequalizer.
++
++## Definitions
++
++### The statement of the flattening lemma for coequalizers
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( P : X → UU l4) (e : cofork f g X)
++  where
++
++  cofork-flattening-lemma-coequalizer :
++    cofork
++      ( map-Σ-map-base f (P ∘ map-cofork f g e))
++      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
++      ( Σ X P)
++  pr1 cofork-flattening-lemma-coequalizer = map-Σ-map-base (map-cofork f g e) P
++  pr2 cofork-flattening-lemma-coequalizer =
++    coherence-square-maps-map-Σ-map-base P g f
++      ( map-cofork f g e)
++      ( map-cofork f g e)
++      ( coherence-cofork f g e)
++
++  flattening-lemma-coequalizer-statement : UUω
++  flattening-lemma-coequalizer-statement =
++    ( {l : Level} → dependent-universal-property-coequalizer l f g e) →
++    { l : Level} →
++    universal-property-coequalizer l
++      ( map-Σ-map-base f (P ∘ map-cofork f g e))
++      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
++      ( cofork-flattening-lemma-coequalizer)
++```
++
++## Properties
++
++### Proof of the flattening lemma for coequalizers
++
++The proof is analogous to the one of the
++[flattening lemma for pushouts](synthetic-homotopy-theory.flattening-lemma-pushouts.md).
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( P : X → UU l4) (e : cofork f g X)
++  where
++
++  cofork-map-flattening-coequalizer :
++    { l : Level} (Y : UU l) →
++    ( Σ X P → Y) →
++    cofork
++      ( map-Σ-map-base f (P ∘ map-cofork f g e))
++      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
++      ( Y)
++  cofork-map-flattening-coequalizer Y =
++    cofork-map
++      ( map-Σ-map-base f (P ∘ map-cofork f g e))
++      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
++      ( cofork-flattening-lemma-coequalizer f g P e)
++
++  comparison-dependent-cofork-ind-Σ-cofork :
++    { l : Level} (Y : UU l) →
++    Σ ( (b : B) → P (map-cofork f g e b) → Y)
++      ( λ k →
++        ( a : A) (t : P (map-cofork f g e (f a))) →
++        ( k (f a) t) ＝
++        ( k (g a) (tr P (coherence-cofork f g e a) t))) ≃
++    dependent-cofork f g e (λ x → P x → Y)
++  comparison-dependent-cofork-ind-Σ-cofork Y =
++    equiv-tot
++      ( λ k →
++        equiv-Π-equiv-family
++          ( equiv-htpy-dependent-fuction-dependent-identification-function-type
++            ( Y)
++            ( coherence-cofork f g e)
++            ( k ∘ f)
++            ( k ∘ g)))
++
++  triangle-comparison-dependent-cofork-ind-Σ-cofork :
++    { l : Level} (Y : UU l) →
++    coherence-triangle-maps
++      ( dependent-cofork-map f g e { P = (λ x → P x → Y) })
++      ( map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
++      ( map-equiv equiv-ev-pair² ∘ cofork-map-flattening-coequalizer Y ∘ ind-Σ)
++  triangle-comparison-dependent-cofork-ind-Σ-cofork Y h =
++    eq-pair-Σ
++      ( refl)
++      ( eq-htpy
++        ( inv-htpy
++          ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
++            ( Y)
++            ( coherence-cofork f g e)
++            ( h))))
++
++  flattening-lemma-coequalizer :
++    flattening-lemma-coequalizer-statement f g P e
++  flattening-lemma-coequalizer dup-coequalizer Y =
++    is-equiv-left-factor
++      ( cofork-map-flattening-coequalizer Y)
++      ( ind-Σ)
++      ( is-equiv-right-factor
++        ( map-equiv equiv-ev-pair²)
++        ( cofork-map-flattening-coequalizer Y ∘ ind-Σ)
++        ( is-equiv-map-equiv equiv-ev-pair²)
++        ( is-equiv-right-factor-htpy
++          ( dependent-cofork-map f g e {P = (λ x → P x → Y)})
++          ( map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
++          ( ( map-equiv equiv-ev-pair²) ∘
++            ( cofork-map-flattening-coequalizer Y) ∘
++            ( ind-Σ))
++          ( triangle-comparison-dependent-cofork-ind-Σ-cofork Y)
++          ( is-equiv-map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
++          ( dup-coequalizer (λ x → P x → Y))))
++      ( is-equiv-ind-Σ)
++```
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index f6ef8f235a..55df1bf9f1 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -69,7 +69,6 @@ module _
+   { l1 l2 l3 l4 l5 : Level} {S : UU l1} {A : UU l2} {B : UU l3}
+   { X : UU l4} (P : X → UU l5)
+   ( f : S → A) (g : S → B) (c : cocone f g X)
+-  ( dup-pushout : {l : Level} → dependent-universal-property-pushout l f g c)
+   where
+ 
+   horizontal-map-cocone-flattening-pushout :
+@@ -114,6 +113,7 @@ module _
+ 
+   flattening-lemma-pushout-statement : UUω
+   flattening-lemma-pushout-statement =
++    ( { l : Level} → dependent-universal-property-pushout l f g c) →
+     { l : Level} →
+     universal-property-pushout l
+       ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
+@@ -137,7 +137,6 @@ module _
+   { l1 l2 l3 l4 l5 : Level} {S : UU l1} {A : UU l2} {B : UU l3}
+   { X : UU l4} (P : X → UU l5)
+   ( f : S → A) (g : S → B) (c : cocone f g X)
+-  ( dup-pushout : {l : Level} → dependent-universal-property-pushout l f g c)
+   where
+ 
+   cocone-map-flattening-pushout :
+@@ -157,7 +156,7 @@ module _
+         ( P ∘ vertical-map-cocone f g c)
+         ( g)
+         ( λ s → tr P (coherence-square-cocone f g c s)))
+-      ( cocone-flattening-pushout P f g c dup-pushout)
++      ( cocone-flattening-pushout P f g c)
+ 
+   comparison-dependent-cocone-ind-Σ-cocone :
+     { l : Level} (Y : UU l) →
+@@ -200,8 +199,8 @@ module _
+               ( h)))))
+ 
+   flattening-lemma-pushout :
+-    flattening-lemma-pushout-statement P f g c dup-pushout
+-  flattening-lemma-pushout Y =
++    flattening-lemma-pushout-statement P f g c
++  flattening-lemma-pushout dup-pushout Y =
+     is-equiv-left-factor
+       ( cocone-map-flattening-pushout Y)
+       ( ind-Σ)
+
+From d11c7516610e80f60a507e8c19b592737d3f37e9 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 02:16:15 +0200
+Subject: [PATCH 06/10] pre-commit
+
+---
+ .../flattening-lemma-coequalizers.lagda.md                   | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+index a4115427f1..d39acc6304 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -7,7 +7,6 @@ module synthetic-homotopy-theory.flattening-lemma-coequalizers where
+ <details><summary>Imports</summary>
+ 
+ ```agda
+--- open import foundation.commuting-squares-of-maps
+ open import foundation.commuting-triangles-of-maps
+ open import foundation.dependent-pair-types
+ open import foundation.equality-dependent-pair-types
+@@ -24,8 +23,6 @@ open import foundation.universe-levels
+ 
+ open import synthetic-homotopy-theory.coforks
+ open import synthetic-homotopy-theory.dependent-coforks
+--- open import synthetic-homotopy-theory.cocones-under-spans
+--- open import synthetic-homotopy-theory.dependent-cocones-under-spans
+ open import synthetic-homotopy-theory.dependent-universal-property-coequalizers
+ open import synthetic-homotopy-theory.universal-property-coequalizers
+ ```
+@@ -136,7 +133,7 @@ module _
+   triangle-comparison-dependent-cofork-ind-Σ-cofork :
+     { l : Level} (Y : UU l) →
+     coherence-triangle-maps
+-      ( dependent-cofork-map f g e { P = (λ x → P x → Y) })
++      ( dependent-cofork-map f g e {P = (λ x → P x → Y)})
+       ( map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
+       ( map-equiv equiv-ev-pair² ∘ cofork-map-flattening-coequalizer Y ∘ ind-Σ)
+   triangle-comparison-dependent-cofork-ind-Σ-cofork Y h =
+
+From 55c698360899c992d633f19a680d62245cf59dc5 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 16:47:48 +0200
+Subject: [PATCH 07/10] Rename nabla to codiagonal
+
+---
+ .../codiagonal-maps-of-types.lagda.md         |  6 +--
+ .../coequalizers.lagda.md                     | 12 +++---
+ .../coforks.lagda.md                          | 41 +++++++++++--------
+ .../dependent-coforks.lagda.md                | 30 +++++++-------
+ 4 files changed, 48 insertions(+), 41 deletions(-)
+
+diff --git a/src/foundation-core/codiagonal-maps-of-types.lagda.md b/src/foundation-core/codiagonal-maps-of-types.lagda.md
+index 83f4e30ee9..d00bb868f9 100644
+--- a/src/foundation-core/codiagonal-maps-of-types.lagda.md
++++ b/src/foundation-core/codiagonal-maps-of-types.lagda.md
+@@ -26,7 +26,7 @@ module _
+   { l1 : Level} (A : UU l1)
+   where
+ 
+-  ∇ : A + A → A
+-  ∇ (inl a) = a
+-  ∇ (inr a) = a
++  codiagonal : A + A → A
++  codiagonal (inl a) = a
++  codiagonal (inr a) = a
+ ```
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+index 694f9f2dd4..14505f879b 100644
+--- a/src/synthetic-homotopy-theory/coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -61,12 +61,12 @@ module _
+   abstract
+     canonical-coequalizer : UU (l1 ⊔ l2)
+     canonical-coequalizer =
+-      pushout (∇ A) (ind-coprod (λ _ → B) f g)
++      pushout (codiagonal A) (ind-coprod (λ _ → B) f g)
+ 
+     cofork-canonical-coequalizer : cofork f g canonical-coequalizer
+     cofork-canonical-coequalizer =
+       cofork-cocone-codiagonal f g
+-        ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g))
++        ( cocone-pushout (codiagonal A) (ind-coprod (λ _ → B) f g))
+ 
+     dup-canonical-coequalizer :
+       { l : Level} →
+@@ -79,7 +79,7 @@ module _
+           ( cofork-canonical-coequalizer)
+           ( P))
+         ( dependent-cocone-map
+-          ( ∇ A)
++          ( codiagonal A)
+           ( ind-coprod (λ _ → B) f g)
+           ( cocone-codiagonal-cofork f g cofork-canonical-coequalizer)
+           ( P))
+@@ -90,16 +90,16 @@ module _
+           ( λ c →
+             is-equiv
+               ( dependent-cocone-map
+-                ( ∇ A)
++                ( codiagonal A)
+                 ( ind-coprod (λ _ → B) f g)
+                 ( c)
+                 ( P)))
+           ( inv
+             ( is-retraction-map-inv-is-equiv
+               ( is-equiv-cofork-cocone-codiagonal f g)
+-              ( cocone-pushout (∇ A) (ind-coprod (λ _ → B) f g))))
++              ( cocone-pushout (codiagonal A) (ind-coprod (λ _ → B) f g))))
+           ( dependent-up-pushout
+-            ( ∇ A)
++            ( codiagonal A)
+             ( ind-coprod (λ _ → B) f g)
+             ( P)))
+         ( is-equiv-dependent-cofork-dependent-cocone-codiagonal f g
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index cfa9caf46b..d142a0904a 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -213,7 +213,7 @@ The type of coforks of parallel pairs is equivalent to the type of
+ [cocones](synthetic-homotopy-theory.cocones-under-spans.md) under the span
+ 
+ ```text
+-    ∇        [f,g]
++     ∇         [f,g]
+ A <----- A + A -----> B.
+ ```
+ 
+@@ -227,19 +227,26 @@ module _
+     where
+ 
+     cofork-cocone-codiagonal :
+-      cocone (∇ A) (ind-coprod (λ _ → B) f g) X →
++      cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X →
+       cofork f g X
+     pr1 (cofork-cocone-codiagonal c) =
+-      vertical-map-cocone (∇ A) (ind-coprod (λ _ → B) f g) c
++      vertical-map-cocone (codiagonal A) (ind-coprod (λ _ → B) f g) c
+     pr2 (cofork-cocone-codiagonal c) =
+       ( ( inv-htpy
+-          ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c)) ·r
++          ( coherence-square-cocone
++            ( codiagonal A)
++            ( ind-coprod (λ _ → B) f g)
++            ( c))) ·r
+         ( inl)) ∙h
+-      ( ( coherence-square-cocone (∇ A) (ind-coprod (λ _ → B) f g) c) ·r inr)
++      ( ( coherence-square-cocone
++          ( codiagonal A)
++          ( ind-coprod (λ _ → B) f g)
++          ( c)) ·r
++        ( inr))
+ 
+     cocone-codiagonal-cofork :
+       cofork f g X →
+-      cocone (∇ A) (ind-coprod (λ _ → B) f g) X
++      cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X
+     pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ f
+     pr1 (pr2 (cocone-codiagonal-cofork e)) = map-cofork f g e
+     pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = refl
+@@ -258,13 +265,13 @@ module _
+         cocone-codiagonal-cofork ∘ cofork-cocone-codiagonal ~ id
+       is-retraction-cocone-codiagonal-fork c =
+         eq-htpy-cocone
+-          ( ∇ A)
++          ( codiagonal A)
+           ( ind-coprod (λ _ → B) f g)
+           ( cocone-codiagonal-cofork (cofork-cocone-codiagonal c))
+           ( c)
+           ( ( ( inv-htpy
+                 ( coherence-square-cocone
+-                  ( ∇ A)
++                  ( codiagonal A)
+                   ( ind-coprod (λ _ → B) f g)
+                   ( c))) ·r
+               ( inl)) ,
+@@ -273,7 +280,7 @@ module _
+                   inv
+                     ( left-inv
+                       ( coherence-square-cocone
+-                        ( ∇ A)
++                        ( codiagonal A)
+                         ( ind-coprod (λ _ → B) f g)
+                         ( c)
+                         ( inl a)))
+@@ -288,48 +295,48 @@ module _
+         ( is-retraction-cocone-codiagonal-fork)
+ 
+     equiv-cocone-codiagonal-cofork :
+-      cocone (∇ A) (ind-coprod (λ _ → B) f g) X ≃
++      cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X ≃
+       cofork f g X
+     pr1 equiv-cocone-codiagonal-cofork = cofork-cocone-codiagonal
+     pr2 equiv-cocone-codiagonal-cofork = is-equiv-cofork-cocone-codiagonal
+ 
+   triangle-cofork-cocone :
+     { l3 l4 : Level} {X : UU l3} {Y : UU l4} →
+-    ( c : cocone (∇ A) (ind-coprod (λ _ → B) f g) X) →
++    ( c : cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X) →
+     coherence-triangle-maps
+       ( cofork-map f g (cofork-cocone-codiagonal c) {Y = Y})
+       ( cofork-cocone-codiagonal)
+-      ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c)
++      ( cocone-map (codiagonal A) (ind-coprod (λ _ → B) f g) c)
+   triangle-cofork-cocone c h =
+     eq-htpy-cofork f g
+       ( cofork-map f g (cofork-cocone-codiagonal c) h)
+       ( cofork-cocone-codiagonal
+-        ( cocone-map (∇ A) (ind-coprod (λ _ → B) f g) c h))
++        ( cocone-map (codiagonal A) (ind-coprod (λ _ → B) f g) c h))
+       ( refl-htpy ,
+         ( right-unit-htpy ∙h
+           ( λ a →
+             ( ap-concat h
+               ( inv
+                 ( coherence-square-cocone
+-                  ( ∇ A)
++                  ( codiagonal A)
+                   ( ind-coprod (λ _ → B) f g)
+                   ( c)
+                   ( inl a)))
+               ( coherence-square-cocone
+-                ( ∇ A)
++                ( codiagonal A)
+                 ( ind-coprod (λ _ → B) f g)
+                 ( c)
+                 ( inr a))) ∙
+             ( identification-right-whisk
+               ( ap-inv h
+                 ( coherence-square-cocone
+-                  ( ∇ A)
++                  ( codiagonal A)
+                   ( ind-coprod (λ _ → B) f g)
+                   ( c)
+                   ( inl a)))
+               ( ap h
+                 ( coherence-square-cocone
+-                  ( ∇ A)
++                  ( codiagonal A)
+                   ( ind-coprod (λ _ → B) f g)
+                   ( c)
+                   ( inr a)))))))
+diff --git a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+index 15a852c49f..fc6840cf4c 100644
+--- a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+@@ -268,14 +268,14 @@ module _
+ 
+     dependent-cofork-dependent-cocone-codiagonal :
+       dependent-cocone
+-        ( ∇ A)
++        ( codiagonal A)
+         ( ind-coprod (λ _ → B) f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P) →
+       dependent-cofork f g e P
+     pr1 (dependent-cofork-dependent-cocone-codiagonal k) =
+       vertical-map-dependent-cocone
+-        ( ∇ A)
++        ( codiagonal A)
+         ( ind-coprod (λ _ → B) f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P)
+@@ -285,14 +285,14 @@ module _
+         ( ap
+           ( tr P (coherence-cofork f g e a))
+           ( coherence-square-dependent-cocone
+-            ( ∇ A)
++            ( codiagonal A)
+             ( ind-coprod (λ _ → B) f g)
+             ( cocone-codiagonal-cofork f g e)
+             ( P)
+             ( k)
+             ( inl a))) ∙
+       coherence-square-dependent-cocone
+-        ( ∇ A)
++        ( codiagonal A)
+         ( ind-coprod (λ _ → B) f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P)
+@@ -302,7 +302,7 @@ module _
+     dependent-cocone-codiagonal-dependent-cofork :
+       dependent-cofork f g e P →
+       dependent-cocone
+-        ( ∇ A)
++        ( codiagonal A)
+         ( ind-coprod (λ _ → B) f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P)
+@@ -333,7 +333,7 @@ module _
+         ( id)
+       is-retraction-dependent-cocone-codiagonal-dependent-cofork d =
+         eq-htpy-dependent-cocone
+-          ( ∇ A)
++          ( codiagonal A)
+           ( ind-coprod (λ _ → B) f g)
+           ( cocone-codiagonal-cofork f g e)
+           ( P)
+@@ -342,7 +342,7 @@ module _
+           ( d)
+           ( inv-htpy
+             ( ( coherence-square-dependent-cocone
+-                ( ∇ A)
++                ( codiagonal A)
+                 ( ind-coprod (λ _ → B) f g)
+                 ( cocone-codiagonal-cofork f g e)
+                 ( P)
+@@ -356,7 +356,7 @@ module _
+                     ( ( ap
+                         ( _∙
+                           coherence-square-dependent-cocone
+-                            ( ∇ A)
++                            ( codiagonal A)
+                             ( ind-coprod (λ _ → B) f g)
+                             ( cocone-codiagonal-cofork f g e)
+                             ( P)
+@@ -365,7 +365,7 @@ module _
+                         ( ap-id
+                           ( inv
+                             ( coherence-square-dependent-cocone
+-                              ( ∇ A)
++                              ( codiagonal A)
+                               ( ind-coprod (λ _ → B) f g)
+                               ( cocone-codiagonal-cofork f g e)
+                               ( P)
+@@ -373,7 +373,7 @@ module _
+                               ( inl a))))) ∙
+                       ( left-inv
+                         ( coherence-square-dependent-cocone
+-                              ( ∇ A)
++                              ( codiagonal A)
+                               ( ind-coprod (λ _ → B) f g)
+                               ( cocone-codiagonal-cofork f g e)
+                               ( P)
+@@ -383,7 +383,7 @@ module _
+                   ap
+                     ( _∙
+                       coherence-square-dependent-cocone
+-                        ( ∇ A)
++                        ( codiagonal A)
+                         ( ind-coprod (λ _ → B) f g)
+                         ( cocone-codiagonal-cofork f g e)
+                         ( P)
+@@ -393,7 +393,7 @@ module _
+                       ( ap-inv
+                         ( tr P (coherence-cofork f g e a))
+                         ( coherence-square-dependent-cocone
+-                          ( ∇ A)
++                          ( codiagonal A)
+                           ( ind-coprod (λ _ → B) f g)
+                           ( cocone-codiagonal-cofork f g e)
+                           ( P)
+@@ -410,7 +410,7 @@ module _
+ 
+     equiv-dependent-cofork-dependent-cocone-codiagonal :
+       dependent-cocone
+-        ( ∇ A)
++        ( codiagonal A)
+         ( ind-coprod (λ _ → B) f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P) ≃
+@@ -426,7 +426,7 @@ module _
+       ( dependent-cofork-map f g e)
+       ( dependent-cofork-dependent-cocone-codiagonal P)
+       ( dependent-cocone-map
+-        ( ∇ A)
++        ( codiagonal A)
+         ( ind-coprod (λ _ → B) f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P))
+@@ -435,7 +435,7 @@ module _
+       ( dependent-cofork-map f g e h)
+       ( dependent-cofork-dependent-cocone-codiagonal P
+         ( dependent-cocone-map
+-          ( ∇ A)
++          ( codiagonal A)
+           ( ind-coprod (λ _ → B) f g)
+           ( cocone-codiagonal-cofork f g e)
+           ( P)
+
+From 52878853ae76541d3a376cb649ac4effd3b55c43 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 16:52:39 +0200
+Subject: [PATCH 08/10] Move the codiagonal map to foundation
+
+---
+ src/foundation-core.lagda.md                  |  1 -
+ .../codiagonal-maps-of-types.lagda.md         | 32 -------------------
+ .../codiagonal-maps-of-types.lagda.md         | 21 ++++++++++--
+ 3 files changed, 19 insertions(+), 35 deletions(-)
+ delete mode 100644 src/foundation-core/codiagonal-maps-of-types.lagda.md
+
+diff --git a/src/foundation-core.lagda.md b/src/foundation-core.lagda.md
+index 983c564c21..cd39ca220d 100644
+--- a/src/foundation-core.lagda.md
++++ b/src/foundation-core.lagda.md
+@@ -7,7 +7,6 @@ module foundation-core where
+ 
+ open import foundation-core.1-types public
+ open import foundation-core.cartesian-product-types public
+-open import foundation-core.codiagonal-maps-of-types public
+ open import foundation-core.coherently-invertible-maps public
+ open import foundation-core.commuting-squares-of-maps public
+ open import foundation-core.commuting-triangles-of-maps public
+diff --git a/src/foundation-core/codiagonal-maps-of-types.lagda.md b/src/foundation-core/codiagonal-maps-of-types.lagda.md
+deleted file mode 100644
+index d00bb868f9..0000000000
+--- a/src/foundation-core/codiagonal-maps-of-types.lagda.md
++++ /dev/null
+@@ -1,32 +0,0 @@
+-# Codiagonal maps of types
+-
+-```agda
+-module foundation-core.codiagonal-maps-of-types where
+-```
+-
+-<details><summary>Imports</summary>
+-
+-```agda
+-open import foundation.universe-levels
+-
+-open import foundation-core.coproduct-types
+-```
+-
+-</details>
+-
+-## Idea
+-
+-The codiagonal map `∇ : A + A → A` of `A` is the map that projects `A + A` onto
+-`A`.
+-
+-## Definitions
+-
+-```agda
+-module _
+-  { l1 : Level} (A : UU l1)
+-  where
+-
+-  codiagonal : A + A → A
+-  codiagonal (inl a) = a
+-  codiagonal (inr a) = a
+-```
+diff --git a/src/foundation/codiagonal-maps-of-types.lagda.md b/src/foundation/codiagonal-maps-of-types.lagda.md
+index 8cae8a6407..60c45ec21e 100644
+--- a/src/foundation/codiagonal-maps-of-types.lagda.md
++++ b/src/foundation/codiagonal-maps-of-types.lagda.md
+@@ -2,14 +2,31 @@
+ 
+ ```agda
+ module foundation.codiagonal-maps-of-types where
+-
+-open import foundation-core.codiagonal-maps-of-types public
+ ```
+ 
+ <details><summary>Imports</summary>
+ 
+ ```agda
++open import foundation.universe-levels
+ 
++open import foundation-core.coproduct-types
+ ```
+ 
+ </details>
++
++## Idea
++
++The codiagonal map `∇ : A + A → A` of `A` is the map that projects `A + A` onto
++`A`.
++
++## Definitions
++
++```agda
++module _
++  { l1 : Level} (A : UU l1)
++  where
++
++  codiagonal : A + A → A
++  codiagonal (inl a) = a
++  codiagonal (inr a) = a
++```
+
+From 5024de58142b9faecaabed0320894c9841610abc Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 18:11:49 +0200
+Subject: [PATCH 09/10] Prose
+
+---
+ src/synthetic-homotopy-theory/coequalizers.lagda.md   | 11 +++++++----
+ ...dependent-universal-property-coequalizers.lagda.md |  2 +-
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+index 14505f879b..58b565106d 100644
+--- a/src/synthetic-homotopy-theory/coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -34,16 +34,19 @@ The **coequalizer** of a parallel pair `f, g : A → B` is the colimiting
+ 
+ ### All parallel pairs admit a coequalizer
+ 
+-The **canonical coequalizer** may be obtained as a pushout of the span
++The **canonical coequalizer** may be obtained as a
++[pushout](synthetic-homotopy-theory.pushouts.md) of the span
+ 
+ ```text
+      ∇         [f,g]
+ A <----- A + A -----> B
+ ```
+ 
+-where the left map is the codiagonal map, sending `inl(a)` and `inr(a)` to `a`,
+-and the right map is defined by the universal property of coproducts to send
+-`inl(a)` to `f(a)` and `inr(a)` to `g(a)`.
++where the left map is the
++[codiagonal map](foundation.codiagonal-maps-of-types.md), sending `inl(a)` and
++`inr(a)` to `a`, and the right map is defined by the universal property of
++[coproducts](foundation.coproduct-types.md) to send `inl(a)` to `f(a)` and
++`inr(a)` to `g(a)`.
+ 
+ The pushout thus constructed will consist of a copy of `B`, a copy of `A`, and
+ for every point `a` of `A` there will be a path from `f(a)` to `a` and to
+diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+index 5901e2f055..2a5d19fb95 100644
+--- a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+@@ -28,7 +28,7 @@ open import synthetic-homotopy-theory.universal-property-coequalizers
+ The **dependent universal property of coequalizers** is a property of
+ [coequalizers](synthetic-homotopy-theory.coequalizers.md) of a parallel pair
+ `f, g : A → B`, asserting that for any type family `P : X → 𝓤` over the
+-coequalizer `e : B → X`, there is an equivalence between section of `P` and
++coequalizer `e : B → X`, there is an equivalence between sections of `P` and
+ dependent cocones on `P` over `e`, given by the map
+ 
+ ```text
+
+From c8da7a34bce055f9bbf95b7f3edc4d3baa39aa15 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 20 Sep 2023 18:43:37 +0200
+Subject: [PATCH 10/10] Reformat pattern matching lambdas
+
+---
+ .../coforks.lagda.md                          | 19 ++++++++++---------
+ .../dependent-coforks.lagda.md                |  8 ++++----
+ 2 files changed, 14 insertions(+), 13 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index d142a0904a..e0d242d305 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -276,15 +276,16 @@ module _
+                   ( c))) ·r
+               ( inl)) ,
+             ( refl-htpy) ,
+-            ( λ { (inl a) →
+-                  inv
+-                    ( left-inv
+-                      ( coherence-square-cocone
+-                        ( codiagonal A)
+-                        ( ind-coprod (λ _ → B) f g)
+-                        ( c)
+-                        ( inl a)))
+-                ; (inr a) → right-unit}))
++            ( λ {
++              (inl a) →
++                inv
++                  ( left-inv
++                    ( coherence-square-cocone
++                      ( codiagonal A)
++                      ( ind-coprod (λ _ → B) f g)
++                      ( c)
++                      ( inl a))) ;
++              (inr a) → right-unit}))
+ 
+     is-equiv-cofork-cocone-codiagonal :
+       is-equiv cofork-cocone-codiagonal
+diff --git a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+index fc6840cf4c..6dbe72ff61 100644
+--- a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+@@ -350,8 +350,8 @@ module _
+               ( inl)) ,
+             ( refl-htpy) ,
+             ( right-unit-htpy ∙h
+-              ( λ
+-                { (inl a) →
++              ( λ {
++                (inl a) →
+                   inv
+                     ( ( ap
+                         ( _∙
+@@ -378,8 +378,8 @@ module _
+                               ( cocone-codiagonal-cofork f g e)
+                               ( P)
+                               ( d)
+-                              ( inl a))))
+-                ; (inr a) →
++                              ( inl a)))) ;
++                (inr a) →
+                   ap
+                     ( _∙
+                       coherence-square-dependent-cocone

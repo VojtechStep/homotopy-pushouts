@@ -1,0 +1,1603 @@
+From b520af4348d8673e7cdd48ebd34b248df9543937 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 5 Dec 2023 18:53:48 +0100
+Subject: [PATCH 01/10] Flattening lemma for sequential colimits
+
+---
+ ...unctoriality-dependent-pair-types.lagda.md |  19 ++
+ .../flattening-lemma-coequalizers.lagda.md    |   2 +-
+ ...ttening-lemma-sequential-colimits.lagda.md | 182 ++++++++++++++++++
+ .../universal-property-coequalizers.lagda.md  | 139 +++++++++++++
+ 4 files changed, 341 insertions(+), 1 deletion(-)
+ create mode 100644 src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+
+diff --git a/src/foundation/functoriality-dependent-pair-types.lagda.md b/src/foundation/functoriality-dependent-pair-types.lagda.md
+index ba4348f969..08e151eb16 100644
+--- a/src/foundation/functoriality-dependent-pair-types.lagda.md
++++ b/src/foundation/functoriality-dependent-pair-types.lagda.md
+@@ -19,6 +19,7 @@ open import foundation.type-arithmetic-dependent-pair-types
+ open import foundation.universe-levels
+ 
+ open import foundation-core.commuting-squares-of-maps
++open import foundation-core.commuting-triangles-of-maps
+ open import foundation-core.dependent-identifications
+ open import foundation-core.equality-dependent-pair-types
+ open import foundation-core.equivalences
+@@ -375,6 +376,24 @@ module _
+   coherence-square-maps-map-Σ-map-base H (a , p) = eq-pair-Σ (H a) refl
+ ```
+ 
++#### `map-Σ-map-base` preserves commuting triangles of maps
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level}
++  {A : UU l1} {B : UU l2} {X : UU l3} (S : X → UU l4)
++  (left : A → X) (right : B → X) (top : A → B)
++  where
++
++  coherence-triangle-maps-map-Σ-map-base :
++    (H : coherence-triangle-maps left right top) →
++    coherence-triangle-maps
++      ( map-Σ-map-base left S)
++      ( map-Σ-map-base right S)
++      ( map-Σ (S ∘ right) top (λ a → tr S (H a)))
++  coherence-triangle-maps-map-Σ-map-base H (a , _) = eq-pair-Σ (H a) refl
++```
++
+ ### The action of `map-Σ-map-base` on identifications of the form `eq-pair-Σ` is given by the action on the base
+ 
+ ```agda
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+index f8948f88e8..24f524d745 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -31,7 +31,7 @@ open import synthetic-homotopy-theory.universal-property-pushouts
+ 
+ ## Idea
+ 
+-The **flattening lemma** for
++The {{#concept "flattening lemma" Disambiguation="coequalizers"}} for
+ [coequalizers](synthetic-homotopy-theory.coequalizers.md) states that
+ coequalizers commute with
+ [dependent pair types](foundation.dependent-pair-types.md). More precisely,
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+new file mode 100644
+index 0000000000..6a535e9c29
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -0,0 +1,182 @@
++# The flattening lemma for sequential colimits
++
++```agda
++module synthetic-homotopy-theory.flattening-lemma-sequential-colimits where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.action-on-identifications-functions
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.identity-types
++open import foundation.transport-along-identifications
++open import foundation.type-arithmetic-dependent-pair-types
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.sequential-diagrams
++open import synthetic-homotopy-theory.dependent-universal-property-sequential-colimits
++open import synthetic-homotopy-theory.flattening-lemma-coequalizers
++open import synthetic-homotopy-theory.universal-property-coequalizers
++open import synthetic-homotopy-theory.universal-property-sequential-colimits
++```
++
++</details>
++
++## Idea
++
++The {{#concept "flattening lemma" Disambiguation="sequential colimits"}} for
++[sequential colimits](synthetic-homotopy-theory.universal-property-sequential-colimits.md)
++states that coequalizers commute with
++[dependent pair types](foundation.dependent-pair-types.md). Specifically, given
++a [cocone](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md)
++
++```text
++  A₀ ---> A₁ ---> A₂ ---> ⋯ ---> X
++```
++
++with the universal property of sequential colimits, and a family `P : X → 𝓤`, we
++obtain a cocone
++
++```text
++  Σ (a : A₀) P(i₀ a) ---> Σ (a : A₁) P(i₁ a) ---> ⋯ ---> Σ (x : X) P(x) ,
++```
++
++which is again a sequential colimit.
++
++## Definitions
++
++### The sequential diagram for the flattening lemma
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : sequential-diagram l1} {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  ( P : X → UU l3)
++  where
++
++  sequential-diagram-flattening-lemma : sequential-diagram (l1 ⊔ l3)
++  pr1 sequential-diagram-flattening-lemma n =
++    Σ ( family-sequential-diagram A n)
++      ( P ∘ map-cocone-sequential-diagram A c n)
++  pr2 sequential-diagram-flattening-lemma n =
++    map-Σ
++      ( P ∘ map-cocone-sequential-diagram A c (succ-ℕ n))
++      ( map-sequential-diagram A n)
++      ( λ a → tr P (coherence-triangle-cocone-sequential-diagram A c n a))
++
++  cocone-sequential-diagram-flattening-lemma :
++    cocone-sequential-diagram sequential-diagram-flattening-lemma (Σ X P)
++  pr1 cocone-sequential-diagram-flattening-lemma n =
++    map-Σ-map-base (map-cocone-sequential-diagram A c n) P
++  pr2 cocone-sequential-diagram-flattening-lemma n =
++    coherence-triangle-maps-map-Σ-map-base P
++      ( map-cocone-sequential-diagram A c n)
++      ( map-cocone-sequential-diagram A c (succ-ℕ n))
++      ( map-sequential-diagram A n)
++      ( coherence-triangle-cocone-sequential-diagram A c n)
++```
++
++### Statement of the flattening lemma
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : sequential-diagram l1} {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  ( P : X → UU l3)
++  where
++
++  statement-flattening-lemma-sequential-colimit : UUω
++  statement-flattening-lemma-sequential-colimit =
++    dependent-universal-property-sequential-colimit A c →
++    universal-property-sequential-colimit
++      ( sequential-diagram-flattening-lemma c P)
++      ( cocone-sequential-diagram-flattening-lemma c P)
++```
++
++## Properties
++
++### Proof of the flattening lemma
++
++Similarly to the proof of the
++[flattening lemma for coequalizers](synthetic-homotopy-theory.flattening-lemma-coequalizers.md),
++this proof uses the fact that sequential colimits correspond to certain
++coequalizers, which is recorded in
++[`synthetic-homotopy-theory.dependent-universal-property-sequential-colimits`](synthetic-homotopy-theory.dependent-universal-property-sequential-colimits.md),
++so it suffices to invoke the flattening lemma for coequalizers.
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : sequential-diagram l1} {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  ( P : X → UU l3)
++  where
++
++  abstract
++    flattening-lemma-sequential-colimit :
++      statement-flattening-lemma-sequential-colimit c P
++    flattening-lemma-sequential-colimit dup-c =
++      universal-property-sequential-colimit-universal-property-coequalizer
++        ( sequential-diagram-flattening-lemma c P)
++        ( cocone-sequential-diagram-flattening-lemma c P)
++        ( universal-property-coequalizer-top-universal-property-coequalizer-bottom-is-equiv
++          ( bottom-map-cofork-cocone-sequential-diagram
++            ( sequential-diagram-flattening-lemma c P))
++          ( top-map-cofork-cocone-sequential-diagram
++            ( sequential-diagram-flattening-lemma c P))
++          ( cofork-cocone-sequential-diagram
++            ( sequential-diagram-flattening-lemma c P)
++            ( cocone-sequential-diagram-flattening-lemma c P))
++          ( bottom-map-cofork-flattening-lemma-coequalizer
++            ( bottom-map-cofork-cocone-sequential-diagram A)
++            ( top-map-cofork-cocone-sequential-diagram A)
++            ( P)
++            ( cofork-cocone-sequential-diagram A c))
++          ( top-map-cofork-flattening-lemma-coequalizer
++            ( bottom-map-cofork-cocone-sequential-diagram A)
++            ( top-map-cofork-cocone-sequential-diagram A)
++            ( P)
++            ( cofork-cocone-sequential-diagram A c))
++          ( cofork-flattening-lemma-coequalizer
++            ( bottom-map-cofork-cocone-sequential-diagram A)
++            ( top-map-cofork-cocone-sequential-diagram A)
++            ( P)
++            ( cofork-cocone-sequential-diagram A c))
++          ( map-inv-associative-Σ ℕ
++            ( family-sequential-diagram A)
++            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++          ( map-inv-associative-Σ ℕ
++            ( family-sequential-diagram A)
++            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++          ( id)
++          ( refl-htpy)
++          ( refl-htpy)
++          ( refl-htpy)
++          ( λ (n , a , p) →
++            ap-id _ ∙ inv right-unit)
++          ( is-equiv-map-equiv
++            ( inv-associative-Σ ℕ
++              ( family-sequential-diagram A)
++              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
++          ( is-equiv-map-equiv
++            ( inv-associative-Σ ℕ
++              ( family-sequential-diagram A)
++              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
++          ( is-equiv-id)
++          ( flattening-lemma-coequalizer
++            ( bottom-map-cofork-cocone-sequential-diagram A)
++            ( top-map-cofork-cocone-sequential-diagram A)
++            ( P)
++            ( cofork-cocone-sequential-diagram A c)
++            ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
++              ( A)
++              ( c)
++              ( dup-c))))
++```
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+index 191bcc9e4e..5b0b790eae 100644
+--- a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -7,13 +7,19 @@ module synthetic-homotopy-theory.universal-property-coequalizers where
+ <details><summary>Imports</summary>
+ 
+ ```agda
++open import foundation.commuting-squares-of-maps
+ open import foundation.contractible-maps
+ open import foundation.contractible-types
++open import foundation.coproduct-types
+ open import foundation.dependent-pair-types
+ open import foundation.equivalences
+ open import foundation.fibers-of-maps
++open import foundation.functoriality-coproduct-types
+ open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.identity-types
+ open import foundation.universe-levels
++open import foundation.whiskering-homotopies
+ 
+ open import synthetic-homotopy-theory.cocones-under-spans
+ open import synthetic-homotopy-theory.coforks
+@@ -149,3 +155,136 @@ module _
+       ( is-equiv-cofork-cocone-codiagonal f g)
+       ( up-coequalizer Y)
+ ```
++
++### In a commuting (something) where the vertical maps are equivalences, the bottom cofork is a coequalizer if and only if the top cofork is a coequalizer
++
++```agda
++module _
++  { l1 l2 l3 l4 l5 l6 : Level}
++  { A : UU l1} {B : UU l2} {C : UU l3}
++  ( f : A → B) (g : A → B) (c : cofork f g C)
++  { A' : UU l4} {B' : UU l5} {C' : UU l6}
++  ( f' : A' → B') (g' : A' → B') (c' : cofork f' g' C')
++  ( hA : A → A') (hB : B → B') (hC : C → C')
++  ( left-front : coherence-square-maps f hA hB f')
++  ( left-back : coherence-square-maps g hA hB g')
++  ( right :
++      coherence-square-maps (map-cofork f g c) hB hC (map-cofork f' g' c'))
++  ( barrel :
++    ( ( pasting-horizontal-coherence-square-maps f
++        ( map-cofork f g c)
++        ( hA)
++        ( hB)
++        ( hC)
++        ( f')
++        ( map-cofork f' g' c')
++        ( left-front)
++        ( right) ∙h
++      ( hC ·l (coherence-cofork f g c)))) ~
++    ( ( coherence-cofork f' g' c' ·r hA) ∙h
++      ( pasting-horizontal-coherence-square-maps g
++        ( map-cofork f g c)
++        ( hA)
++        ( hB)
++        ( hC)
++        ( g')
++        ( map-cofork f' g' c')
++        ( left-back)
++        ( right))))
++  ( is-equiv-hA : is-equiv hA) (is-equiv-hB : is-equiv hB)
++  ( is-equiv-hC : is-equiv hC)
++  where
++
++  universal-property-coequalizer-top-universal-property-coequalizer-bottom-is-equiv :
++    ({l : Level} → universal-property-coequalizer l f' g' c') →
++    ({l : Level} → universal-property-coequalizer l f g c)
++  universal-property-coequalizer-top-universal-property-coequalizer-bottom-is-equiv
++    ( up-c') =
++    universal-property-coequalizer-universal-property-pushout f g c
++      ( universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
++        ( vertical-map-span-cocone-cofork f' g')
++        ( horizontal-map-span-cocone-cofork f' g')
++        ( horizontal-map-cocone-cofork f' g' c')
++        ( vertical-map-cocone-cofork f' g' c')
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( horizontal-map-cocone-cofork f g c)
++        ( vertical-map-cocone-cofork f g c)
++        ( map-coprod hA hA)
++        ( hA)
++        ( hB)
++        ( hC)
++        ( coherence-square-cocone-cofork f g c)
++        ( λ where
++          (inl a) → refl
++          (inr a) → refl)
++        ( λ where
++          (inl a) → left-front a
++          (inr a) → left-back a)
++        ( pasting-horizontal-coherence-square-maps f
++          ( map-cofork f g c)
++          ( hA)
++          ( hB)
++          ( hC)
++          ( f')
++          ( map-cofork f' g' c')
++          ( left-front)
++          ( right))
++        ( right)
++        ( coherence-square-cocone-cofork f' g' c')
++        ( λ where
++          (inl a) → right-unit
++          (inr a) → barrel a)
++        ( is-equiv-map-coprod is-equiv-hA is-equiv-hA)
++        ( is-equiv-hA)
++        ( is-equiv-hB)
++        ( is-equiv-hC)
++        ( universal-property-pushout-universal-property-coequalizer f' g' c'
++          ( up-c')))
++
++  universal-property-coequalizer-bottom-universal-property-coequalizer-top-is-equiv :
++    ({l : Level} → universal-property-coequalizer l f g c) →
++    ({l : Level} → universal-property-coequalizer l f' g' c')
++  universal-property-coequalizer-bottom-universal-property-coequalizer-top-is-equiv
++    ( up-c) =
++    universal-property-coequalizer-universal-property-pushout f' g' c'
++      ( universal-property-pushout-bottom-universal-property-pushout-top-cube-is-equiv
++        ( vertical-map-span-cocone-cofork f' g')
++        ( horizontal-map-span-cocone-cofork f' g')
++        ( horizontal-map-cocone-cofork f' g' c')
++        ( vertical-map-cocone-cofork f' g' c')
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( horizontal-map-cocone-cofork f g c)
++        ( vertical-map-cocone-cofork f g c)
++        ( map-coprod hA hA)
++        ( hA)
++        ( hB)
++        ( hC)
++        ( coherence-square-cocone-cofork f g c)
++        ( λ where
++          (inl a) → refl
++          (inr a) → refl)
++        ( λ where
++          (inl a) → left-front a
++          (inr a) → left-back a)
++        ( pasting-horizontal-coherence-square-maps f
++          ( map-cofork f g c)
++          ( hA)
++          ( hB)
++          ( hC)
++          ( f')
++          ( map-cofork f' g' c')
++          ( left-front)
++          ( right))
++        ( right)
++        ( coherence-square-cocone-cofork f' g' c')
++        ( λ where
++          (inl a) → right-unit
++          (inr a) → barrel a)
++        ( is-equiv-map-coprod is-equiv-hA is-equiv-hA)
++        ( is-equiv-hA)
++        ( is-equiv-hB)
++        ( is-equiv-hC)
++        ( universal-property-pushout-universal-property-coequalizer f g c up-c))
++```
+
+From 1e281aa2db03e8f56328f3337e015f02d651f38c Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 5 Dec 2023 22:13:59 +0100
+Subject: [PATCH 02/10] Use morphisms of arrows
+
+---
+ src/foundation/morphisms-arrows.lagda.md      |   2 +-
+ src/synthetic-homotopy-theory.lagda.md        |   1 +
+ ...ttening-lemma-sequential-colimits.lagda.md | 111 +++++-----
+ .../universal-property-coequalizers.lagda.md  | 189 +++++++++---------
+ 4 files changed, 160 insertions(+), 143 deletions(-)
+
+diff --git a/src/foundation/morphisms-arrows.lagda.md b/src/foundation/morphisms-arrows.lagda.md
+index 49084f0757..31a852119c 100644
+--- a/src/foundation/morphisms-arrows.lagda.md
++++ b/src/foundation/morphisms-arrows.lagda.md
+@@ -163,7 +163,7 @@ module _
+     coh-comp-hom-arrow
+ ```
+ 
+-### Homotopies of morphsims of arrows
++### Homotopies of morphisms of arrows
+ 
+ A **homotopy of morphisms of arrows** from `(i , j , H)` to `(i' , j' , H')` is
+ a triple `(I , J , K)` consisting of homotopies `I : i ~ i'` and `J : j ~ j'`
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index 0558cae6e7..47dbab16c5 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -48,6 +48,7 @@ open import synthetic-homotopy-theory.eckmann-hilton-argument public
+ open import synthetic-homotopy-theory.equivalences-sequential-diagrams public
+ open import synthetic-homotopy-theory.flattening-lemma-coequalizers public
+ open import synthetic-homotopy-theory.flattening-lemma-pushouts public
++open import synthetic-homotopy-theory.flattening-lemma-sequential-colimits public
+ open import synthetic-homotopy-theory.free-loops public
+ open import synthetic-homotopy-theory.functoriality-loop-spaces public
+ open import synthetic-homotopy-theory.functoriality-sequential-colimits public
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 6a535e9c29..71a3e537ff 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -21,9 +21,10 @@ open import foundation.type-arithmetic-dependent-pair-types
+ open import foundation.universe-levels
+ 
+ open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
+-open import synthetic-homotopy-theory.sequential-diagrams
++open import synthetic-homotopy-theory.coforks
+ open import synthetic-homotopy-theory.dependent-universal-property-sequential-colimits
+ open import synthetic-homotopy-theory.flattening-lemma-coequalizers
++open import synthetic-homotopy-theory.sequential-diagrams
+ open import synthetic-homotopy-theory.universal-property-coequalizers
+ open import synthetic-homotopy-theory.universal-property-sequential-colimits
+ ```
+@@ -126,57 +127,63 @@ module _
+       universal-property-sequential-colimit-universal-property-coequalizer
+         ( sequential-diagram-flattening-lemma c P)
+         ( cocone-sequential-diagram-flattening-lemma c P)
+-        ( universal-property-coequalizer-top-universal-property-coequalizer-bottom-is-equiv
+-          ( bottom-map-cofork-cocone-sequential-diagram
+-            ( sequential-diagram-flattening-lemma c P))
+-          ( top-map-cofork-cocone-sequential-diagram
+-            ( sequential-diagram-flattening-lemma c P))
+-          ( cofork-cocone-sequential-diagram
+-            ( sequential-diagram-flattening-lemma c P)
+-            ( cocone-sequential-diagram-flattening-lemma c P))
+-          ( bottom-map-cofork-flattening-lemma-coequalizer
+-            ( bottom-map-cofork-cocone-sequential-diagram A)
+-            ( top-map-cofork-cocone-sequential-diagram A)
+-            ( P)
+-            ( cofork-cocone-sequential-diagram A c))
+-          ( top-map-cofork-flattening-lemma-coequalizer
+-            ( bottom-map-cofork-cocone-sequential-diagram A)
+-            ( top-map-cofork-cocone-sequential-diagram A)
+-            ( P)
+-            ( cofork-cocone-sequential-diagram A c))
+-          ( cofork-flattening-lemma-coequalizer
+-            ( bottom-map-cofork-cocone-sequential-diagram A)
+-            ( top-map-cofork-cocone-sequential-diagram A)
+-            ( P)
+-            ( cofork-cocone-sequential-diagram A c))
+-          ( map-inv-associative-Σ ℕ
+-            ( family-sequential-diagram A)
+-            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
+-          ( map-inv-associative-Σ ℕ
+-            ( family-sequential-diagram A)
+-            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
+-          ( id)
+-          ( refl-htpy)
+-          ( refl-htpy)
+-          ( refl-htpy)
+-          ( λ (n , a , p) →
+-            ap-id _ ∙ inv right-unit)
+-          ( is-equiv-map-equiv
+-            ( inv-associative-Σ ℕ
++        ( universal-property-coequalizer-top-universal-property-coequalizer-bottom-hom-arrow-is-equiv
++            ( map-inv-associative-Σ ℕ
+               ( family-sequential-diagram A)
+-              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
+-          ( is-equiv-map-equiv
+-            ( inv-associative-Σ ℕ
++              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++            ( map-inv-associative-Σ ℕ
+               ( family-sequential-diagram A)
+-              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
+-          ( is-equiv-id)
+-          ( flattening-lemma-coequalizer
+-            ( bottom-map-cofork-cocone-sequential-diagram A)
+-            ( top-map-cofork-cocone-sequential-diagram A)
+-            ( P)
+-            ( cofork-cocone-sequential-diagram A c)
+-            ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
+-              ( A)
+-              ( c)
+-              ( dup-c))))
++              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++            ( id)
++            ( ( bottom-map-cofork-cocone-sequential-diagram
++                ( sequential-diagram-flattening-lemma c P)) ,
++              ( bottom-map-cofork-flattening-lemma-coequalizer
++                ( bottom-map-cofork-cocone-sequential-diagram A)
++                ( top-map-cofork-cocone-sequential-diagram A)
++                ( P)
++                ( cofork-cocone-sequential-diagram A c)) ,
++              ( refl-htpy))
++            ( ( top-map-cofork-cocone-sequential-diagram
++                ( sequential-diagram-flattening-lemma c P)) ,
++              ( top-map-cofork-flattening-lemma-coequalizer
++                ( bottom-map-cofork-cocone-sequential-diagram A)
++                ( top-map-cofork-cocone-sequential-diagram A)
++                ( P)
++                ( cofork-cocone-sequential-diagram A c)) ,
++              ( refl-htpy))
++            ( ( map-cofork _ _
++                ( cofork-cocone-sequential-diagram
++                  ( sequential-diagram-flattening-lemma c P)
++                  ( cocone-sequential-diagram-flattening-lemma c P))) ,
++              ( map-cofork _ _
++                ( cofork-flattening-lemma-coequalizer _ _ P
++                  ( cofork-cocone-sequential-diagram A c))) ,
++              ( refl-htpy))
++            ( ind-Σ
++              ( coherence-triangle-cocone-sequential-diagram
++                ( sequential-diagram-flattening-lemma c P)
++                ( cocone-sequential-diagram-flattening-lemma c P)) ,
++              ( coherence-cofork _ _
++                ( cofork-flattening-lemma-coequalizer _ _ P
++                  ( cofork-cocone-sequential-diagram A c))) ,
++              ( λ (n , a , p) →
++                ap-id _ ∙ inv right-unit))
++            ( is-equiv-map-equiv
++              ( inv-associative-Σ ℕ
++                ( family-sequential-diagram A)
++                ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
++            ( is-equiv-map-equiv
++              ( inv-associative-Σ ℕ
++                ( family-sequential-diagram A)
++                ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
++            ( is-equiv-id)
++            ( flattening-lemma-coequalizer
++              ( bottom-map-cofork-cocone-sequential-diagram A)
++              ( top-map-cofork-cocone-sequential-diagram A)
++              ( P)
++              ( cofork-cocone-sequential-diagram A c)
++              ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
++                ( A)
++                ( c)
++                ( dup-c))))
+ ```
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+index 5b0b790eae..266ee90bf1 100644
+--- a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -7,7 +7,6 @@ module synthetic-homotopy-theory.universal-property-coequalizers where
+ <details><summary>Imports</summary>
+ 
+ ```agda
+-open import foundation.commuting-squares-of-maps
+ open import foundation.contractible-maps
+ open import foundation.contractible-types
+ open import foundation.coproduct-types
+@@ -16,10 +15,9 @@ open import foundation.equivalences
+ open import foundation.fibers-of-maps
+ open import foundation.functoriality-coproduct-types
+ open import foundation.functoriality-dependent-pair-types
+-open import foundation.homotopies
+ open import foundation.identity-types
++open import foundation.morphisms-arrows
+ open import foundation.universe-levels
+-open import foundation.whiskering-homotopies
+ 
+ open import synthetic-homotopy-theory.cocones-under-spans
+ open import synthetic-homotopy-theory.coforks
+@@ -39,7 +37,7 @@ postcomposition map
+ cofork-map : (X → Y) → cofork Y
+ ```
+ 
+-is an equivalence.
++is an [equivalence](foundation.equivalences.md).
+ 
+ ## Definitions
+ 
+@@ -156,135 +154,146 @@ module _
+       ( up-coequalizer Y)
+ ```
+ 
+-### In a commuting (something) where the vertical maps are equivalences, the bottom cofork is a coequalizer if and only if the top cofork is a coequalizer
++### In a cofork on equivalences in the category of arrows, the domain cofork is a coequalizer if and only if the codomain cofork is a coequalizer
++
++In other words, given two coforks connected vertically with equivalences, as in
++the following diagram:
++
++```text
++    ----->
++  A -----> B -----> C
++  |        |        |
++ ≃|        |≃       |≃
++  V  ----> V        V
++  A' ----> B' ----> C' ,
++```
++
++equipped with [commuting squares](foundation.commuting-squares-of-maps.md) for
++the three small squares, and a coherence datum expressing that the right square
++coequalizes the left squares in the category of arrows, we have that the top
++cofork is a coequalizer if and only if the bottom square is a coequalizer.
+ 
+ ```agda
+ module _
+   { l1 l2 l3 l4 l5 l6 : Level}
+   { A : UU l1} {B : UU l2} {C : UU l3}
+-  ( f : A → B) (g : A → B) (c : cofork f g C)
+   { A' : UU l4} {B' : UU l5} {C' : UU l6}
+-  ( f' : A' → B') (g' : A' → B') (c' : cofork f' g' C')
+   ( hA : A → A') (hB : B → B') (hC : C → C')
+-  ( left-front : coherence-square-maps f hA hB f')
+-  ( left-back : coherence-square-maps g hA hB g')
+-  ( right :
+-      coherence-square-maps (map-cofork f g c) hB hC (map-cofork f' g' c'))
+-  ( barrel :
+-    ( ( pasting-horizontal-coherence-square-maps f
+-        ( map-cofork f g c)
+-        ( hA)
+-        ( hB)
+-        ( hC)
+-        ( f')
+-        ( map-cofork f' g' c')
+-        ( left-front)
+-        ( right) ∙h
+-      ( hC ·l (coherence-cofork f g c)))) ~
+-    ( ( coherence-cofork f' g' c' ·r hA) ∙h
+-      ( pasting-horizontal-coherence-square-maps g
+-        ( map-cofork f g c)
+-        ( hA)
+-        ( hB)
+-        ( hC)
+-        ( g')
+-        ( map-cofork f' g' c')
+-        ( left-back)
+-        ( right))))
++  ( f : hom-arrow hA hB) (g : hom-arrow hA hB) (c : hom-arrow hB hC)
++  ( H :
++    htpy-hom-arrow hA hC
++      ( comp-hom-arrow hA hB hC c f)
++      ( comp-hom-arrow hA hB hC c g))
+   ( is-equiv-hA : is-equiv hA) (is-equiv-hB : is-equiv hB)
+   ( is-equiv-hC : is-equiv hC)
+   where
+ 
+-  universal-property-coequalizer-top-universal-property-coequalizer-bottom-is-equiv :
+-    ({l : Level} → universal-property-coequalizer l f' g' c') →
+-    ({l : Level} → universal-property-coequalizer l f g c)
+-  universal-property-coequalizer-top-universal-property-coequalizer-bottom-is-equiv
++  top-cofork-hom-arrow :
++    cofork (map-domain-hom-arrow hA hB f) (map-domain-hom-arrow hA hB g) C
++  pr1 top-cofork-hom-arrow = map-domain-hom-arrow hB hC c
++  pr2 top-cofork-hom-arrow = htpy-domain-htpy-hom-arrow hA hC _ _ H
++
++  bottom-cofork-hom-arrow :
++    cofork (map-codomain-hom-arrow hA hB f) (map-codomain-hom-arrow hA hB g) C'
++  pr1 bottom-cofork-hom-arrow = map-codomain-hom-arrow hB hC c
++  pr2 bottom-cofork-hom-arrow = htpy-codomain-htpy-hom-arrow hA hC _ _ H
++
++  universal-property-coequalizer-top-universal-property-coequalizer-bottom-hom-arrow-is-equiv :
++    ({l : Level} →
++      universal-property-coequalizer l _ _ bottom-cofork-hom-arrow) →
++    ({l : Level} → universal-property-coequalizer l _ _ top-cofork-hom-arrow)
++  universal-property-coequalizer-top-universal-property-coequalizer-bottom-hom-arrow-is-equiv
+     ( up-c') =
+-    universal-property-coequalizer-universal-property-pushout f g c
++    universal-property-coequalizer-universal-property-pushout _ _
++      ( top-cofork-hom-arrow)
+       ( universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
+-        ( vertical-map-span-cocone-cofork f' g')
+-        ( horizontal-map-span-cocone-cofork f' g')
+-        ( horizontal-map-cocone-cofork f' g' c')
+-        ( vertical-map-cocone-cofork f' g' c')
+-        ( vertical-map-span-cocone-cofork f g)
+-        ( horizontal-map-span-cocone-cofork f g)
+-        ( horizontal-map-cocone-cofork f g c)
+-        ( vertical-map-cocone-cofork f g c)
++        ( vertical-map-span-cocone-cofork
++          ( map-codomain-hom-arrow hA hB f)
++          ( map-codomain-hom-arrow hA hB g))
++        ( horizontal-map-span-cocone-cofork
++          ( map-codomain-hom-arrow hA hB f)
++          ( map-codomain-hom-arrow hA hB g))
++        ( horizontal-map-cocone-cofork _ _ bottom-cofork-hom-arrow)
++        ( vertical-map-cocone-cofork _ _ bottom-cofork-hom-arrow)
++        ( vertical-map-span-cocone-cofork
++          ( map-domain-hom-arrow hA hB f)
++          ( map-domain-hom-arrow hA hB g))
++        ( horizontal-map-span-cocone-cofork
++          ( map-domain-hom-arrow hA hB f)
++          ( map-domain-hom-arrow hA hB g))
++        ( horizontal-map-cocone-cofork _ _ top-cofork-hom-arrow)
++        ( vertical-map-cocone-cofork _ _ top-cofork-hom-arrow)
+         ( map-coprod hA hA)
+         ( hA)
+         ( hB)
+         ( hC)
+-        ( coherence-square-cocone-cofork f g c)
++        ( coherence-square-cocone-cofork _ _ top-cofork-hom-arrow)
+         ( λ where
+           (inl a) → refl
+           (inr a) → refl)
+         ( λ where
+-          (inl a) → left-front a
+-          (inr a) → left-back a)
+-        ( pasting-horizontal-coherence-square-maps f
+-          ( map-cofork f g c)
+-          ( hA)
+-          ( hB)
+-          ( hC)
+-          ( f')
+-          ( map-cofork f' g' c')
+-          ( left-front)
+-          ( right))
+-        ( right)
+-        ( coherence-square-cocone-cofork f' g' c')
++          (inl a) → coh-hom-arrow hA hB f a
++          (inr a) → coh-hom-arrow hA hB g a)
++        ( coh-comp-hom-arrow hA hB hC c f)
++        ( coh-hom-arrow hB hC c)
++        ( coherence-square-cocone-cofork _ _ bottom-cofork-hom-arrow)
+         ( λ where
+           (inl a) → right-unit
+-          (inr a) → barrel a)
++          (inr a) → coh-htpy-hom-arrow hA hC _ _ H a)
+         ( is-equiv-map-coprod is-equiv-hA is-equiv-hA)
+         ( is-equiv-hA)
+         ( is-equiv-hB)
+         ( is-equiv-hC)
+-        ( universal-property-pushout-universal-property-coequalizer f' g' c'
++        ( universal-property-pushout-universal-property-coequalizer _ _
++          ( bottom-cofork-hom-arrow)
+           ( up-c')))
+ 
+-  universal-property-coequalizer-bottom-universal-property-coequalizer-top-is-equiv :
+-    ({l : Level} → universal-property-coequalizer l f g c) →
+-    ({l : Level} → universal-property-coequalizer l f' g' c')
+-  universal-property-coequalizer-bottom-universal-property-coequalizer-top-is-equiv
++  universal-property-coequalizer-bottom-universal-property-coequalizer-top-hom-arrow-is-equiv :
++    ({l : Level} → universal-property-coequalizer l _ _ top-cofork-hom-arrow) →
++    ({l : Level} → universal-property-coequalizer l _ _ bottom-cofork-hom-arrow)
++  universal-property-coequalizer-bottom-universal-property-coequalizer-top-hom-arrow-is-equiv
+     ( up-c) =
+-    universal-property-coequalizer-universal-property-pushout f' g' c'
++    universal-property-coequalizer-universal-property-pushout _ _
++      ( bottom-cofork-hom-arrow)
+       ( universal-property-pushout-bottom-universal-property-pushout-top-cube-is-equiv
+-        ( vertical-map-span-cocone-cofork f' g')
+-        ( horizontal-map-span-cocone-cofork f' g')
+-        ( horizontal-map-cocone-cofork f' g' c')
+-        ( vertical-map-cocone-cofork f' g' c')
+-        ( vertical-map-span-cocone-cofork f g)
+-        ( horizontal-map-span-cocone-cofork f g)
+-        ( horizontal-map-cocone-cofork f g c)
+-        ( vertical-map-cocone-cofork f g c)
++        ( vertical-map-span-cocone-cofork
++          ( map-codomain-hom-arrow hA hB f)
++          ( map-codomain-hom-arrow hA hB g))
++        ( horizontal-map-span-cocone-cofork
++          ( map-codomain-hom-arrow hA hB f)
++          ( map-codomain-hom-arrow hA hB g))
++        ( horizontal-map-cocone-cofork _ _ bottom-cofork-hom-arrow)
++        ( vertical-map-cocone-cofork _ _ bottom-cofork-hom-arrow)
++        ( vertical-map-span-cocone-cofork
++          ( map-domain-hom-arrow hA hB f)
++          ( map-domain-hom-arrow hA hB g))
++        ( horizontal-map-span-cocone-cofork
++          ( map-domain-hom-arrow hA hB f)
++          ( map-domain-hom-arrow hA hB g))
++        ( horizontal-map-cocone-cofork _ _ top-cofork-hom-arrow)
++        ( vertical-map-cocone-cofork _ _ top-cofork-hom-arrow)
+         ( map-coprod hA hA)
+         ( hA)
+         ( hB)
+         ( hC)
+-        ( coherence-square-cocone-cofork f g c)
++        ( coherence-square-cocone-cofork _ _ top-cofork-hom-arrow)
+         ( λ where
+           (inl a) → refl
+           (inr a) → refl)
+         ( λ where
+-          (inl a) → left-front a
+-          (inr a) → left-back a)
+-        ( pasting-horizontal-coherence-square-maps f
+-          ( map-cofork f g c)
+-          ( hA)
+-          ( hB)
+-          ( hC)
+-          ( f')
+-          ( map-cofork f' g' c')
+-          ( left-front)
+-          ( right))
+-        ( right)
+-        ( coherence-square-cocone-cofork f' g' c')
++          (inl a) → coh-hom-arrow hA hB f a
++          (inr a) → coh-hom-arrow hA hB g a)
++        ( coh-comp-hom-arrow hA hB hC c f)
++        ( coh-hom-arrow hB hC c)
++        ( coherence-square-cocone-cofork _ _ bottom-cofork-hom-arrow)
+         ( λ where
+           (inl a) → right-unit
+-          (inr a) → barrel a)
++          (inr a) → coh-htpy-hom-arrow hA hC _ _ H a)
+         ( is-equiv-map-coprod is-equiv-hA is-equiv-hA)
+         ( is-equiv-hA)
+         ( is-equiv-hB)
+         ( is-equiv-hC)
+-        ( universal-property-pushout-universal-property-coequalizer f g c up-c))
++        ( universal-property-pushout-universal-property-coequalizer _ _
++          ( top-cofork-hom-arrow)
++          ( up-c)))
+ ```
+
+From 462f82ed6fe497d5741a43c0d020d771f2dda702 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Wed, 6 Dec 2023 00:16:40 +0100
+Subject: [PATCH 03/10] Simplify proof with path algebra
+
+---
+ ...ting-triangles-of-identifications.lagda.md | 94 +++++++++++++++++++
+ src/foundation/morphisms-arrows.lagda.md      | 72 +++++---------
+ 2 files changed, 119 insertions(+), 47 deletions(-)
+
+diff --git a/src/foundation/commuting-triangles-of-identifications.lagda.md b/src/foundation/commuting-triangles-of-identifications.lagda.md
+index 540eeebbce..f4da573108 100644
+--- a/src/foundation/commuting-triangles-of-identifications.lagda.md
++++ b/src/foundation/commuting-triangles-of-identifications.lagda.md
+@@ -8,8 +8,10 @@ module foundation.commuting-triangles-of-identifications where
+ 
+ ```agda
+ open import foundation.action-on-identifications-functions
++open import foundation.path-algebra
+ open import foundation.universe-levels
+ 
++open import foundation-core.equivalences
+ open import foundation-core.function-types
+ open import foundation-core.homotopies
+ open import foundation-core.identity-types
+@@ -47,3 +49,95 @@ module _
+     (left : x ＝ z) (right : y ＝ z) (top : x ＝ y) → UU l
+   coherence-triangle-identifications' left right top = (top ∙ right) ＝ left
+ ```
++
++### Properties
++
++### Whiskering of triangles of identifications
++
++```agda
++module _
++  {l : Level} {A : UU l} {x y z u : A}
++  (left : x ＝ z) (top : x ＝ y) {right : y ＝ z} (p : z ＝ u)
++  where
++
++  equiv-right-whisk-triangle-identifications :
++    ( coherence-triangle-identifications left right top) ≃
++    ( coherence-triangle-identifications (left ∙ p) (right ∙ p) top)
++  equiv-right-whisk-triangle-identifications =
++    ( equiv-concat-assoc' (left ∙ p) top right p) ∘e
++    ( equiv-identification-right-whisk p)
++
++  right-whisk-triangle-identifications :
++    coherence-triangle-identifications left right top →
++    coherence-triangle-identifications (left ∙ p) (right ∙ p) top
++  right-whisk-triangle-identifications =
++    map-equiv equiv-right-whisk-triangle-identifications
++
++  right-unwhisk-triangle-identifications :
++    coherence-triangle-identifications (left ∙ p) (right ∙ p) top →
++    coherence-triangle-identifications left right top
++  right-unwhisk-triangle-identifications =
++    map-inv-equiv equiv-right-whisk-triangle-identifications
++
++  equiv-right-whisk-triangle-identifications' :
++    ( coherence-triangle-identifications' left right top) ≃
++    ( coherence-triangle-identifications' (left ∙ p) (right ∙ p) top)
++  equiv-right-whisk-triangle-identifications' =
++    ( equiv-concat-assoc top right p (left ∙ p)) ∘e
++    ( equiv-identification-right-whisk p)
++
++  right-whisk-triangle-identifications' :
++    coherence-triangle-identifications' left right top →
++    coherence-triangle-identifications' (left ∙ p) (right ∙ p) top
++  right-whisk-triangle-identifications' =
++    map-equiv equiv-right-whisk-triangle-identifications'
++
++  right-unwhisk-triangle-identifications' :
++    coherence-triangle-identifications' (left ∙ p) (right ∙ p) top →
++    coherence-triangle-identifications' left right top
++  right-unwhisk-triangle-identifications' =
++    map-inv-equiv equiv-right-whisk-triangle-identifications'
++
++module _
++  {l : Level} {A : UU l} {x y z u : A}
++  (p : u ＝ x) {left : x ＝ z} {right : y ＝ z} {top : x ＝ y}
++  where
++
++  equiv-left-whisk-triangle-identifications :
++    ( coherence-triangle-identifications left right top) ≃
++    ( coherence-triangle-identifications (p ∙ left) right (p ∙ top))
++  equiv-left-whisk-triangle-identifications =
++    ( inv-equiv (equiv-concat-assoc' (p ∙ left) p top right)) ∘e
++    ( equiv-identification-left-whisk p)
++
++  left-whisk-triangle-identifications :
++    coherence-triangle-identifications left right top →
++    coherence-triangle-identifications (p ∙ left) right (p ∙ top)
++  left-whisk-triangle-identifications =
++    map-equiv equiv-left-whisk-triangle-identifications
++
++  left-unwhisk-triangle-identifications :
++    coherence-triangle-identifications (p ∙ left) right (p ∙ top) →
++    coherence-triangle-identifications left right top
++  left-unwhisk-triangle-identifications =
++    map-inv-equiv equiv-left-whisk-triangle-identifications
++
++  equiv-left-whisk-triangle-identifications' :
++    ( coherence-triangle-identifications' left right top) ≃
++    ( coherence-triangle-identifications' (p ∙ left) right (p ∙ top))
++  equiv-left-whisk-triangle-identifications' =
++    ( inv-equiv (equiv-concat-assoc p top right (p ∙ left))) ∘e
++    ( equiv-identification-left-whisk p)
++
++  left-whisk-triangle-identifications' :
++    coherence-triangle-identifications' left right top →
++    coherence-triangle-identifications' (p ∙ left) right (p ∙ top)
++  left-whisk-triangle-identifications' =
++    map-equiv equiv-left-whisk-triangle-identifications'
++
++  left-unwhisk-triangle-identifications' :
++    coherence-triangle-identifications' (p ∙ left) right (p ∙ top) →
++    coherence-triangle-identifications' left right top
++  left-unwhisk-triangle-identifications' =
++    map-inv-equiv equiv-left-whisk-triangle-identifications'
++```
+diff --git a/src/foundation/morphisms-arrows.lagda.md b/src/foundation/morphisms-arrows.lagda.md
+index 31a852119c..b0b4ed1604 100644
+--- a/src/foundation/morphisms-arrows.lagda.md
++++ b/src/foundation/morphisms-arrows.lagda.md
+@@ -10,9 +10,11 @@ module foundation.morphisms-arrows where
+ open import foundation.action-on-identifications-functions
+ open import foundation.commuting-squares-of-homotopies
+ open import foundation.commuting-squares-of-identifications
++open import foundation.commuting-triangles-of-identifications
+ open import foundation.dependent-pair-types
+ open import foundation.fundamental-theorem-of-identity-types
+ open import foundation.homotopy-induction
++open import foundation.path-algebra
+ open import foundation.structure-identity-principle
+ open import foundation.universe-levels
+ 
+@@ -377,60 +379,36 @@ module _
+       ( htpy-domain-left-whisker-htpy-hom-arrow)
+       ( htpy-codomain-left-whisker-htpy-hom-arrow)
+   coh-left-whisker-htpy-hom-arrow a =
+-    ( inv
+-      ( ap
+-        ( concat _ _)
+-        ( ap-comp h
+-          ( map-domain-hom-arrow g h γ)
+-          ( htpy-domain-htpy-hom-arrow f g α β H a)))) ∙
+-    ( assoc
++    ( left-whisk-triangle-identifications'
+       ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g α a))
+-      ( coh-hom-arrow g h γ (map-domain-hom-arrow f g α a))
++      ( ( ap
++          ( coh-hom-arrow g h γ (map-domain-hom-arrow f g α a) ∙_)
++          ( inv
++            ( ap-comp h
++              ( map-domain-hom-arrow g h γ)
++              ( htpy-domain-htpy-hom-arrow f g α β H a)))) ∙
++        ( nat-htpy
++          ( coh-hom-arrow g h γ)
++          ( htpy-domain-htpy-hom-arrow f g α β H a)))) ∙
++    ( right-whisk-square-identification
+       ( ap
+-        ( h ∘ map-domain-hom-arrow g h γ)
+-        ( htpy-domain-htpy-hom-arrow f g α β H a))) ∙
+-    ( ap
+-      ( concat
+-        ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g α a))
+-        ( h _))
+-      ( nat-htpy
+-        ( coh-hom-arrow g h γ)
+-        ( htpy-domain-htpy-hom-arrow f g α β H a))) ∙
+-    ( inv
+-      ( assoc
+-        ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g α a))
+-        ( ap
+-          ( map-codomain-hom-arrow g h γ ∘ g)
+-          ( htpy-domain-htpy-hom-arrow f g α β H a))
+-        ( coh-hom-arrow g h γ (map-domain-hom-arrow f g β a)))) ∙
+-    ( ap
+-      ( concat' _ (coh-hom-arrow g h γ (map-domain-hom-arrow f g β a)))
++        ( map-codomain-hom-arrow g h γ)
++        ( htpy-codomain-htpy-hom-arrow f g α β H (f a)))
++      ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g α a))
++      ( coh-hom-arrow g h γ (map-domain-hom-arrow f g β a))
+       ( ( ap
+-          ( concat
+-            ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g α a))
+-            ( _))
++          ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g α a) ∙_)
+           ( ap-comp
+             ( map-codomain-hom-arrow g h γ)
+             ( g)
+             ( htpy-domain-htpy-hom-arrow f g α β H a))) ∙
+-        ( ( inv
+-            ( ap-concat
+-              ( map-codomain-hom-arrow g h γ)
+-              ( coh-hom-arrow f g α a)
+-              ( ap g (htpy-domain-htpy-hom-arrow f g α β H a)))) ∙
+-          ( ap
+-            ( ap (map-codomain-hom-arrow g h γ))
+-            ( coh-htpy-hom-arrow f g α β H a)) ∙
+-          ( ap-concat
+-            ( map-codomain-hom-arrow g h γ)
+-            ( htpy-codomain-htpy-hom-arrow f g α β H (f a))
+-            ( coh-hom-arrow f g β a))))) ∙
+-    ( assoc
+-      ( ap
+-        ( map-codomain-hom-arrow g h γ)
+-        ( htpy-codomain-htpy-hom-arrow f g α β H (f a)))
+-      ( ap (map-codomain-hom-arrow g h γ) (coh-hom-arrow f g β a))
+-      ( coh-hom-arrow g h γ (map-domain-hom-arrow f g β a)))
++        ( coherence-square-identifications-ap
++          ( map-codomain-hom-arrow g h γ)
++          ( htpy-codomain-htpy-hom-arrow f g α β H (f a))
++          ( coh-hom-arrow f g α a)
++          ( coh-hom-arrow f g β a)
++          ( ap g (htpy-domain-htpy-hom-arrow f g α β H a))
++          ( coh-htpy-hom-arrow f g α β H a))))
+ 
+   left-whisker-htpy-hom-arrow :
+     htpy-hom-arrow f h
+
+From 2f6af3e7c31b6bb5923cb783cca9d5c5a3740551 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Thu, 7 Dec 2023 17:02:58 +0100
+Subject: [PATCH 04/10] Avoid unnecessary pattern matching lambdas
+
+---
+ ...e-arithmetic-dependent-pair-types.lagda.md |  14 ++-
+ .../flattening-lemma-coequalizers.lagda.md    |  20 +---
+ ...ttening-lemma-sequential-colimits.lagda.md | 108 +++++++++---------
+ .../universal-property-coequalizers.lagda.md  |  25 ++--
+ 4 files changed, 73 insertions(+), 94 deletions(-)
+
+diff --git a/src/foundation/type-arithmetic-dependent-pair-types.lagda.md b/src/foundation/type-arithmetic-dependent-pair-types.lagda.md
+index ebca7b4ac0..731454fb58 100644
+--- a/src/foundation/type-arithmetic-dependent-pair-types.lagda.md
++++ b/src/foundation/type-arithmetic-dependent-pair-types.lagda.md
+@@ -201,13 +201,17 @@ module _
+   pr1 associative-Σ = map-associative-Σ
+   pr2 associative-Σ = is-equiv-map-associative-Σ
+ 
++  abstract
++    is-equiv-map-inv-associative-Σ : is-equiv map-inv-associative-Σ
++    is-equiv-map-inv-associative-Σ =
++      is-equiv-is-invertible
++        map-associative-Σ
++        is-retraction-map-inv-associative-Σ
++        is-section-map-inv-associative-Σ
++
+   inv-associative-Σ : Σ A (λ x → Σ (B x) (λ y → C (x , y))) ≃ Σ (Σ A B) C
+   pr1 inv-associative-Σ = map-inv-associative-Σ
+-  pr2 inv-associative-Σ =
+-    is-equiv-is-invertible
+-      map-associative-Σ
+-      is-retraction-map-inv-associative-Σ
+-      is-section-map-inv-associative-Σ
++  pr2 inv-associative-Σ = is-equiv-map-inv-associative-Σ
+ ```
+ 
+ ### Associativity, second formulation
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+index 24f524d745..1b37a284fb 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -171,26 +171,18 @@ module _
+             ( vertical-map-span-cocone-cofork f g)
+             ( horizontal-map-span-cocone-cofork f g)
+             ( cocone-codiagonal-cofork f g e))
+-          ( λ where
+-            (inl a , t) → refl
+-            (inr a , t) → refl)
+-          ( λ where
+-            (inl a , t) → refl
+-            (inr a , t) → refl)
++          ( ind-Σ (ind-coprod _ (ev-pair refl-htpy) (ev-pair refl-htpy)))
++          ( ind-Σ (ind-coprod _ (ev-pair refl-htpy) (ev-pair refl-htpy)))
+           ( refl-htpy)
+           ( refl-htpy)
+           ( coherence-square-cocone-cofork
+             ( bottom-map-cofork-flattening-lemma-coequalizer f g P e)
+             ( top-map-cofork-flattening-lemma-coequalizer f g P e)
+             ( cofork-flattening-lemma-coequalizer f g P e))
+-          ( λ where
+-            (inl a , t) → refl
+-            (inr a , t) →
+-              ( ap-id
+-                ( eq-pair-Σ
+-                  ( coherence-cofork f g e a)
+-                  ( refl))) ∙
+-              ( inv right-unit))
++          ( ind-Σ
++            ( ind-coprod _
++              ( ev-pair refl-htpy)
++              ( ev-pair (λ t → ap-id _ ∙ inv right-unit))))
+           ( is-equiv-map-equiv
+             ( right-distributive-Σ-coprod A A
+               ( ( P) ∘
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 71a3e537ff..5a724b6252 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -128,62 +128,56 @@ module _
+         ( sequential-diagram-flattening-lemma c P)
+         ( cocone-sequential-diagram-flattening-lemma c P)
+         ( universal-property-coequalizer-top-universal-property-coequalizer-bottom-hom-arrow-is-equiv
+-            ( map-inv-associative-Σ ℕ
+-              ( family-sequential-diagram A)
+-              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
+-            ( map-inv-associative-Σ ℕ
+-              ( family-sequential-diagram A)
+-              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
+-            ( id)
+-            ( ( bottom-map-cofork-cocone-sequential-diagram
+-                ( sequential-diagram-flattening-lemma c P)) ,
+-              ( bottom-map-cofork-flattening-lemma-coequalizer
+-                ( bottom-map-cofork-cocone-sequential-diagram A)
+-                ( top-map-cofork-cocone-sequential-diagram A)
+-                ( P)
+-                ( cofork-cocone-sequential-diagram A c)) ,
+-              ( refl-htpy))
+-            ( ( top-map-cofork-cocone-sequential-diagram
+-                ( sequential-diagram-flattening-lemma c P)) ,
+-              ( top-map-cofork-flattening-lemma-coequalizer
+-                ( bottom-map-cofork-cocone-sequential-diagram A)
+-                ( top-map-cofork-cocone-sequential-diagram A)
+-                ( P)
+-                ( cofork-cocone-sequential-diagram A c)) ,
+-              ( refl-htpy))
+-            ( ( map-cofork _ _
+-                ( cofork-cocone-sequential-diagram
+-                  ( sequential-diagram-flattening-lemma c P)
+-                  ( cocone-sequential-diagram-flattening-lemma c P))) ,
+-              ( map-cofork _ _
+-                ( cofork-flattening-lemma-coequalizer _ _ P
+-                  ( cofork-cocone-sequential-diagram A c))) ,
+-              ( refl-htpy))
+-            ( ind-Σ
+-              ( coherence-triangle-cocone-sequential-diagram
+-                ( sequential-diagram-flattening-lemma c P)
+-                ( cocone-sequential-diagram-flattening-lemma c P)) ,
+-              ( coherence-cofork _ _
+-                ( cofork-flattening-lemma-coequalizer _ _ P
+-                  ( cofork-cocone-sequential-diagram A c))) ,
+-              ( λ (n , a , p) →
+-                ap-id _ ∙ inv right-unit))
+-            ( is-equiv-map-equiv
+-              ( inv-associative-Σ ℕ
+-                ( family-sequential-diagram A)
+-                ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
+-            ( is-equiv-map-equiv
+-              ( inv-associative-Σ ℕ
+-                ( family-sequential-diagram A)
+-                ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
+-            ( is-equiv-id)
+-            ( flattening-lemma-coequalizer
+-              ( bottom-map-cofork-cocone-sequential-diagram A)
+-              ( top-map-cofork-cocone-sequential-diagram A)
++          ( map-inv-associative-Σ ℕ
++            ( family-sequential-diagram A)
++            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++          ( map-inv-associative-Σ ℕ
++            ( family-sequential-diagram A)
++            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++          ( id)
++          ( ( bottom-map-cofork-cocone-sequential-diagram
++              ( sequential-diagram-flattening-lemma c P)) ,
++            ( bottom-map-cofork-flattening-lemma-coequalizer _ _
+               ( P)
+-              ( cofork-cocone-sequential-diagram A c)
+-              ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
+-                ( A)
+-                ( c)
+-                ( dup-c))))
++              ( cofork-cocone-sequential-diagram A c)) ,
++            ( refl-htpy))
++          ( ( top-map-cofork-cocone-sequential-diagram
++              ( sequential-diagram-flattening-lemma c P)) ,
++            ( top-map-cofork-flattening-lemma-coequalizer _ _
++              ( P)
++              ( cofork-cocone-sequential-diagram A c)) ,
++            ( refl-htpy))
++          ( ( map-cofork _ _
++              ( cofork-cocone-sequential-diagram
++                ( sequential-diagram-flattening-lemma c P)
++                ( cocone-sequential-diagram-flattening-lemma c P))) ,
++            ( map-cofork _ _
++              ( cofork-flattening-lemma-coequalizer _ _ P
++                ( cofork-cocone-sequential-diagram A c))) ,
++            ( refl-htpy))
++          ( ind-Σ
++            ( coherence-triangle-cocone-sequential-diagram
++              ( sequential-diagram-flattening-lemma c P)
++              ( cocone-sequential-diagram-flattening-lemma c P)) ,
++            ( coherence-cofork _ _
++              ( cofork-flattening-lemma-coequalizer _ _ P
++                ( cofork-cocone-sequential-diagram A c))) ,
++            ( ind-Σ (λ n → ind-Σ (λ a p → ap-id _ ∙ inv right-unit))))
++          ( is-equiv-map-equiv
++            ( inv-associative-Σ ℕ
++              ( family-sequential-diagram A)
++              ( P ∘ ind-Σ (map-cocone-sequential-diagram A c))))
++          ( is-equiv-map-inv-associative-Σ ℕ
++            ( family-sequential-diagram A)
++            ( P ∘ ind-Σ (map-cocone-sequential-diagram A c)))
++          ( is-equiv-id)
++          ( flattening-lemma-coequalizer
++            ( bottom-map-cofork-cocone-sequential-diagram A)
++            ( top-map-cofork-cocone-sequential-diagram A)
++            ( P)
++            ( cofork-cocone-sequential-diagram A c)
++            ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
++              ( A)
++              ( c)
++              ( dup-c))))
+ ```
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+index 266ee90bf1..7d7e89a25a 100644
+--- a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -15,6 +15,7 @@ open import foundation.equivalences
+ open import foundation.fibers-of-maps
+ open import foundation.functoriality-coproduct-types
+ open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
+ open import foundation.identity-types
+ open import foundation.morphisms-arrows
+ open import foundation.universe-levels
+@@ -228,18 +229,12 @@ module _
+         ( hB)
+         ( hC)
+         ( coherence-square-cocone-cofork _ _ top-cofork-hom-arrow)
+-        ( λ where
+-          (inl a) → refl
+-          (inr a) → refl)
+-        ( λ where
+-          (inl a) → coh-hom-arrow hA hB f a
+-          (inr a) → coh-hom-arrow hA hB g a)
++        ( ind-coprod _ refl-htpy refl-htpy)
++        ( ind-coprod _ (coh-hom-arrow hA hB f) (coh-hom-arrow hA hB g))
+         ( coh-comp-hom-arrow hA hB hC c f)
+         ( coh-hom-arrow hB hC c)
+         ( coherence-square-cocone-cofork _ _ bottom-cofork-hom-arrow)
+-        ( λ where
+-          (inl a) → right-unit
+-          (inr a) → coh-htpy-hom-arrow hA hC _ _ H a)
++        ( ind-coprod _ (λ _ → right-unit) (coh-htpy-hom-arrow hA hC _ _ H))
+         ( is-equiv-map-coprod is-equiv-hA is-equiv-hA)
+         ( is-equiv-hA)
+         ( is-equiv-hB)
+@@ -277,18 +272,12 @@ module _
+         ( hB)
+         ( hC)
+         ( coherence-square-cocone-cofork _ _ top-cofork-hom-arrow)
+-        ( λ where
+-          (inl a) → refl
+-          (inr a) → refl)
+-        ( λ where
+-          (inl a) → coh-hom-arrow hA hB f a
+-          (inr a) → coh-hom-arrow hA hB g a)
++        ( ind-coprod _ refl-htpy refl-htpy)
++        ( ind-coprod _ (coh-hom-arrow hA hB f) (coh-hom-arrow hA hB g))
+         ( coh-comp-hom-arrow hA hB hC c f)
+         ( coh-hom-arrow hB hC c)
+         ( coherence-square-cocone-cofork _ _ bottom-cofork-hom-arrow)
+-        ( λ where
+-          (inl a) → right-unit
+-          (inr a) → coh-htpy-hom-arrow hA hC _ _ H a)
++        ( ind-coprod _ (λ _ → right-unit) (coh-htpy-hom-arrow hA hC _ _ H))
+         ( is-equiv-map-coprod is-equiv-hA is-equiv-hA)
+         ( is-equiv-hA)
+         ( is-equiv-hB)
+
+From c56581bd0f067c637e62e9a95c274c5c8bbe6c1b Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Thu, 7 Dec 2023 17:03:14 +0100
+Subject: [PATCH 05/10] Informal proof for the flattening lemma for sequential
+ colimits
+
+---
+ ...ttening-lemma-sequential-colimits.lagda.md | 23 +++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 5a724b6252..88bb67ec1e 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -113,6 +113,29 @@ coequalizers, which is recorded in
+ [`synthetic-homotopy-theory.dependent-universal-property-sequential-colimits`](synthetic-homotopy-theory.dependent-universal-property-sequential-colimits.md),
+ so it suffices to invoke the flattening lemma for coequalizers.
+ 
++**Proof:** The diagram we construct is
++
++```text
++
++                             --------->
++  Σ ((n, a) : Σ ℕ A) P(iₙ a) ---------> Σ ((n, a) : Σ ℕ A) P(iₙ a) -----> Σ (x : X) P(x)
++            |                                     |                            |
++    assoc-Σ | ≃                           assoc-Σ | ≃                       id | ≃
++            |                                     |                            |
++            V               ---------->           V                            V
++  Σ (n : ℕ, a : Aₙ) P(iₙ a) ----------> Σ (n : ℕ, a : Aₙ) P(iₙ a) ------> Σ (x : X) P(x) ,
++```
++
++where the top is the cofork obtained by coforkification of the cocone for the
++flattening lemma, and the bottom is the cofork obtained by flattening the
++coforkification of the original cocone.
++
++By assumption, the original cocone is a sequential colimit, which implies that
++its coforkification is a coequalizer. The flattening lemma for coequalizers
++implies that the bottom cofork is a coequalizer, which in turn implies that the
++top cofork is a coequalizer, hence the flattening of the original cocone is a
++sequential colimit.
++
+ ```agda
+ module _
+   { l1 l2 l3 : Level} {A : sequential-diagram l1} {X : UU l2}
+
+From 5b01687f9b86774c4bff1d181863efa2d33b1148 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Thu, 7 Dec 2023 17:05:52 +0100
+Subject: [PATCH 06/10] pre-commit
+
+---
+ src/foundation/commuting-triangles-of-identifications.lagda.md  | 2 +-
+ .../flattening-lemma-sequential-colimits.lagda.md               | 1 -
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/foundation/commuting-triangles-of-identifications.lagda.md b/src/foundation/commuting-triangles-of-identifications.lagda.md
+index f4da573108..edbdbefd0a 100644
+--- a/src/foundation/commuting-triangles-of-identifications.lagda.md
++++ b/src/foundation/commuting-triangles-of-identifications.lagda.md
+@@ -50,7 +50,7 @@ module _
+   coherence-triangle-identifications' left right top = (top ∙ right) ＝ left
+ ```
+ 
+-### Properties
++## Properties
+ 
+ ### Whiskering of triangles of identifications
+ 
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 88bb67ec1e..00ebc5dc05 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -116,7 +116,6 @@ so it suffices to invoke the flattening lemma for coequalizers.
+ **Proof:** The diagram we construct is
+ 
+ ```text
+-
+                              --------->
+   Σ ((n, a) : Σ ℕ A) P(iₙ a) ---------> Σ ((n, a) : Σ ℕ A) P(iₙ a) -----> Σ (x : X) P(x)
+             |                                     |                            |
+
+From 294eb0ca8de4be9a52879bf2baed8b512b7431e3 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Thu, 7 Dec 2023 17:10:18 +0100
+Subject: [PATCH 07/10] thinko
+
+---
+ .../universal-property-coequalizers.lagda.md                    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+index 7d7e89a25a..db1a3035d3 100644
+--- a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -172,7 +172,7 @@ the following diagram:
+ equipped with [commuting squares](foundation.commuting-squares-of-maps.md) for
+ the three small squares, and a coherence datum expressing that the right square
+ coequalizes the left squares in the category of arrows, we have that the top
+-cofork is a coequalizer if and only if the bottom square is a coequalizer.
++cofork is a coequalizer if and only if the bottom cofork is a coequalizer.
+ 
+ ```agda
+ module _
+
+From d8b96bb356f8a7f1204a9d3356c85dedd06eeb63 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Sat, 9 Dec 2023 19:03:42 +0100
+Subject: [PATCH 08/10] Add prose for whiskering of triangles of
+ identifications
+
+---
+ ...ting-triangles-of-identifications.lagda.md | 58 +++++++++++++++++++
+ 1 file changed, 58 insertions(+)
+
+diff --git a/src/foundation/commuting-triangles-of-identifications.lagda.md b/src/foundation/commuting-triangles-of-identifications.lagda.md
+index edbdbefd0a..aa909bd7c4 100644
+--- a/src/foundation/commuting-triangles-of-identifications.lagda.md
++++ b/src/foundation/commuting-triangles-of-identifications.lagda.md
+@@ -54,6 +54,64 @@ module _
+ 
+ ### Whiskering of triangles of identifications
+ 
++Given a commuting triangle of identifications
++
++```text
++       top
++    x ----- y
++     \     /
++ left \   / right
++       \ /
++        z     ,
++```
++
++we may consider three ways of attaching new identifications to it: prepending
++`p : u ＝ x` to the left, which gives us a commuting triangle
++
++```text
++         p ∙ top
++        u ----- y
++         \     /
++ p ∙ left \   / right
++           \ /
++            z     ,
++```
++
++or appending an identification `p : z ＝ u` to the right, which gives
++
++```text
++           top
++        u ----- y
++         \     /
++ left ∙ p \   / right ∙ p
++           \ /
++            z     ,
++```
++
++or splicing an identification `p : y ＝ u` and its inverse into the middle, to
++get
++
++```text
++     top ∙ p
++    u ----- y
++     \     /
++ left \   / p⁻¹ ∙ right
++       \ /
++        z     ,
++```
++
++which isn't formalized yet.
++
++Because concatenation of identifications is an equivalence, it follows that all
++of these transformations are equivalences.
++
++These lemmas are useful in proofs involving path algebra, because taking
++`equiv-right-whisk-triangle-identicications` as an example, it provides us with
++two maps: the forward direcation states `(p ＝ q ∙ r) → (p ∙ s ＝ q ∙ (r ∙ s))`,
++which allows one to append an identification without needing to reassociate on
++the right, and the backwards direction conversely allows one to concel out an
++identification in parantheses.
++
+ ```agda
+ module _
+   {l : Level} {A : UU l} {x y z u : A}
+
+From 4597882a7e7e9d267ca407f5ff149d418dfd4e4b Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 12 Dec 2023 16:41:29 +0100
+Subject: [PATCH 09/10] Fix typos
+
+---
+ .../commuting-triangles-of-identifications.lagda.md         | 6 +++---
+ .../flattening-lemma-sequential-colimits.lagda.md           | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/foundation/commuting-triangles-of-identifications.lagda.md b/src/foundation/commuting-triangles-of-identifications.lagda.md
+index aa909bd7c4..63fdd6e73b 100644
+--- a/src/foundation/commuting-triangles-of-identifications.lagda.md
++++ b/src/foundation/commuting-triangles-of-identifications.lagda.md
+@@ -107,10 +107,10 @@ of these transformations are equivalences.
+ 
+ These lemmas are useful in proofs involving path algebra, because taking
+ `equiv-right-whisk-triangle-identicications` as an example, it provides us with
+-two maps: the forward direcation states `(p ＝ q ∙ r) → (p ∙ s ＝ q ∙ (r ∙ s))`,
++two maps: the forward direction states `(p ＝ q ∙ r) → (p ∙ s ＝ q ∙ (r ∙ s))`,
+ which allows one to append an identification without needing to reassociate on
+-the right, and the backwards direction conversely allows one to concel out an
+-identification in parantheses.
++the right, and the backwards direction conversely allows one to cancel out an
++identification in parentheses.
+ 
+ ```agda
+ module _
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 00ebc5dc05..72ebcff9d9 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -35,7 +35,7 @@ open import synthetic-homotopy-theory.universal-property-sequential-colimits
+ 
+ The {{#concept "flattening lemma" Disambiguation="sequential colimits"}} for
+ [sequential colimits](synthetic-homotopy-theory.universal-property-sequential-colimits.md)
+-states that coequalizers commute with
++states that sequential colimits commute with
+ [dependent pair types](foundation.dependent-pair-types.md). Specifically, given
+ a [cocone](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md)
+ 
+
+From 23d46f6bf0e150780654e766e1b09879d23b69a6 Mon Sep 17 00:00:00 2001
+From: VojtechStep <vojtechstepancik@outlook.com>
+Date: Tue, 12 Dec 2023 16:57:37 +0100
+Subject: [PATCH 10/10] More formal prose
+
+---
+ ...ttening-lemma-sequential-colimits.lagda.md | 25 +++++++++++--------
+ 1 file changed, 14 insertions(+), 11 deletions(-)
+
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 72ebcff9d9..0ad8516ee5 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -52,6 +52,9 @@ obtain a cocone
+ 
+ which is again a sequential colimit.
+ 
++The result may be read as
++`colimₙ (Σ (a : Aₙ) P(iₙ a)) ≃ Σ (a : colimₙ Aₙ) P(a)`.
++
+ ## Definitions
+ 
+ ### The sequential diagram for the flattening lemma
+@@ -116,21 +119,21 @@ so it suffices to invoke the flattening lemma for coequalizers.
+ **Proof:** The diagram we construct is
+ 
+ ```text
+-                             --------->
+-  Σ ((n, a) : Σ ℕ A) P(iₙ a) ---------> Σ ((n, a) : Σ ℕ A) P(iₙ a) -----> Σ (x : X) P(x)
+-            |                                     |                            |
+-    assoc-Σ | ≃                           assoc-Σ | ≃                       id | ≃
+-            |                                     |                            |
+-            V               ---------->           V                            V
+-  Σ (n : ℕ, a : Aₙ) P(iₙ a) ----------> Σ (n : ℕ, a : Aₙ) P(iₙ a) ------> Σ (x : X) P(x) ,
++                               ------->
++  Σ (n : ℕ) Σ (a : Aₙ) P(iₙ a) -------> Σ (n : ℕ) Σ (a : Aₙ) P(iₙ a) ----> Σ (x : X) P(x)
++             |                                     |                            |
++ inv-assoc-Σ | ≃                       inv-assoc-Σ | ≃                       id | ≃
++             |                                     |                            |
++             V                --------->           V                            V
++   Σ ((n, a) : Σ ℕ A) P(iₙ a) ---------> Σ ((n, a) : Σ ℕ A) P(iₙ a) -----> Σ (x : X) P(x) ,
+ ```
+ 
+-where the top is the cofork obtained by coforkification of the cocone for the
+-flattening lemma, and the bottom is the cofork obtained by flattening the
+-coforkification of the original cocone.
++where the top is the cofork corresponding to the cocone for the flattening
++lemma, and the bottom is the cofork obtained by flattening the cofork
++corresponding to the given base cocone.
+ 
+ By assumption, the original cocone is a sequential colimit, which implies that
+-its coforkification is a coequalizer. The flattening lemma for coequalizers
++its corresponding cofork is a coequalizer. The flattening lemma for coequalizers
+ implies that the bottom cofork is a coequalizer, which in turn implies that the
+ top cofork is a coequalizer, hence the flattening of the original cocone is a
+ sequential colimit.
