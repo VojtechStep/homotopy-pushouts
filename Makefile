@@ -1,3 +1,5 @@
+default: Thesis.pdf
+
 .PHONY: clean
 clean:
 	latexmk -C
