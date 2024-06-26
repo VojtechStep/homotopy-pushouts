@@ -30,6 +30,7 @@
 DEDICATION
 }
 \include{tex/title.tex}
+\tableofcontents
 #+end_export
 
 * Introduction
@@ -37,22 +38,46 @@ DEDICATION
 :UNNUMBERED: t
 :END:
 
+
+* Homotopy Type Theory
+
+* Pushouts
+
+** Descent property
+
+** Flattening lemma
+
+* Other colimits
+
+** Coequalizers
+
+** Sequential colimits
+
+* Identity types of pushouts
+
+** Induction principle
+
+** Zigzag construction
+
+* Conclusion
+
+* COMMENT Battle plan
+
 - [cite:@rijke2022introduction]
 - [cite:@hottbook]
 - [cite:@warn2023pushouts]
 - [cite:@sojakova2020sequentialcolimits]
-
-* Battle plan
-- [-] Σ-types over pushouts
+- 
+- [X] $\Sigma$ -types over pushouts
   - [X] Flattening lemma
-  - [ ] Applications
-- [-] Path spaces of pushouts
-  - [ ] Formalize Kraus, von Raumer
-    - [ ] Understand the proof
-    - [ ] Convert from relations to spans?
-  - [-] Figure out how to encode the sequence construction
+  - [X] Applications
+- [X] Path spaces of pushouts
+  - [X] Formalize Kraus, von Raumer
+    - [X] Understand the proof
+    - [X] Convert from relations to spans?
+  - [X] Figure out how to encode the sequence construction
     - [X] Induction on naturals into Σ, pushing forward (a_0 ⇝_t a , a_0 ⇝_{t+1} b) ↦ (a_0 ⇝_{t + 2} a , a_0 ⇝_{t + 3} b)
-    - [ ] Try encoding the construction with spans instead of relations
+    - [X] Try encoding the construction with spans instead of relations
 - [ ] Descent stuff
 
 #+PRINT_BIBLIOGRAPHY:
