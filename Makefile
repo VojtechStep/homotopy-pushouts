@@ -19,3 +19,6 @@ Thesis.tex: Thesis.org
 
 Thesis.pdf: Thesis.tex tex/*.tex bibliography.bib
 	latexmk -interaction=nonstopmode -pdf -lualatex $<
+
+docker-verify: Thesis.pdf
+	docker run -v "${PWD}:/thesis" ghcr.io/mff-cuni-cz/cuni-thesis-validator verify /thesis/Thesis.pdf
