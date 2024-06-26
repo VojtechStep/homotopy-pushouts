@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-24.04"
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v23
@@ -23,6 +23,31 @@ jobs:
       - name: Build PDF
         run: "nix build --no-link --print-out-paths --print-build-logs | xargs -I{} cp {} Thesis.pdf"
 
+      - name: Store PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: PDF
+          path: Thesis.pdf
+
+  verify:
+    needs: build
+    runs-on: "ubuntu-24.04"
+    container: "ghcr.io/mff-cuni-cz/cuni-thesis-validator:latest"
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: PDF
+      - name: Verify PDF/A
+        run: |
+          verify Thesis.pdf | grep 'nonCompliant="0"'
+
+  release:
+    needs: build
+    runs-on: "ubuntu-24.04"
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: PDF
       - name: Create release
         id: release
         uses: softprops/action-gh-release@v1
@@ -32,4 +57,3 @@ jobs:
           target_commitish: ${{ github.sha }}
           prerelease: true
           generate_release_notes: true
-
