@@ -25,7 +25,7 @@
 \def\ThesisSupervisor{doctor Egbert Rijke}
 \def\StudyProgramme{Mathematical Structures}
 \def\StudyBranch{MSPN}
-\def\YearSubmitted{2023}
+\def\YearSubmitted{2024}
 \def\Dedication{
 DEDICATION
 }
