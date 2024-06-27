@@ -1,8 +1,11 @@
 #+TITLE: Formalization of Homotopy Pushouts in Homotopy Type Theory
 #+AUTHOR: Vojtěch Štěpančík
 #+KEYWORDS: synthetic homotopy theory, homotopy type theory, univalent foundations of mathematics, formalization, homotopy pushouts
-#+DESCRIPTION: ABSTRACT
-#+DESCRIPTION: MORE ABSTRACT
+#+DESCRIPTION: Homotopy pushouts can be constructed as higher inductive types in Homotopy Type Theory, and their properties
+#+DESCRIPTION: may be explored using the logical framework and formalized in a proof assitant. This thesis focuses on
+#+DESCRIPTION: the descent property, characterizing type families over pushouts, and the flattening lemma, characterizing
+#+DESCRIPTION: the total spaces of such families. We then use the built machinery to provide the first fully formalized
+#+DESCRIPTION: proof of Wärn's zigzag construction of identity types of pushouts as sequential colimits.
 
 # Document settings
 #+LATEX_COMPILER: lualatex
@@ -18,6 +21,9 @@
 #+LATEX_HEADER: \hypersetup{unicode,breaklinks=true,pdfapart=2,pdfaconformance=U}
 #+LATEX_HEADER: \input{tex/pdfa.tex}
 #+LATEX_HEADER: \overfullrule=1mm
+
+#+LATEX_HEADER: \newcommand{\typeformer}[1]{\mathrm{#1}}
+#+LATEX_HEADER: \newcommand{\constr}[1]{\mathrm{#1}}
 
 # Title page
 #+begin_export latex
@@ -38,6 +44,15 @@ DEDICATION
 :UNNUMBERED: t
 :END:
 
+ Homotopy Type Theory [cite:@hottbook] is a logical framework built on Martin-Löf's type theory and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory, in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization". The validity of the constructions is verified by type-checking the programs.
+
+ In this setting, one can define higher inductive types (HITs), by specifying both /point/ constructors, and higher /path/ constructors. Homotopy pushouts are examples of HITs — given type $S, A, B$ and maps $f : S → A$, $g : S → B$, we define $\typeformer{Pushout} f g$ to be the higher inductive type with point constructors
+ 
+ \begin{align*}
+   \constr{inl}
+ \end{align*}
+
+ This work focuses on homotopy pushouts \mdash specifically we provide an exposition and formalization of the descent property and flattening lemma, and use the built infrastructure to formally prove correctness of Wärn's zigzag construction of identity types of pushouts.
 
 * Homotopy Type Theory
 
@@ -61,6 +76,8 @@ DEDICATION
 
 * Conclusion
 
+#+PRINT_BIBLIOGRAPHY:
+
 * COMMENT Battle plan
 
 - [cite:@rijke2022introduction]
@@ -79,8 +96,6 @@ DEDICATION
     - [X] Induction on naturals into Σ, pushing forward (a_0 ⇝_t a , a_0 ⇝_{t+1} b) ↦ (a_0 ⇝_{t + 2} a , a_0 ⇝_{t + 3} b)
     - [X] Try encoding the construction with spans instead of relations
 - [ ] Descent stuff
-
-#+PRINT_BIBLIOGRAPHY:
 
 # The local variable is necessary to setup hyperref correctly
 
