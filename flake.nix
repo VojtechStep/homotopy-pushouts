@@ -23,6 +23,8 @@
           # Org dependencies
           # - default packages and their dependencies
           amsmath wrapfig ulem hyperref capt-of infwarerr epstopdf-pkg
+          # Font
+          xstring xkeyval carlisle realscripts kastrup fontspec newpx
           # Bibliography
           biblatex
           # Other utility packages
