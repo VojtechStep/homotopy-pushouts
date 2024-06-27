@@ -86,5 +86,5 @@ DEDICATION
 
 # Local Variables:
 # org-latex-default-packages-alist: (("" "graphicx" t) ("" "wrapfig" nil) ("" "rotating" nil) ("normalem" "ulem" t) ("" "amsmath" t) ("" "amssymb" t) ("" "capt-of" nil) ("rgb" "xcolor" nil) ("" "hyperxmp" nil) ("pdfa" "hyperref" nil) ("" "geometry" nil) ("nottoc" "tocbibind" nil) ("" "lmodern" t))
-# org-latex-classes: (("report" "\\documentclass{report}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+# org-latex-classes: (("report" "\\documentclass{report}" ("\\chapter{%s}" . "\\chapter*{%1$s}\\addcontentsline{toc}{chapter}{%1$s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 # End:
