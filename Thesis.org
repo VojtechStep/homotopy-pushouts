@@ -10,7 +10,7 @@
 #+CITE_EXPORT: biblatex alphabetic
 #+LATEX_CLASS: report
 #+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
-#+OPTIONS: title:nil toc:nil
+#+OPTIONS: title:nil toc:nil ':t
 
 # Package options, derived partially from the thesis template
 #+LATEX_HEADER: \geometry{margin=25mm,bindingoffset=14.2mm}
