@@ -10,7 +10,7 @@
 # Document settings
 #+LATEX_COMPILER: lualatex
 #+BIBLIOGRAPHY: ./bibliography.bib
-#+CITE_EXPORT: biblatex alphabetic
+#+CITE_EXPORT: biblatex iso-authoryear
 #+LATEX_CLASS: report
 #+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
 #+OPTIONS: title:nil toc:nil ':t
@@ -19,11 +19,42 @@
 #+LATEX_HEADER: \geometry{margin=25mm,bindingoffset=14.2mm}
 #+LATEX_HEADER: \let\openright=\cleardoublepage
 #+LATEX_HEADER: \hypersetup{unicode,breaklinks=true,pdfapart=2,pdfaconformance=U}
+#+LATEX_HEADER: \usetikzlibrary{decorations.pathmorphing}
 #+LATEX_HEADER: \input{tex/pdfa.tex}
+
+# Highlight overfull
 #+LATEX_HEADER: \overfullrule=1mm
 
-#+LATEX_HEADER: \newcommand{\typeformer}[1]{\mathrm{#1}}
-#+LATEX_HEADER: \newcommand{\constr}[1]{\mathrm{#1}}
+#+LATEX_HEADER: \newcommand{\TODO}[1][]{\textcolor{red}{\ifthenelse{\equal{#1}{}}{TODO}{#1}}}
+
+# Syntax macros
+#+LATEX_HEADER: \newcommand{\typeformer}[1]{\operatorname{#1}}
+#+LATEX_HEADER: \newcommand{\constructor}[1]{\operatorname{#1}}
+#+LATEX_HEADER: \newcommand{\defterm}[1]{\operatorname{#1}}
+#+LATEX_HEADER: \DeclareMathOperator{\refl}{refl}
+#+LATEX_HEADER: \DeclareMathOperator{\reflhtpy}{refl-htpy}
+#+LATEX_HEADER: \DeclareMathOperator{\tr}{tr}
+#+LATEX_HEADER: \DeclareMathOperator{\comp}{\circ}
+#+LATEX_HEADER: \DeclareMathOperator{\concat}{\bullet}
+#+LATEX_HEADER: \DeclareMathOperator{\htpy}{\sim}
+#+LATEX_HEADER: \DeclareMathOperator{\lwhisk}{\cdot{l}}
+#+LATEX_HEADER: \DeclareMathOperator{\rwhisk}{\cdot{r}}
+#+LATEX_HEADER: \DeclareMathOperator{\lunit}{lunit}
+#+LATEX_HEADER: \DeclareMathOperator{\runit}{runit}
+
+# Object macros
+#+LATEX_HEADER: \newcommand{\POData}[2]{\typeformer{Pushout}\;#1\;#2}
+#+LATEX_HEADER: \newcommand{\PO}[3]{#2 \sqcup_{#1} #3}
+#+LATEX_HEADER: \renewcommand{\S}{\mathcal{S}}
+
+# Universes
+#+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
+#+LATEX_HEADER: \newcommand{\UV}{\mathcal{V}}
+#+LATEX_HEADER: \newcommand{\UW}{\mathcal{W}}
+
+# Descent data
+#+LATEX_HEADER: \newcommand{\DD}{\operatorname{DD}}
+#+LATEX_HEADER: \newcommand{\ddfam}{\operatorname{dd-fam}}
 
 # Title page
 #+begin_export latex
@@ -39,28 +70,290 @@ DEDICATION
 \tableofcontents
 #+end_export
 
+# Theorem environments
+#+begin_export latex
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newaliascnt{lemma}{thm}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\newaliascnt{corol}{thm}
+\newtheorem{corol}[corol]{Corollary}
+\aliascntresetthe{corol}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+\newaliascnt{constr}{defn}
+\newtheorem{constr}[constr]{Construction}
+\aliascntresetthe{constr}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\def\thmautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\corolautorefname{Corollary}
+\def\defnautorefname{Definition}
+\def\constructorautorefname{Construction}
+#+end_export
+
 * Introduction
 :PROPERTIES:
 :UNNUMBERED: t
 :END:
 
- Homotopy Type Theory [cite:@hottbook] is a logical framework built on Martin-Löf's type theory and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory, in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization". The validity of the constructions is verified by type-checking the programs.
+ Homotopy Type Theory [cite:@UF13] is a logical framework built on Martin-Löf's type theory and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory, in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite/na:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization". The validity of the constructions is verified by type-checking the programs.
 
- In this setting, one can define higher inductive types (HITs), by specifying both /point/ constructors, and higher /path/ constructors. Homotopy pushouts are examples of HITs — given type $S, A, B$ and maps $f : S → A$, $g : S → B$, we define $\typeformer{Pushout} f g$ to be the higher inductive type with point constructors
+ In this setting, one can define higher inductive types (HITs), by specifying both /point/ constructors, and higher /path/ constructors of the type. Homotopy pushouts are examples of HITs — given types $S, A, B$ and maps $f : S → A$, $g : S → B$, we define $\POData{f}{g}$ to be the higher inductive type with point constructors
  
  \begin{align*}
-   \constr{inl}
+   \constructor{inl} &: A \to \POData{f}{g} \\
+   \constructor{inr} &: B \to \POData{f}{g}
+ \end{align*}
+ 
+ and a path constructor
+ 
+ \begin{align*}
+   \constructor{glue} : (s : S) \to \constructor{inl}(f s) =_{\POData{f}{g}} \constructor{inr}(g s)
  \end{align*}
 
  This work focuses on homotopy pushouts \mdash specifically we provide an exposition and formalization of the descent property and flattening lemma, and use the built infrastructure to formally prove correctness of Wärn's zigzag construction of identity types of pushouts.
+ 
+ \TODO[Mention that David writes "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile". But it's in the categorical paper?]
 
 * Homotopy Type Theory
+
+#+NAME: lemma:is-equiv-tr
+#+begin_lemma
+For every type $A$, type family $B : A \to \UU$, two elements $x, y : A$ and an identification $p : x = y$, the transport map $\tr{P} p : B x \to B y$ is an equivalence.
+#+end_lemma
+
+#+NAME: lemma:compute-equiv-eq-ap
+#+begin_lemma
+\TODO
+#+end_lemma
+
+#+NAME: lemma:fundamental-theorem-id
+#+ATTR_LATEX: :options [Fundamental theorem of identity types]
+#+begin_lemma
+\TODO
+#+end_lemma
+
+#+NAME: lemma:3for2-equiv
+#+ATTR_LATEX: :options [3-for-2 property of equivalences]
+#+begin_lemma
+Consider a commuting triangle of maps
+#+begin_center
+\begin{tikzcd}
+  A \arrow[rr, "f"] \arrow[rd, "h"'] & & B \arrow[ld, "g"] \\
+  & C.
+\end{tikzcd}
+
+If any two of the maps are equivalences, then so is the third.
+#+end_center
+#+end_lemma
+
+#+begin_proof
+\TODO
+#+end_proof
+
+** Higher inductive types
 
 * Pushouts
 
 ** Descent property
 
+#+begin_defn
+Given a span diagram $f : S \to A$, $g : S \to B$, we call *descent data* on $(f, g)$ the type of triples $(P_A, P_B, P_S)$ consisting of type families
+\begin{align*}
+  P_A &: A \to \UU \\
+  P_B &: B \to \UU
+\end{align*}
+and a fiberwise equivalence
+\begin{equation*}
+  P_S : (s : S) \to P_A(f s) \simeq P_B(g s).
+\end{equation*}
+
+We use the notation $\DD(\S)$ descent data on the span diagram $\S$ when we write about it in formulas.
+#+end_defn
+
+It may not be immediately clear why "descent data" is an appropriate name for this concept, because there is no apparent downward motion. Traditionally, descent is studied in the context of a collection of objects $X_i$ covering a single object $X$, and local structure on the individual $X_i$'s descending onto $X$, collecting into a global structure, given that the pieces are appropriately compatible on any "overlaps". A pushout of $\mathcal{S}$ is covered by $A$ and $B$, and the overlaps are encoded in $f$ and $g$. Then structure on $A$ and $B$, expressed as type families $P_A$ and $P_B$, "descends" to a structure on $X$ (a type family over $X$). Two elements "overlap" in $X$ if there is an identification between them coming from $S$, and the gluing/compatibility condition exactly requires the local structure of $P_A$ and $P_B$ to agree on such elements, i.e. asks for an equivalence $P_A(f s) \simeq P_B(g s)$.
+
+#+NAME: thm:descent-property
+#+ATTR_LATEX: :options [Descent property]
+#+begin_thm
+Consider a span diagram $f : S \to A$, $g : S \to B$. Then the type of type families over the pushout $\PO{S}{A}{B} \to \UU$ is equivalent to the type of descent data on $(f, g)$.
+#+end_thm
+
+#+begin_proof
+\TODO[triangle with univalence, compute-equiv-eq-ap].
+#+end_proof
+
+\TODO[Describe why we care about the following: equivalence between concepts in families and concepts in descent data].
+
+#+begin_constr
+Given a cocone
+#+begin_center
+\begin{tikzcd}
+  S \arrow[d, "f"'] \arrow[r, "g"] & B \arrow[d, "j"] \\
+  A \arrow[r, "i"'] \arrow[ur, phantom, "H"] & X
+\end{tikzcd}
+#+end_center
+and a type family $P : X \to \UU$, we obtain descent data $(P_A, P_B, P_S)$ by precomposing
+\begin{align*}
+  P_A &:= (\lambda a \to P(i a)) : A \to \UU \\
+  P_B &:= (\lambda b \to P(j b)) : B \to \UU
+\end{align*}
+and transporting in $P$
+\begin{equation*}
+  P_S := (\lambda s \to \tr{P} (H s)) : (s : S) \to P (i (f s)) \simeq P (j (g s)).
+\end{equation*}
+
+Note that $\tr{P} (H s)$ is an equivalence by [[lemma:is-equiv-tr]].
+#+end_constr
+
+#+begin_defn
+Consider a span diagram $f : S \to A$, $g : S \to B$, and two descent data $(P_A, P_B, P_S)$ and $(Q_A, Q_B, Q_S)$ over it. A *morphism* of descent data between them is a pair of fiberwise maps
+\begin{align*}
+  h_A : (a : A) → P_A a → Q_A a
+  h_B : (b : B) → P_B b → Q_B b
+\end{align*}
+equipped with a family of homotopies $h_S$ indexed by $s : S$ making
+#+begin_center
+\begin{tikzcd}
+  P_A(f s) \arrow[r, "h_A(f s)"] \arrow[d, "P_S s"'] & Q_A(f s) \arrow[d, "Q_S s"] \\
+  P_B(g s) \arrow[r, "h_B(g s)"'] & Q_B(g s)
+\end{tikzcd}
+#+end_center
+commute.
+
+We write $(h_A, h_B, h_S) : (P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)$.
+#+end_defn
+
+#+begin_defn
+For any two morphisms $(h_A, h_B, h_S)$ and $(k_A, k_B, k_S)$ between $(P_A, P_B, P_S)$ and $(Q_A, Q_B, Q_S)$, we define the type of *homotopies* to be the type of triples $(H_A, H_B, H_S)$ consisting of fiberwise homotopies
+\begin{align*}
+  H_A &: (a : A) \to h_A(a) \htpy k_A(a) \\
+  H_B &: (b : B) \to h_B(b) \htpy h_B(b)
+\end{align*}
+and a coherence datum $H_S$ indexed by $s : S$, asserting that the squares of homotopies
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  h_B(g s) \comp P_S(s)
+  \arrow[r, squiggly, "H_B(g s) \rwhisk P_S(s)"]
+  \arrow[d, squiggly, "h_S(s)"']
+  & k_B(g s) \comp P_S(s)
+  \arrow[d, squiggly, "k_S(s)"] \\
+  Q_S(s) \comp h_A(f s)
+  \arrow[r, squiggly, "Q_S(s) \lwhisk H_A(f s)"'] & Q_S(s) \comp k_A(f s)
+\end{tikzcd}
+#+end_center
+commute.
+
+We write $(H_A, H_B, H_S) : (h_A, h_B, h_S) \htpy (k_A, k_B, k_S)$.
+#+end_defn
+
+The coherence can be seen as a filler of the shape one gets by gluing the squares $h_S$ and $k_S$ along the common vertical maps, as in
+#+begin_center
+\begin{tikzcd}[row sep=5em]
+  P_A(f s)
+  \arrow[r, bend left, "k_A(f s)"]
+  \arrow[r, bend right, "h_A(f s)"']
+  \arrow[d, "P_S(s)"']
+  & Q_A(f s) \arrow[d, "Q_S(s)"] \\
+  P_B(g s)
+  \arrow[r, bend left, "k_B(g s)"]
+  \arrow[r, bend right, "h_B(g s)"']
+  & Q_B(g s).
+\end{tikzcd}
+#+end_center
+
+The front square is $h_S$, the back square is $k_S$, the top face is $H_A$ and the bottom face is $H_B$. The coherence $H_S$ expresses that going along the front square and then the top face is homotopic to first going along the bottom face and then the back square.
+
+#+begin_lemma
+The type of homotopies of morphisms of descent data characterizes the identity type of morphisms of descent data. In other words, given two morphisms of descent data $h, k : (P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)$, there is an equivalence
+\begin{equation*}
+  \defterm{extensionality-hom-DD} : (h = k) \simeq (h \htpy k).
+\end{equation*}
+#+end_lemma
+
+#+begin_proof
+We define the underlying map by path induction. Assume $h \doteq k$ are identified by $\refl$. The identity homotopy $h \htpy k$ is defined as
+\begin{align*}
+  H_A &:= (\lambda a \to \reflhtpy) &&: (a : A) \to h_A \htpy h_A \\
+  H_B &:= (\lambda b \to \reflhtpy) &&: (b : B) \to h_B \htpy h_B \\
+  H_S &:= (\lambda s \to \runit)    &&: (s : S) \to h_S(s) \concat refl = h_S(s).
+\end{align*}
+
+To show that it is an equivalence, we may appeal to [[lemma:fundamental-theorem-id]]. It then suffices to show that the type $\Sigma (k : P \to Q). (h \htpy k)$ is contractible.
+#+end_proof
+
+#+begin_defn
+\TODO[Family with descent data].
+#+end_defn
+
+#+begin_lemma
+\TODO[Characterize Id($i a_0$)].
+#+end_lemma
+
+#+begin_lemma
+\TODO[Uniqueness of type family associated to descent data].
+#+end_lemma
+
+#+begin_lemma
+\TODO[Given $P \approx (P_A, P_B, P_S)$ and $Q \approx (Q_A, Q_B, Q_S)$, fiberwise maps correspond to homs of descent data].
+#+end_lemma
+
+#+begin_corol
+\TODO[Uniqueness of a fiberwise map with nice computational properties].
+#+end_corol
+
+#+begin_lemma
+\TODO[Fiberwise equivalences correspond to equivs of descent data].
+#+end_lemma
+
+#+begin_defn
+\TODO[Sections of descent data].
+#+end_defn
+
+#+begin_lemma
+\TODO[Sections of descent data correspond to sections of type families].
+#+end_lemma
+
+\TODO[Summary, lead onto flattening].
+
 ** Flattening lemma
+
+#+name: lemma:flattening-lemma
+#+begin_lemma
+\TODO[Flattening lemma].
+#+end_lemma
+
+** Identity systems
+
+#+begin_defn
+\TODO[Identity systems of descent data].
+#+end_defn
+
+#+begin_remark
+\TODO[Compare to KvR].
+#+end_remark
+
+#+begin_lemma
+\TODO[Descent data is an identity system iff family is an identity system].
+#+end_lemma
+
+#+begin_lemma
+\TODO[Converse map suffices to get an identity system].
+#+end_lemma
+
+#+begin_lemma
+\TODO[$(I_A, I_B, I_S)$ is an identity system].
+#+end_lemma
+
+#+begin_lemma
+\TODO[Any identity system is uniquely equivalent to $(I_A, I_B, I_S)$].
+#+end_lemma
 
 * Other colimits
 
@@ -68,15 +361,19 @@ DEDICATION
 
 ** Sequential colimits
 
-* Identity types of pushouts
+* Proof of correctness of the zigzag construction
 
-** Induction principle
+\TODO[Mention that there are multiple versions].
 
-** Zigzag construction
+** Zigzags of sequential diagrams
+
+** The zigzag construction
+
+** Proof of correctness
 
 * Conclusion
 
-#+PRINT_BIBLIOGRAPHY:
+#+PRINT_BIBLIOGRAPHY: :heading bibintoc
 
 * COMMENT Battle plan
 
@@ -100,6 +397,7 @@ DEDICATION
 # The local variable is necessary to setup hyperref correctly
 
 # Local Variables:
-# org-latex-default-packages-alist: (("" "graphicx" t) ("" "wrapfig" nil) ("" "rotating" nil) ("normalem" "ulem" t) ("" "amsmath" t) ("" "amssymb" t) ("" "capt-of" nil) ("rgb" "xcolor" nil) ("pdfa" "hyperref" nil) ("" "hyperxmp" nil) ("" "geometry" nil) ("nottoc" "tocbibind" nil) ("" "newpxtext" nil))
+# org-latex-default-packages-alist: (("" "graphicx" t) ("" "wrapfig" nil) ("" "rotating" nil) ("normalem" "ulem" t) ("" "amsmath" t) ("" "amssymb" t) ("" "amsthm" t) ("" "capt-of" nil) ("rgb" "xcolor" nil) ("pdfa" "hyperref" nil) ("" "hyperxmp" nil) ("" "geometry" nil) ("nottoc" "tocbibind" nil) ("" "newpxtext" nil) ("" "unicode-math" nil) ("" "aliascnt") ("" "tikz-cd" t))
 # org-latex-classes: (("report" "\\documentclass{report}" ("\\chapter{%s}" . "\\chapter*{%1$s}\\addcontentsline{toc}{chapter}{%1$s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+# org-latex-reference-command: "\\autoref{%s}"
 # End:

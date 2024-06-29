@@ -24,9 +24,13 @@
           # - default packages and their dependencies
           amsmath wrapfig ulem hyperref capt-of infwarerr epstopdf-pkg
           # Font
-          xstring xkeyval carlisle realscripts kastrup fontspec newpx
+          xstring xkeyval carlisle realscripts kastrup fontspec newpx unicode-math lualatex-math
+          # Theorems
+          amscls
           # Bibliography
-          biblatex
+          biblatex biblatex-iso690
+          # Diagrams
+          tikz-cd pgf
           # Other utility packages
           geometry xcolor tocbibind
           # Generating PDF/A-2U
