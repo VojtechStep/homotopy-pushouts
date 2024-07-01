@@ -11,10 +11,8 @@ Thesis.tex: Thesis.org
 	emacs --batch --eval="\
 	(progn\
 	  (require 'org)\
-	  (put 'org-latex-default-packages-alist 'safe-local-variable (lambda (_) t))\
-	  (put 'org-latex-classes 'safe-local-variable (lambda (_) t))\
-	  (put 'org-prefer-user-labels 'safe-local-variable (lambda (_) t))\
-	  (put 'org-latex-reference-command 'safe-local-variable (lambda (_) t))\
+	  (setq enable-local-variables :all)\
+	  (setq enable-local-eval t)\
 	  (with-current-buffer\
 	    (find-file \"$<\")\
 	    (org-latex-export-to-latex)))"
