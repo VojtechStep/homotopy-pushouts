@@ -10,7 +10,7 @@
 # Document settings
 #+LATEX_COMPILER: lualatex
 #+BIBLIOGRAPHY: ./bibliography.bib
-#+CITE_EXPORT: biblatex iso-authoryear,maxcitenames=3
+#+CITE_EXPORT: biblatex iso-authoryear,maxcitenames=3,backref=true
 #+LATEX_CLASS: report
 #+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
 #+OPTIONS: title:nil toc:nil ':t
@@ -47,6 +47,8 @@
 #+LATEX_HEADER: \DeclareMathOperator{\rwhisk}{\cdot{r}}
 #+LATEX_HEADER: \DeclareMathOperator{\lunit}{lunit}
 #+LATEX_HEADER: \DeclareMathOperator{\runit}{runit}
+
+#+LATEX_HEADER: \newcommand{\N}{\mathbb{N}}
 
 # Products
 #+LATEX_HEADER: \DeclareMathOperator{\pr}{pr}
@@ -143,6 +145,8 @@ DEDICATION
  \end{align*}
 
  This work focuses on homotopy pushouts \mdash specifically we provide an exposition and formalization of the descent property and flattening lemma, and use the built infrastructure to formally prove correctness of Wärn's zigzag construction of identity types of pushouts.
+ 
+ \TODO[We build more infrastructure than strictly necessary for sequential colimits, since we anticipate it will be useful when formalizing applications of the zigzag construction. The formalized material comes from SvDR20, and as a byproduct we started an effort to collect pages for formalization of results from the literature. Even though it is not of mathematical nature, it is relevant to the formalization aspect, as it builds more documentation, makes the development accessible, and sets an example for beginning formalizers].
  
  \TODO[Mention that David writes "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile". But it's in the categorical paper?]
 
@@ -767,7 +771,7 @@ $f(a)$ to $g(a)$.]
 \TODO[Maybe present all of this infrastructure informally?]
 
 #+begin_lemma
-\TODO[]
+\TODO[Cofork is a coequalizer iff the corresponding cocone is a pushout].
 #+end_lemma
 
 #+begin_defn
@@ -786,12 +790,90 @@ $f(a)$ to $g(a)$.]
 
 [cite/t/cf:@SvDR20]
 
+\TODO[Note that AFAIK descent and flattening aren't necessary for the main result of this thesis, but flattening and esp. generalized flattening are used in SvDR20 to prove connectivity results, which are then used in applications].
+
+#+begin_defn
+\TODO[Sequential diagrams].
+#+end_defn
+
+#+begin_remark
+\TODO[AKA cotowers --- we decided to use (inverse) sequential diagrams in agda-unimath].
+#+end_remark
+
+#+begin_defn
+\TODO[Cocones under sequential diagrams].
+#+end_defn
+
+The standard sequential colimit may be obtained as a coequalizer of
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  \Sigma \N A
+  \arrow[r, shift right=1.25, "\id"']
+  \arrow[r, shift left=1.25, "\tot_{\term{suc}}(a)"]
+  & \Sigma \N A
+\end{tikzcd}
+#+end_center
+
+#+begin_defn
+\TODO[Dependent cocones under sequential diagrams].
+#+end_defn
+
+#+begin_defn
+\TODO[Universal property].
+#+end_defn
+
+#+begin_defn
+\TODO[Dependent universal property].
+#+end_defn
+
+#+begin_lemma
+\TODO[DUP $\leftrightarrow$ UP].
+#+end_lemma
+
+#+begin_lemma
+\TODO[Functoriality].
+#+end_lemma
+
+\TODO[The initial motivation for shifts is to show that dropping a finite number of vertices from a sequential diagram preserves the colimit. It is also useful for showing that zigzags induce equivalences in the colimit].
+
+#+begin_constr
+\TODO[Shifts of sequential diagrams].
+#+end_constr
+
+#+begin_constr
+\TODO[Inclusion morphisms into shifts].
+#+end_constr
+
+#+begin_constr
+\TODO[Shifts of morphisms of sequential diagrams].
+#+end_constr
+
+#+begin_constr
+\TODO[Shifts of cocones].
+#+end_constr
+
+#+begin_constr
+\TODO[Shifts of homotopies of cocones].
+#+end_constr
+
+#+begin_constr
+\TODO[Unshifts of cocones].
+#+end_constr
+
+#+begin_constr
+\TODO[Unshifts of homotopies of cocones].
+#+end_constr
+
 * Proof of correctness of the zigzag construction
 
 \TODO[Mention that there are multiple versions].
 \TODO[Mention that ours is a slight variation by switching relations for spans].
 
 ** Zigzags of sequential diagrams
+
+#+begin_defn
+\TODO[Zigzags].
+#+end_defn
 
 ** The zigzag construction
 
@@ -802,8 +884,7 @@ $f(a)$ to $g(a)$.]
   \arrow[d, "\pr_3"']
   \arrow[rd, phantom, "\ulcorner", at end]
   & \Sigma (s : S) (r : b = (g s)). \; P_A^n(f s)
-  \arrow[d, "\blank \concat_n' s \defeq \inr"] \\
-  P_B^n(b)
+  \arrow[d, "\blank \concat_n' s \defeq \inr"] \\ P_B^n(b)
   \arrow[r, "\incl_B^n \defeq \inl"']
   & P_B^{n + 1}(b)
 \end{tikzcd}
@@ -825,17 +906,25 @@ $f(a)$ to $g(a)$.]
 
 ** Proof of correctness
 
+\TODO[The objective is to show that the zigzag descent data is an identity system. To do that, assume "dependent" descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, and a point $q_0 : Q_{\Sigma A}(a_0, \iota_A^0(\refl))$ and conjure a section of $Q$. Explicitly (write out the type of a section), which in every case proceeds by induction on $P_\bullet^{\infty}$.]
+
 * Conclusion
+
+Future work:
+- more abstract proof of the last coherence: using dependent identifications, and/or a more general lemma about coherent sections over zigzags; although that might have limited applications
+- formalize applications
+- formalize categorical statement
 
 #+PRINT_BIBLIOGRAPHY: :heading bibintoc
 
 * COMMENT Battle plan
-
 - [cite:@rijke2022introduction]
 - [cite:@hottbook]
 - [cite:@warn2023pushouts]
+- [cite:@wärn2024path] ArΧiv version, categorical formulation, future work
 - [cite:@sojakova2020sequentialcolimits]
-- 
+- [cite:@buchholtz2022synthetic] 2.5 for straightening/unstraightening
+
 - [X] $\Sigma$ -types over pushouts
   - [X] Flattening lemma
   - [X] Applications
@@ -844,9 +933,11 @@ $f(a)$ to $g(a)$.]
     - [X] Understand the proof
     - [X] Convert from relations to spans?
   - [X] Figure out how to encode the sequence construction
-    - [X] Induction on naturals into Σ, pushing forward (a_0 ⇝_t a , a_0 ⇝_{t+1} b) ↦ (a_0 ⇝_{t + 2} a , a_0 ⇝_{t + 3} b)
+    - [X] Induction on naturals with Σ → Σ, pushing forward $(a_0 \rightsquigarrow_t a , a_0 \rightsquigarrow_{t+1} b) \mapsto (a_0 \rightsquigarrow_{t + 2} a , a_0 \rightsquigarrow_{t + 3} b)$
     - [X] Try encoding the construction with spans instead of relations
-- [ ] Descent stuff
+- [X] Descent stuff
+- [X] Zig-zags of sequences induce equivalences on sequential colimits
+  - [X] More general functoriality of sequential colimits - not just standard ones, but formulated with UP
 
 # The local variable is necessary to setup hyperref correctly
 
