@@ -10,7 +10,7 @@
 # Document settings
 #+LATEX_COMPILER: lualatex
 #+BIBLIOGRAPHY: ./bibliography.bib
-#+CITE_EXPORT: biblatex iso-authoryear,maxcitenames=3,backref=true
+#+CITE_EXPORT: biblatex iso-authoryear,maxcitenames=3,backref=true,useprefix=true
 #+LATEX_CLASS: report
 #+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
 #+OPTIONS: title:nil toc:nil ':t
@@ -37,7 +37,7 @@
 #+LATEX_HEADER: \newcommand{\defterm}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \newcommand{\term}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \DeclareMathOperator{\id}{id}
-#+LATEX_HEADER: \newcommand{\defeq}{\mathop{:=}}
+#+LATEX_HEADER: \newcommand{\defeq}{\mathrel{:=}}
 #+LATEX_HEADER: \newcommand{\judeq}{\doteq}
 #+LATEX_HEADER: \DeclareMathOperator{\comp}{\circ}
 
@@ -341,22 +341,23 @@ It was first shown by [cite/t:@AGS12] that the four properties are equivalent fo
 
 ** Descent property
 
+The universal property of pushouts characterizes maps out of a pushout to any type in any universe, so in particular maps where the codomain itself is a universe: a type family $P : X \to \UU$ corresponds to a cocone $(P_A, P_B, H)$ where $P_A : A \to \UU$, $P_B : B \to \UU$ are type families, and $H$ is a homotopy in the universe $H : (s : S) \to P_A(f s) = P_B(g s)$. Since we have a characterization of identifications in universes via the univalence axiom, we arrive at the definition of descent data:
+
 #+begin_defn
-Given a span diagram $f : S \to A$, $g : S \to B$, we call *descent data* on $(f, g)$ the type of triples $(P_A, P_B, P_S)$ consisting of type families
+Given a span diagram $\S \defeq (f, g)$, we call *descent data* on $\S$ a triple $(P_A, P_B, P_S)$ consisting of type families
 \begin{align*}
   P_A &: A \to \UU \\
-  P_B &: B \to \UU
+  P_B &: B \to \UU \\
+\intertext{and a fiberwise equivalence}
+  P_S &: (s : S) \to P_A(f s) \simeq P_B(g s).
 \end{align*}
-and a fiberwise equivalence
-\begin{equation*}
-  P_S : (s : S) \to P_A(f s) \simeq P_B(g s).
-\end{equation*}
 
 We use the notation $\DD(\S)$ for descent data on the span diagram $\S$ when we write about it in formulas.
 #+end_defn
 
-\TODO[Move this exposition before the definition?]
 It may not be immediately clear why "descent data" is an appropriate name for this concept, because there is no apparent downward motion. Traditionally, descent is studied in the context of a collection of objects $X_i$ covering a single object $X$, and local structure on the individual $X_i$'s descending onto $X$, collecting into a global structure, given that the pieces are appropriately compatible on any "overlaps". A pushout of $\S$ is covered by $A$ and $B$, and the overlaps are encoded in $f$ and $g$. Then structure on $A$ and $B$, expressed as type families $P_A$ and $P_B$, "descends" to a structure on $X$ (a type family over $X$). Two elements "overlap" in $X$ if there is an identification between them coming from $S$, and the gluing/compatibility condition exactly requires the local structure of $P_A$ and $P_B$ to agree on such elements, i.e. asks for an equivalence $P_A(f s) \simeq P_B(g s)$.
+
+The study of type theoretic descent describes how type families and related concepts, such as fiberwise maps or sections, arise as local data with gluing conditions.
 
 #+NAME: thm:descent-property
 #+ATTR_LATEX: :options [Descent property]
