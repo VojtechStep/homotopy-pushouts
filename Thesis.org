@@ -27,6 +27,9 @@
 
 #+LATEX_HEADER: \newcommand{\TODO}[1][]{{\leavevmode\color{red}{\ifthenelse{\equal{#1}{}}{TODO}{#1}}}}
 
+#+LATEX_HEADER: \newcommand{\ie}{i.e.~}
+#+LATEX_HEADER: \newcommand{\eg}{e.g.~}
+
 # Syntax macros
 #+LATEX_HEADER: \newcommand{\blank}{{-}}
 #+LATEX_HEADER: \newcommand{\typeformer}[1]{\operatorname{#1}}
@@ -34,19 +37,23 @@
 #+LATEX_HEADER: \newcommand{\defterm}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \newcommand{\term}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \DeclareMathOperator{\id}{id}
-#+LATEX_HEADER: \DeclareMathOperator{\Id}{Id}
-#+LATEX_HEADER: \DeclareMathOperator{\refl}{refl}
-#+LATEX_HEADER: \DeclareMathOperator{\reflhtpy}{refl-htpy}
 #+LATEX_HEADER: \newcommand{\defeq}{\mathop{:=}}
 #+LATEX_HEADER: \newcommand{\judeq}{\doteq}
-#+LATEX_HEADER: \DeclareMathOperator{\tr}{tr}
 #+LATEX_HEADER: \DeclareMathOperator{\comp}{\circ}
+
+#+LATEX_HEADER: \DeclareMathOperator{\Id}{Id}
+#+LATEX_HEADER: \DeclareMathOperator{\refl}{refl}
 #+LATEX_HEADER: \DeclareMathOperator{\concat}{\bullet}
-#+LATEX_HEADER: \DeclareMathOperator{\htpy}{\sim}
-#+LATEX_HEADER: \DeclareMathOperator{\lwhisk}{\cdot{l}}
-#+LATEX_HEADER: \DeclareMathOperator{\rwhisk}{\cdot{r}}
 #+LATEX_HEADER: \DeclareMathOperator{\lunit}{lunit}
 #+LATEX_HEADER: \DeclareMathOperator{\runit}{runit}
+#+LATEX_HEADER: \DeclareMathOperator{\tr}{tr}
+#+LATEX_HEADER: \DeclareMathOperator{\ap}{ap}
+#+LATEX_HEADER: \DeclareMathOperator{\apd}{apd}
+
+#+LATEX_HEADER: \DeclareMathOperator{\htpy}{\sim}
+#+LATEX_HEADER: \DeclareMathOperator{\reflhtpy}{refl-htpy}
+#+LATEX_HEADER: \DeclareMathOperator{\lwhisk}{\cdot_{l}}
+#+LATEX_HEADER: \DeclareMathOperator{\rwhisk}{\cdot_{r}}
 
 #+LATEX_HEADER: \newcommand{\N}{\mathbb{N}}
 
@@ -56,6 +63,11 @@
 # Pushouts/coproducts
 #+LATEX_HEADER: \DeclareMathOperator{\inl}{inl}
 #+LATEX_HEADER: \DeclareMathOperator{\inr}{inr}
+# #+LATEX_HEADER: \DeclareMathOperator{\spanDiag}{span-diagram}
+#+LATEX_HEADER: \DeclareMathOperator{\cocone}{cocone}
+#+LATEX_HEADER: \DeclareMathOperator{\coconeMap}{cocone-map}
+#+LATEX_HEADER: \DeclareMathOperator{\depCocone}{dep-cocone}
+#+LATEX_HEADER: \DeclareMathOperator{\depCoconeMap}{dep-cocone-map}
 #+LATEX_HEADER: \DeclareMathOperator{\incl}{incl}
 
 # Apparently unicode-math doesn't fix \Sigma in operator font,
@@ -213,28 +225,119 @@ If any two of the maps are equivalences, then so is the third.
 
 \TODO[Decide how to treat and write "span" vs "span diagram"].
 
-#+begin_defn
-\TODO[Spans/span diagrams].
-#+end_defn
+\TODO[We differentiate between the concept of a "span", which is an element on a structure with a fixed domain and codomain, and a "span diagram", which is a pair of types with a span between them. The distinction is important when looking at morphisms of these structures --- a morphism of spans is a map between the spanning types, equipped with two homotopies for the appropriate triangles, while a morphism of span diagrams is a natural transformation. The presented material does not formally require the notion of spans, so we introduce span diagrams as the primitive notion. A similar distinction may be done between "cocone structure" with a specific vertex, and a "cocone". It is not realized in the current work, but there are plans to make the change in the library].
 
 #+begin_defn
-\TODO[Cocones].
+A *span diagram* is a quintuple $(A, B, S, f, g)$, where $A : \UU$, $B : \UV$ and $S : \UW$ are types, and $f : S \to A$ and $g : S \to B$ are ordinary maps.
+
+We call $A$, $B$ and $S$ the *domain*, *codomain*, and the *spanning type* of the span diagram, respectively.
 #+end_defn
+
+#+begin_remark
+\TODO[This might be a bad idea:] In the prose, we will often write $\S$ or $\S \judeq (f, g)$ for a span diagram, implicitly introducing the relevant types as the domains and codomains of the maps $f$ and $g$, which will by convention be called $A$, $B$ and $S$ as in the definition. We hope to not cause confusion by this choice.
+#+end_remark
 
 #+begin_defn
-\TODO[Universal property].
+Given a span diagram $\S \judeq (f, g)$ and a type $X : \UU$, a *cocone* under $\S$ on $X$ is a triple $(i, j, H)$, where $i : A \to X$ and $j : B \to X$ are ordinary maps, and $H$ is a homotopy witnessing that the square
+#+begin_center
+\begin{tikzcd}
+  S \arrow[r, "g"] \arrow[d, "f"']
+  & B \arrow[d, "j"] \\
+  A \arrow[r, "i"']
+  & X
+\end{tikzcd}
+#+end_center
+commutes, \ie $H : i \comp f \htpy j \comp g$.
+
+We write $\cocone(\S, X)$ for the type of cocones under $\S$ on $X$.
 #+end_defn
+
+\TODO[To define what a "colimiting cocone" is in type theory, we derive inspiration from the categorical description as a classifier of cocones (phrasing?): a cocone $c$ on $X$ is a pushout if maps $X \to Y$ are in bijection with cocones on $Y$. There is a natural construction for extending a cocone $c$ on $X$ by a map $X \to Y$ to a cocone on $Y$, and we say that $c$ is a pushout of $\S$ exactly when this extension map is an equivalence $(X \to Y) \simeq \cocone(\S, Y)$].
+
+#+begin_constr
+Given a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type $Y : \UV$ we construct a map
+\begin{equation*}
+  \coconeMap_c^Y : (X \to Y) \to \cocone(\S, Y)
+\end{equation*}
+which sends $h$ to $(h \comp i, h \comp j, h \lwhisk H)$.
+
+We may omit the upper index $Y$ or the lower index $c$, or both, if the appropriate value is clear from context.
+#+end_constr
 
 #+begin_defn
-\TODO[Dependent universal property].
+A cocone $c$ under $\S$ on $X$ satisfies the *universal property of pushouts* if for all $Y : \UV$, the map $\coconeMap_c^Y$ is an equivalence.
+
+A cocone satisfying the universal property of pushouts is called a *pushout*.
 #+end_defn
 
+\TODO[The universal property characterizes simple maps out of the colimit. In dependent type theory, we can also ask about characterizations of /dependent/ maps out of the colimit. To that end we introduce dependent cocones and the dependent universal property].
+
+#+begin_defn
+Consider a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UV$. A *dependent cocone* over $c$ on $P$ is a triple $(i', j', H')$, where $i' : (a : A) \to P(i a)$ and $j' : (b : B) \to P(j b)$ are dependent maps over $i$ and $j$, respectively, and $H$ is a \TODO[dependent homotopy] between $i' \comp f$ and $j' \comp g$, \ie a family of identifications
+\begin{alignat*}{2}
+  H &:&& (s : S) \to i'(f s) =_{H s} j'(g s) \\
+    &\judeq\;&& (s : S) \to \tr_P(H s) (i'(f s)) = j'(g s).
+\end{alignat*}
+
+We write $\depCocone(c, P)$ for the type of dependent cocones over $c$ on $P$.
+#+end_defn
+
+#+begin_constr
+Given a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UV$, define a map
+\begin{equation*}
+  \depCoconeMap_c^P : ((x : X) \to P(x)) \to \depCocone(c, P)
+\end{equation*}
+which sends $h$ to $(h \comp i, h \comp j, \lambda s \to \apd_h(H s))$.
+
+We may omit the indices $c$ or $P$ if they are clear from context.
+#+end_constr
+
+#+begin_defn
+A cocone $c : \cocone(\S, X)$ satisfies the *dependent universal property of pushouts* if for all $P : X \to \UV$, the map $\depCoconeMap_c^P$ is an equivalence.
+#+end_defn
+
+Note that the dependent universal property isn't a property of dependent cocones, but rather a property of cocones and their extensions by dependent functions.
+
+\TODO[We don't introduce a new name for cocones satisfying the dependent universal property, because curiously enough, the two properties are equivalent, as claimed by the following lemma.]
+
+#+name: lemma:dup-iff-up-pushout
 #+begin_lemma
-\TODO[DUP $\leftrightarrow$ UP].
+A cocone $c : \cocone(\S, X)$ satisfies the universal property of pushouts if and only if it satisfies the dependent universal property of pushouts.
 #+end_lemma
 
-\TODO[Mention results of Sojakova].
-[cite:@Soj14]
+#+begin_proof
+\TODO[Figure out how to skip this proof].
+#+end_proof
+
+#+begin_remark
+This equivalence of a non-dependent and dependent universal property is a more general phenomenon. In homotopy type theory, there are often multiple ways of describing "universality". These expressions usually involve a base sort of objects and dependent objects, which can be equipped with some structure functorial in an appropriate notion of maps and dependent maps.
+
+The functorial action
+\begin{equation*}
+  \term{fmap} : (X \to Y) \to \term{structure}(X) \to \term{structure}(Y)
+\end{equation*}
+can have its arguments rearranged so that for every structured object $(X, s)$ and a plain object $Y$, we get an "evaluation" map
+\begin{equation*}
+  \term{ev-map}_{(X, s)}^Y : (X \to Y) \to \term{structure}(Y).
+\end{equation*}
+In the dependent case, we get a map
+\begin{equation*}
+  \term{dep-ev-map}_{(X, s)}^P : ((x : X) \to P(x)) \to \term{dep-structure}((X, s), P).
+\end{equation*}
+
+When talking about pushouts, we take the base objects to be types, dependent objects to be type families, and maps and dependent maps to be ordinary functions and dependent functions. The functorial structure on a type $X$ is the structure of a cocone on $X$ under a fixed span $\S$, and the dependent structure on a type family $P : X \to \UV$ over a cocone $c$ on $X$ is the structure of a dependent cocone on $P$ over $c$. The evaluation maps are $\coconeMap$ and $\depCoconeMap$, respectively.
+
+With these general definitions in place, consider a structured object $(X, s)$; we may ask for the following properties to be satisfied:
+- Universal property: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ is an equivalence
+- Dependent universal property: For every dependent object $P$, $\term{dep-ev-map}_{(X, s)}^P$ is an equivalence
+- Recursion principle and uniqueness: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ has a unique section
+- Induction principle: For every dependent object $P$, $\term{dep-ev-map}_{(X, s)}^P$ has a section
+
+The universal properties correspond to a notion of initiality: the evaluation map is an equivalence if and only if it has contractible fibers, \ie for all structured objects $(X, s)$ and $(Y, t)$, there is a unique map $h : X \to Y$ such that $\term{ev-map}_{(X, s)}^Y h = t$. The condition asks for $h$ to preserve the structure. In other words, the universal property says that $(X, s)$ is the initial object in a hypothetical "category" of structured objects and homomorphisms.
+
+It was first shown by [cite/t:@AGS12] that the four properties are equivalent for a class of examples, where we have objects, type families, ordinary functions, dependent functions, and the (dependent) structures are (fibered) algebras for a polynomial functor. The result was later extended by
+[cite/t:@Soj14] to include (fibered) algebras for W-suspensions, a higher inductive analogue of W-types. The structure of a (dependent) cocone can be expressed as a (fibered) algebra of a specific W-suspension, so this result is applicable to [[lemma:dup-iff-up-pushout]], but it hasn't been formalized in the library.
+#+end_remark
 
 ** Descent property
 
@@ -911,7 +1014,7 @@ The standard sequential colimit may be obtained as a coequalizer of
 * Conclusion
 
 Future work:
-- more abstract proof of the last coherence: using dependent identifications, and/or a more general lemma about coherent sections over zigzags; although that might have limited applications
+- more abstract proof of the last coherence: using the calculus of dependent identifications, and/or a more general lemma about coherent sections over zigzags; although that might have limited applications
 - formalize applications
 - formalize categorical statement
 
