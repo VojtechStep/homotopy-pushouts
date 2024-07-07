@@ -63,15 +63,48 @@
   doi =          {10.36045/bbms/1103408963}
 }
 
-@Article{KvR19,
-  title =        {Path Spaces of Higher Inductive Types in Homotopy
-                  Type Theory},
-  author =       {Nicolai Kraus and Jakob von Raumer},
-  journal =      {2019 34th Annual ACM/IEEE Symposium on Logic in
-                  Computer Science (LICS)},
+@InProceedings{KvR19,
+  author =       {Kraus, Nicolai and von Raumer, Jakob},
+  title =        {Path spaces of higher inductive types in homotopy
+                  type theory},
   year =         2019,
-  pages =        {1-13},
-  url =          {https://api.semanticscholar.org/CorpusID:58028918}
+  publisher =    {IEEE Press},
+  abstract =     {The study of equality types is central to homotopy
+                  type theory. Characterizing these types is often
+                  tricky, and various strategies, such as the
+                  encode-decode method, have been developed.We prove a
+                  theorem about equality types of coequalizers and
+                  pushouts, reminiscent of an induction principle and
+                  without any restrictions on the truncation levels.
+                  This result makes it possible to reason directly
+                  about certain equality types and to streamline
+                  existing proofs by eliminating the necessity of
+                  auxiliary constructions.To demonstrate this, we give
+                  a very short argument for the calculation of the
+                  fundamental group of the circle (Licata and Shulman
+                  [1]), and for the fact that pushouts preserve
+                  embeddings. Further, our development suggests a
+                  higher version of the Seifert-van Kampen theorem,
+                  and the set-truncation operator maps it to the
+                  standard Seifert-van Kampen theorem (due to Favonia
+                  and Shulman [2]).We provide a formalization of the
+                  main technical results in the proof assistant Lean.},
+  booktitle =    {Proceedings of the 34th Annual ACM/IEEE Symposium on
+                  Logic in Computer Science},
+  articleno =    7,
+  numpages =     13,
+  location =     {Vancouver, Canada},
+  series =       {LICS '19}
+}
+
+@article{Mat76,
+  title =        {Pull-Backs in Homotopy Theory},
+  author =       {Michael Mather},
+  journal =      {Canadian Journal of Mathematics},
+  year =         1976,
+  volume =       28,
+  pages =        {225 - 263},
+  doi =          {10.4153/CJM-1976-029-0}
 }
 
 @misc{Rij19,
@@ -104,14 +137,45 @@
                   {https://github.com/martinescardo/HoTTEST-Summer-School/blob/06dab2ca8ea0c760ac2dcb40006c280d619e5368/HoTT/hott-intro.pdf}
 }
 
-@Article{Soj14,
+@Article{Soj15,
+  author =       {Sojakova, Kristina},
   title =        {Higher Inductive Types as Homotopy-Initial Algebras},
-  author =       {Kristina Sojakova},
-  journal =      {ACM SIGPLAN Notices},
-  year =         2014,
+  year =         2015,
+  issue_date =   {January 2015},
+  publisher =    {Association for Computing Machinery},
+  address =      {New York, NY, USA},
   volume =       50,
-  pages =        {31 - 42},
-  url =          {https://api.semanticscholar.org/CorpusID:14607000}
+  number =       1,
+  issn =         {0362-1340},
+  url =          {https://doi.org/10.1145/2775051.2676983},
+  doi =          {10.1145/2775051.2676983},
+  abstract =     {Homotopy Type Theory is a new field of mathematics
+                  based on the recently-discovered correspondence
+                  between Martin-L\"{o}f's constructive type theory
+                  and abstract homotopy theory. We have a powerful
+                  interplay between these disciplines - we can use
+                  geometric intuition to formulate new concepts in
+                  type theory and, conversely, use type-theoretic
+                  machinery to verify and often simplify existing
+                  mathematical proofs.Higher inductive types form a
+                  crucial part of this new system since they allow us
+                  to represent mathematical objects, such as spheres,
+                  tori, pushouts, and quotients, in the type theory.
+                  We investigate a class of higher inductive types
+                  called W-suspensions which generalize
+                  Martin-L\"{o}f's well-founded trees. We show that a
+                  propositional variant of W-suspensions, whose
+                  computational behavior is determined up to a higher
+                  path, is characterized by the universal property of
+                  being a homotopy-initial algebra. As a corollary we
+                  get that W-suspensions in the strict form are
+                  homotopy-initial.},
+  journal =      {SIGPLAN Not.},
+  month =        {jan},
+  pages =        {31–42},
+  numpages =     12,
+  keywords =     {higher inductive type, homotopy type theory,
+                  homotopy-initial algebra, w-suspension}
 }
 
 @InProceedings{SvDR20,

@@ -35,6 +35,8 @@
 
 #+MACRO: PR (eval (let* ((full-name (concat $1 "-" $2 ".patch")) (path (concat "attachments/" full-name))) (if (file-exists-p path) (concat "=" full-name "= ([[https://github.com/UniMath/agda-unimath/pull/" $1 "][PR]])") (error (concat "File does not exist: " path)))))
 
+#+LATEX_HEADER: \newcommand{\DeclareBinOperator}[2]{\newcommand{#1}{\mathbin{#2}}}
+
 # Syntax macros
 #+LATEX_HEADER: \newcommand{\blank}{{-}}
 #+LATEX_HEADER: \newcommand{\typeformer}[1]{\operatorname{#1}}
@@ -42,25 +44,27 @@
 #+LATEX_HEADER: \newcommand{\defterm}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \newcommand{\term}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \DeclareMathOperator{\id}{id}
-#+LATEX_HEADER: \newcommand{\defeq}{\mathrel{:=}}
-#+LATEX_HEADER: \newcommand{\judeq}{\doteq}
-#+LATEX_HEADER: \DeclareMathOperator{\comp}{\circ}
+# #+LATEX_HEADER: \newcommand{\defeq}{\mathrel{:=}}
+#+LATEX_HEADER: \DeclareBinOperator{\defeq}{:=}
+#+LATEX_HEADER: \DeclareBinOperator{\judeq}{\doteq}
+#+LATEX_HEADER: \DeclareBinOperator{\comp}{\circ}
 
 #+LATEX_HEADER: \DeclareMathOperator{\equivEq}{equiv-eq}
 
 #+LATEX_HEADER: \DeclareMathOperator{\Id}{Id}
 #+LATEX_HEADER: \DeclareMathOperator{\refl}{refl}
-#+LATEX_HEADER: \DeclareMathOperator{\concat}{\bullet}
+#+LATEX_HEADER: \DeclareBinOperator{\concat}{\bullet}
 #+LATEX_HEADER: \DeclareMathOperator{\lunit}{lunit}
 #+LATEX_HEADER: \DeclareMathOperator{\runit}{runit}
 #+LATEX_HEADER: \DeclareMathOperator{\tr}{tr}
 #+LATEX_HEADER: \DeclareMathOperator{\ap}{ap}
 #+LATEX_HEADER: \DeclareMathOperator{\apd}{apd}
 
-#+LATEX_HEADER: \DeclareMathOperator{\htpy}{\sim}
+#+LATEX_HEADER: \DeclareBinOperator{\htpy}{\sim}
 #+LATEX_HEADER: \DeclareMathOperator{\reflhtpy}{refl-htpy}
-#+LATEX_HEADER: \DeclareMathOperator{\lwhisk}{\cdot_{l}}
-#+LATEX_HEADER: \DeclareMathOperator{\rwhisk}{\cdot_{r}}
+#+LATEX_HEADER: \DeclareMathOperator{\eqHtpy}{eq-htpy}
+#+LATEX_HEADER: \DeclareBinOperator{\lwhisk}{\cdot_{l}}
+#+LATEX_HEADER: \DeclareBinOperator{\rwhisk}{\cdot_{r}}
 
 #+LATEX_HEADER: \newcommand{\N}{\mathbb{N}}
 
@@ -316,6 +320,7 @@ A cocone $c : \cocone(\S, X)$ satisfies the universal property of pushouts if an
 \TODO[Figure out how to skip this proof].
 #+end_proof
 
+#+name: remark:universal-properties
 #+begin_remark
 This equivalence of a non-dependent and dependent universal property is a more general phenomenon. In homotopy type theory, there are often multiple ways of describing universal properties. These expressions usually involve a base sort of objects and dependent objects, which can be equipped with some structure functorial in an appropriate notion of maps and dependent maps.
 
@@ -343,7 +348,7 @@ With these general definitions in place, consider a structured object $(X, s)$; 
 The universal properties correspond to a notion of initiality: the evaluation map is an equivalence if and only if it has contractible fibers, \ie for all structured objects $(X, s)$ and $(Y, t)$, there is a unique map $h : X \to Y$ such that $\term{ev-map}_{(X, s)}^Y h = t$. The condition asks for $h$ to preserve the structure. In other words, the universal property says that $(X, s)$ is the initial object in a hypothetical "category" of structured objects and homomorphisms.
 
 It was first shown by [cite/t:@AGS12] that the four properties are equivalent for a class of examples, where we have objects, type families, ordinary functions, dependent functions, and the (dependent) structures are (fibered) algebras for a polynomial functor. The result was later extended by
-[cite/t:@Soj14] to include (fibered) algebras for W-suspensions, a higher inductive analogue of W-types. The structure of a (dependent) cocone can be expressed as a (fibered) algebra of a specific W-suspension, so this result is applicable to [[lemma:dup-iff-up-pushout]], but it hasn't been formalized in the library.
+[cite/t:@Soj15] to include (fibered) algebras for W-suspensions, a higher inductive analogue of W-types. The structure of a (dependent) cocone can be expressed as a (fibered) algebra of a specific W-suspension, so this result is applicable to [[lemma:dup-iff-up-pushout]], but it hasn't been formalized in the library.
 
 We will rely on informal understanding of this principle when discussing options for formalization of a universal property of the identity types of pushouts in [[#sec:identity-systems]].
 #+end_remark
@@ -377,10 +382,10 @@ Given a cocone $c \judeq (i, j, H)$ on $X$, construct a map
 \end{displaymath}
 which sends a type family $P : X \to \UU$ to the descent data $(P_A, P_B, P_S)$ obtained by precomposing
 \begin{alignat*}{3}
-  P_A &:= (\lambda a \to P(i a)) &&: A \to \UU \\
-  P_B &:= (\lambda b \to P(j b)) &&: B \to \UU \\
+  P_A &\defeq (\lambda a \to P(i a)) &&: A \to \UU \\
+  P_B &\defeq (\lambda b \to P(j b)) &&: B \to \UU \\
 \intertext{and transporting in $P$}
-  P_S &:= (\lambda s \to \tr_P (H s)) &\quad&: (s : S) \to P (i (f s)) \simeq P (j (g s)).
+  P_S &\defeq (\lambda s \to \tr_P (H s)) &\quad&: (s : S) \to P (i (f s)) \simeq P (j (g s)).
 \end{alignat*}
 
 Note that $\tr_P (H s)$ is an equivalence by [[lemma:is-equiv-tr]].
@@ -492,7 +497,7 @@ When relating concepts from the world of type families with concepts from the wo
 #+begin_defn
 Given a span $\S$ and a cocone $c$ on $X$, we define the type of *families with descent data* to be the type of triples $(P, P', e)$ consisting of a type family $P : X \to \UU$, descent data $P' : \DD(\S)$, and an equivalence of descent data $e : \ddFam_c(P) \simeq P'$.
 
-We write $e : P \correspDD P'$ for a family $P$ with descent data $P'$ related by an equivalence $e$.
+We write $e : P \correspDD P'$ for a family $P$ with descent data $P'$ related by an equivalence $e$. We also say that $P$ is characterized by $P'$.
 #+end_defn
 
 #+begin_remark
@@ -503,20 +508,14 @@ We write $e : P \correspDD P'$ for a family $P$ with descent data $P'$ related b
 \TODO[Move this to flattening?] The concept of a family with descent data has a direction: the equivalence relates $\ddFam_c(P)$ on the left with $P'$ on the right. It lends itself well to characterizations of concrete type families, where $P$ has a specific shape, and we want to recover the shape of corresponding descent data by computing $P(i a)$'s and $P(j b)$'s. However there are applications where the converse direction is more suitable. In those cases we write $e : P' \correspDD P$ for descent data $P'$, a type family $P$, and an equivalence of descent data $e : P' \simeq \ddFam(P)$.
 #+end_remark
 
+As a first example of a family with descent data, we characterize the type family of based identity types.
+
 #+begin_constr
-\TODO[$(I_A, I_B, I_S)$].
-Given a cocone
-#+begin_center
-\begin{tikzcd}
-  S \arrow[d, "f"'] \arrow[r, "g"] & B \arrow[d, "j"] \\
-  A \arrow[r, "i"'] \arrow[ur, phantom, "H"] & X
-\end{tikzcd}
-#+end_center
-and a point $x_0 : X$, construct the descent data $(I_A, I_B, I_S)$ as \TODO[typesetting]
+Given a span $\S \judeq (f, g)$, a cocone $(i, j, H)$ on $X$ and a point $x_0 : X$, construct the descent data $(I_A, I_B, I_S)$ as \TODO[typesetting]
 \begin{align*}
-  I_A &:= (\lambda a \to x = (i a)) &&: A \to \UU \\
-  I_B &:= (\lambda b \to x = (j b)) &&: B \to \UU \\
-  I_S &:= (\lambda s, p \to p \concat (H s)) &&: (s : S) \to I_A(f s) \simeq I_B(g s).
+  I_A &\defeq (\lambda a \to x = (i a)) &&: A \to \UU \\
+  I_B &\defeq (\lambda b \to x = (j b)) &&: B \to \UU \\
+  I_S &\defeq (\lambda s, p \to p \concat (H s)) &&: (s : S) \to I_A(f s) \simeq I_B(g s).
 \end{align*}
 
 The concatenation operation is an equivalence by [[lemma:is-equiv-concat]].
@@ -536,12 +535,12 @@ Given a cocone and a basepoint $x_0 : X$ as above, the type family $\Id(x_0) : X
 and a coherence $e_S$
 #+begin_center
 \begin{tikzcd}
-  (x_0 = (i (f s)))
+  (x_0 = i (f s))
   \arrow[r, "e_A(f s)"]
   \arrow[d, "\tr_{\Id(x_0)} (H s)"']
   & I_A(f s)
   \arrow[d, "I_S s"] \\
-  (x_0 = (j (g s)))
+  (x_0 = j (g s))
   \arrow[r, "e_B(g s)"']
   & I_B(g s)
 \end{tikzcd}
@@ -552,18 +551,248 @@ and a coherence $e_S$
 By definition, $I_A(a) \judeq (x_0 = (i a))$ and $I_B(b) \judeq (x_0 = (j b))$, so we may choose the identity equivalence for $e_A$ and $e_B$. Then the coherence datum amounts to showing that $\tr_{\Id(x_0)}(H s, p) = p \concat (H s)$, which is [[lemma:tr-id-right]].
 #+end_proof
 
-#+begin_lemma
-\TODO[Given $P \approx (P_A, P_B, P_S)$ and $Q \approx (Q_A, Q_B, Q_S)$, fiberwise maps correspond to homs of descent data].
-#+end_lemma
+For any given type family $P$ over $X$, we can talk about its /sections/, elements of the type $(x : X) \to P(x)$. We define an analogous concept of /sections of descent data/, and show that indeed they correspond to sections of type families over pushouts.
 
 #+begin_defn
+Given a span $\S$ and descent data $(P_A, P_B, P_S)$ over it, a *section* of $(P_A, P_B, P_S)$ is a triple $(t_A, t_B, t_S)$ consisting of sections
+\begin{align*}
+  t_A &: (a : A) \to P_A(a) \\
+  t_B &: (b : B) \to P_B(b)
+\intertext{and a coherence}
+  t_S &: (s : S) \to P_S(s, t_A(f s)) = t_B(g s).
+\end{align*}
+
+We write $\sectDD(P_A, P_B, P_S)$ for the type of sections of $(P_A, P_B, P_S)$.
+#+end_defn
+
+#+name: def:sect-sect
+#+begin_constr
+Given a span $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $e : P \correspDD (P_A, P_B, P_S)$, construct a map
+\[
+  \term{sect-sect}_c : ((x : X) \to P(x)) \to \sectDD(P_A, P_B, P_S)
+\]
+by assigning to a dependent function $h$ the section
+\begin{alignat*}{3}
+  &(\lambda a \to e_A(h(i a))) &&:\,&& (a : A) \to P_A(a) \\
+  &(\lambda b \to e_B(h(j b))) &&:&& (b : B) \to P_B(b) \\
+  &(\lambda s \to (e_S(h(i(f s))))^{-1} \concat \ap_{e_B}(\apd_h(H s))) &&:&& (s : S) \to \\
+  &&&&&P_S(s, e_A(h(i(f s)))) = e_B(h(j(g s))).
+\end{alignat*}
+#+end_constr
+
+#+name: lemma:is-equiv-sect-sect
+#+begin_lemma
+Consider a span $\S$, a pushout cocone $c$ on $X$ and a family with descent data $P \correspDD (P_A, P_B, P_S)$. Then the map $\term{sect-sect}_c$ is an equivalence.
+#+end_lemma
+
+#+begin_proof
+The map factors through the dependent cocone map as
+#+begin_center
+\begin{tikzcd}
+  ((x : X) \to P(x))
+  \arrow[rr, "\depCoconeMap_c", "\simeq"']
+  \arrow[dr, "\term{sect-sect}_c"']
+  && \depCocone(c, P)
+  \arrow[dl, "\simeq"] \\
+  & \sectDD(P_A, P_B, P_S),
+\end{tikzcd}
+#+end_center
+where the right map takes $(i', j', H')$ to
+\begin{alignat*}{3}
+  &(\lambda a \to e_A(i' a)) &\quad&:\,&& (a : A) \to P_A(a) \\
+  &(\lambda b \to e_B(j' b)) &&:&& (b : B) \to P_B(b) \\
+  &(\lambda s \to (e_S(i'(f s)))^{-1} \concat \ap_{e_B}(H' s)) &&:&& (s : S) \to \\
+  &&&&&P_S(s, e_A(i'(f s))) = e_B(j'(g s)).
+\end{alignat*}
+
+The right map is an equivalence, because its action on the first two components is postcomposition by a fiberwise equivalence, which is an equivalence, and its action on the third component is a fiberwise application of $\ap_{e_B}$, which is an equivalence, and concatenation with an identification, which is an equivalence.
+
+The triangle commutes by $\reflhtpy$. By the 3-for-2 property of equivalences, it follows that $\term{sect-sect}_c$ is an equivalence.
+#+end_proof
+
+\TODO[Are homotopies of sections worth mentioning? It gives a nicer phrasing of (some) computation rules by computing the fibers of $\term{sect-sect}_c$, but it's all pretty standard stuff].
+
+Equipped with the tools for computing data over pushouts by gluing together data over its components, we continue by computing fiberwise maps and equivalences over pushouts. We first characterize type families of fiberwise maps, \ie families with fibers of the shape $P(x) \to Q(x)$.
+
+#+begin_remark
+It is important to differentiate between families of /function types/, \ie a type family that to every $x : X$ assigns the /type/ $P(x) \to Q(x)$, and families of /functions/, \ie a family that to every $x : X$ assigns a /function/ from $P(x)$ to $R(x)$. Descent data plays the role of a family of types, so it makes sense to talk about "descent data corresponding to a family of function types", but it doesn't make sense to talk about "descent data corresponding to a family of functions". The kind of objects that corresponds to families of functions are the sections of the descent data of a family of function types.
+#+end_remark
+
+#+name: lemma:family-with-dd-function-types
+#+begin_lemma
+Given a cocone $c$ on $X$ and two families with descent data $e^P : P \approx (P_A, P_B, P_S)$ and $e^Q : Q \approx (Q_A, Q_B, Q_S)$, the type family
+\[
+  (\lambda x \to (P(x) \to Q(x))) : X \to \UU
+\]
+is characterized by the descent data
+\begin{alignat*}{3}
+  &(\lambda a \to (P_A(a) \to Q_A(a))) &\quad&:\,&&A \to \UU \\
+  &(\lambda b \to (P_B(b) \to Q_B(b))) &&:&&B \to \UU \\
+  &(\lambda s, h \to Q_S(s) \comp h \comp (P_S(s))^{-1}) &&:&&(s : S) \to \\
+  &&&&&(P_A(f s) \to Q_A(f s)) \simeq (P_B(g s) \to Q_B(g s)).
+\end{alignat*}
+
+Note that postcomposition and precomposition by an equivalence is an equivalence of function types.
+#+end_lemma
+
+#+begin_proof
+We need to provide equivalences
+\begin{align*}
+  e_A &: (a : A) \to (P(i a) \to Q(i a)) \simeq (P_A(a) \to Q_A(a)) \\
+  e_B &: (b : B) \to (P(j b) \to Q(j b)) \simeq (P_B(b) \to Q_B(b))
+\end{align*}
+and a coherence $e_S$
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  (P(i(f s)) \to Q(i(f s)))
+  \arrow[r, "e_A(f s)"]
+  \arrow[d, "\tr_{(\lambda x \to (P(x) \to Q(x)))}(H s)"']
+  & (P_A(f s) \to Q_A(f s))
+  \arrow[d, "Q_S(s) \comp \, \blank \, \comp (P_S(s))^{-1}"] \\
+  (P(j(g s)) \to Q(j(g s)))
+  \arrow[r, "e_B(g s)"']
+  & (P_B(g s) \to Q_B(g s)).
+\end{tikzcd}
+#+end_center
+
+Define the equivalences by
+\begin{align*}
+e_A(a, h) &\defeq e^Q_A(a) \comp h \comp (e^P_A(a))^{-1}\\
+e_B(b, h) &\defeq e^Q_B(b) \comp h \comp (e^P_B(b))^{-1}.
+\end{align*}
+
+Transport in a type family of function types can be computed as composition of transports in the involved families by \TODO[ref], so the left map can be replaced by $\tr_Q(H s) \comp \blank \comp \tr_P(H s)^{-1}$. Since we want to identify two functions, we invoke function extensionality, and are left with the goal
+#+begin_center
+\begin{tikzcd}
+  P_B(g s)
+  \arrow[r, "(P_S(s))^{-1}"]
+  \arrow[d, "(e^P_B(g s))^{-1}"']
+  & P_A(f s)
+  \arrow[d, "(e^P_A(f s))^{-1}"] \\
+  P(j(g s))
+  \arrow[r, "\tr_P(H s)^{-1}"']
+  & P(i(f s))
+  \arrow[r, "h"]
+  & Q(i(f s))
+  \arrow[r, "e^Q_A(f s)"]
+  \arrow[d, "\tr_Q(H s)"']
+  & Q_A(f s)
+  \arrow[d, "Q_S(s)"] \\
+  && Q(j(g s))
+  \arrow[r, "e^Q_B(g s)"']
+  & Q_B(g s)
+\end{tikzcd}
+#+end_center
+for all $h : P(i(f s)) \to Q(i(f s))$. The right square is exactly $e^Q_S(s)$, and the left square is $e^P_S(s)$ mirrored vertically and horizontally.
+#+end_proof
+
+#+name: lemma:hom-sect-dd
+#+begin_lemma
+The type of sections of the descent data defined in [[lemma:family-with-dd-function-types]] is equivalent to morphisms $(P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)$.
+#+end_lemma
+
+#+begin_proof
+\TODO
+#+end_proof
+
+#+begin_thm
+Consider a span $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
+\[
+  \term{hom-map} : ((x : X) \to P(x) \to Q(x)) \simeq ((P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)).
+\]
+Additionally, the following diagrams commute for all $h : (x : X) \to P(x) \to Q(x)$
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  P(i a)
+  \arrow[r, "h(i a)"]
+  \arrow[d, "e^P_A(a)"']
+  & Q(i a)
+  \arrow[d, "e^Q_A(a)"] \\
+  P_A(a)
+  \arrow[r, "\term{hom-map}(h)_A(a)"']
+  & Q_A(a)
+\end{tikzcd}
+\begin{tikzcd}[column sep=6em]
+  P(j b)
+  \arrow[r, "h(j b)"]
+  \arrow[d, "e^P_B(b)"']
+  & Q(j b)
+  \arrow[d, "e^Q_B(b)"] \\
+  P_B(b)
+  \arrow[r, "\term{hom-map}(h)_B(b)"']
+  & Q_B(b).
+\end{tikzcd}
+#+end_center
+#+end_thm
+
+#+begin_proof
+The type of fiberwise maps is by definition the type of sections of the family $\lambda x \to (P(x) \to Q(x))$, which is equivalent to the type of sections of the descent data from [[lemma:family-with-dd-function-types]] by [[lemma:is-equiv-sect-sect]]. That type of sections is equivalent to the type of morphisms of descent data by [[lemma:hom-sect-dd]].
+
+Computing the action of this equivalence on a fiberwise map $h : (x : X) \to P(x) \to Q(x)$, we get the definitional equalities
+\begin{alignat*}{2}
+  &\term{hom-map}(h)_A &&\defeq \lambda a \to e^Q_A(a) \comp h(i a) \comp (e^P_A(a))^{-1} \\
+  &\term{hom-map}(h)_B &&\defeq \lambda b \to e^Q_B(b) \comp h(j b) \comp (e^P_B(b))^{-1},
+\end{alignat*}
+so by transposing $e^P_A(a)$ and $e^P_B(b)$, we get the desired computation rules.
+#+end_proof
+
+Completely analogously, we may characterize the type family of equivalence types, and show that fiberwise equivalences correspond to equivalences of descent data. We present the statements without proof \TODO[but they are formalized].
+
+#+begin_lemma
+Given a cocone $c$ on $X$ and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$, the type family
+\begin{displaymath}
+  (\lambda x \to (P(x) \simeq Q(x))) : X \to \UU
+\end{displaymath}
+is characterized by the descent data
+\begin{alignat*}{3}
+  &(\lambda a \to (P_A(a) \simeq Q_A(a))) &\quad&:\,&&A \to \UU \\
+  &(\lambda b \to (P_B(b) \simeq Q_B(b))) &&:&&B \to \UU \\
+  &(\lambda s, h \to Q_S(s) \comp h \comp (P_S(s))^{-1}) &&:&&(s : S) \to \\
+  &&&&&(P_A(f s) \simeq Q_A(f s)) \simeq (P_B(g s) \simeq Q_B(g s)).
+\end{alignat*}
+#+end_lemma
+
+#+begin_thm
+Consider a span $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
+\begin{displaymath}
+  \term{equivDD-equiv} : ((x : X) \to P(x) \simeq Q(x)) \simeq ((P_A, P_B, P_S) \simeq (Q_A, Q_B, Q_S)).
+\end{displaymath}
+Additionally, the following diagrams commute for all $e : (x : X) \to P(x) \simeq Q(x)$
+#+begin_center
+\begin{tikzcd}[column sep=8em]
+  P(i a)
+  \arrow[r, "e(i a)"]
+  \arrow[d, "e^P_A(a)"']
+  & Q(i a)
+  \arrow[d, "e^Q_A(a)"] \\
+  P_A(a)
+  \arrow[r, "\term{equivDD-equiv}(e)_A(a)"']
+  & Q_A(a)
+\end{tikzcd}
+\begin{tikzcd}[column sep=8em]
+  P(j b)
+  \arrow[r, "e(j b)"]
+  \arrow[d, "e^P_B(b)"']
+  & Q(j b)
+  \arrow[d, "e^Q_B(b)"] \\
+  P_B(b)
+  \arrow[r, "\term{equivDD-equiv}(e)_B(b)"']
+  & Q_B(b).
+\end{tikzcd}
+#+end_center
+#+end_thm
+
+\TODO[Does it make sense to talk about homotopies of morphisms of descent data? I formalized it all, and we can show that for a morphism, the type of fiberwise functions such that the induced morphism is homotopic to the original one is contractible, but that still needs a bit more work to properly interpret the computation rules (the computation on points is easy enough, but the path case is tricky). It adds approx. 1 page].
+
+#+begin_comment
+,#+begin_defn
 For any two morphisms $(h_A, h_B, h_S)$ and $(k_A, k_B, k_S)$ between $(P_A, P_B, P_S)$ and $(Q_A, Q_B, Q_S)$, we define the type of *homotopies* to be the type of triples $(H_A, H_B, H_S)$ consisting of fiberwise homotopies
 \begin{align*}
   H_A &: (a : A) \to h_A(a) \htpy k_A(a) \\
   H_B &: (b : B) \to h_B(b) \htpy h_B(b)
 \end{align*}
 and a coherence datum $H_S$ indexed by $s : S$, asserting that the squares of homotopies
-#+begin_center
+,#+begin_center
 \begin{tikzcd}[column sep=6em]
   h_B(g s) \comp P_S(s)
   \arrow[r, squiggly, "H_B(g s) \rwhisk P_S(s)"]
@@ -573,15 +802,15 @@ and a coherence datum $H_S$ indexed by $s : S$, asserting that the squares of ho
   Q_S(s) \comp h_A(f s)
   \arrow[r, squiggly, "Q_S(s) \lwhisk H_A(f s)"'] & Q_S(s) \comp k_A(f s)
 \end{tikzcd}
-#+end_center
+,#+end_center
 commute.
 
 We write $(H_A, H_B, H_S) : (h_A, h_B, h_S) \htpy (k_A, k_B, k_S)$.
-#+end_defn
+,#+end_defn
 
-#+begin_remark
+,#+begin_remark
 The coherence can be seen as a filler of the shape one gets by gluing the squares $h_S$ and $k_S$ along the common vertical maps, as in
-#+begin_center
+,#+begin_center
 \begin{tikzcd}[row sep=5em]
   P_A(f s)
   \arrow[r, bend left, "k_A(f s)"]
@@ -593,56 +822,50 @@ The coherence can be seen as a filler of the shape one gets by gluing the square
   \arrow[r, bend right, "h_B(g s)"']
   & Q_B(g s).
 \end{tikzcd}
-#+end_center
+,#+end_center
 
 The front square is $h_S$, the back square is $k_S$, the top face is $H_A$ and the bottom face is $H_B$. The coherence $H_S$ expresses that going along the front square and then the top face is homotopic to first going along the bottom face and then the back square.
-#+end_remark
+,#+end_remark
 
-#+begin_lemma
+,#+begin_lemma
 The type of homotopies of morphisms of descent data characterizes the identity type of morphisms of descent data. In other words, given two morphisms of descent data $h, k : (P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)$, there is an equivalence
 \begin{equation*}
   \defterm{extensionality-hom-DD} : (h = k) \simeq (h \htpy k).
 \end{equation*}
-#+end_lemma
+,#+end_lemma
 
-#+begin_proof
+,#+begin_proof
 We define the underlying map by path induction. Assume $h \doteq k$ are identified by $\refl$. The identity homotopy $h \htpy k$ is defined as \TODO[typesetting]
 \begin{align*}
-  H_A &:= (\lambda a \to \reflhtpy) &&: (a : A) \to h_A \htpy h_A \\
-  H_B &:= (\lambda b \to \reflhtpy) &&: (b : B) \to h_B \htpy h_B \\
-  H_S &:= (\lambda s \to \runit)    &&: (s : S) \to h_S(s) \concat refl = h_S(s).
+  H_A &\defeq (\lambda a \to \reflhtpy) &&: (a : A) \to h_A \htpy h_A \\
+  H_B &\defeq (\lambda b \to \reflhtpy) &&: (b : B) \to h_B \htpy h_B \\
+  H_S &\defeq (\lambda s \to \runit)    &&: (s : S) \to h_S(s) \concat refl = h_S(s).
 \end{align*}
 
 To show that it is an equivalence, we may appeal to [[lemma:fundamental-theorem-id]]. It then suffices to show that the type $\Sigma (k : P \to Q). (h \htpy k)$ is contractible.
-#+end_proof
+,#+end_proof
 
-#+begin_corol
+,#+begin_corol
 \TODO[Uniqueness of a fiberwise map with nice computational properties].
-#+end_corol
+,#+end_corol
+#+end_comment
 
-#+begin_lemma
-\TODO[Fiberwise equivalences correspond to equivs of descent data].
-#+end_lemma
+The correspondence of concepts between the world of type families over pushouts and the world of descent data is summarized in [[fig:descent-table]]. Since we want to arrive at an alternative characterization of the identity descent data $(I_A, I_B, I_S)$ via the zigzag construction, we chose to identify its universal property. We can take inspiration from the various universal properties satisfied by the family of identity types $\Id(x_0) \defeq (\lambda x \to (x_0 = x))$. Some of those properties arise from it being the initial pointed type family, in the sense of [[remark:universal-properties]]. As we will see, in this case the induction principle can be reduced to defining a converse map; it will automatically be a section. \TODO[We make an educated guess that it will be the easiest property to formalize]. It also corresponds to the induction principle stated by [cite/t:@KvR19].
 
-#+begin_defn
-\TODO[Sections of descent data].
-#+end_defn
+However, the induction principle speaks about dependent type families of the sort $(x : X) \to (p : P(x)) \to \UU$. Instead of building new infrastructure for "dependent descent data", we notice that by uncurrying, those dependent type families are exactly the type families $\Sigma X P \to \UU$! This observation makes us ask another question --- to use descent, we need type families over a pushout; by assumption, $X$ is a pushout, but here we require $\Sigma X P$ to be a pushouts as well. The next section is dedicated to proving that indeed, the total space of a family over a pushout is a pushout.
 
-#+begin_lemma
-\TODO[Sections of descent data correspond to sections of type families].
-#+end_lemma
-
-\TODO[Summary, lead onto flattening].
-
+#+name: fig:descent-table
+#+caption: Translation table between type families and descent data
+#+begin_figure
 |                    | Families                       | Descent data                             |
 |--------------------+--------------------------------+------------------------------------------|
 | Objects            | $P : X \to \UU$                | $(P_A, P_B, P_S)$                        |
+| Sections           | $(x : X) \to P(x)$             | $\sectDD(P_A, P_B, P_S)$                 |
 | Morphisms          | $(x : X) \to P(x) \to Q(x)$    | $(P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)$    |
 | Equivalences       | $(x : X) \to P(x) \simeq Q(x)$ | $(P_A, P_B, P_S) \simeq (Q_A, Q_B, Q_S)$ |
-| Sections           | $(x : X) \to P(x)$             | $\sectDD(P_A, P_B, P_S)$                 |
-| Identity types     | $\lambda x \to (x_0 = x)$      | $(I_A, I_B, I_S)$                        |
+| Identity objects   | $\lambda x \to (x_0 = x)$      | $(I_A, I_B, I_S)$                        |
 | Identity induction | Identity systems               | ???                                      |
-
+#+end_figure
 
 ** Flattening lemma
 
@@ -656,18 +879,24 @@ To show that it is an equivalence, we may appeal to [[lemma:fundamental-theorem-
 #+end_lemma
 
 #+begin_proof
-\TODO[Probably omitted].
+\TODO[Probably omitted. Goes through the pullback property and the dual statement for pullbacks].
 #+end_proof
 
 #+begin_constr
-Given a cocone
+Given a span diagram $\S \judeq (f, g)$ and descent data $(P_A, P_B, P_S)$, construct the *total span diagram* \TODO[($\Sigma \S$ ?)]
 #+begin_center
-\begin{tikzcd}
-  S \arrow[d, "f"'] \arrow[r, "g"] & B \arrow[d, "j"] \\
-  A \arrow[r, "i"'] \arrow[ur, phantom, "H"] & X
+\begin{tikzcd}[column sep=huge]
+  \Sigma A P_A
+  & \Sigma S (P_A \comp f)
+  \arrow[l, "\tot_f(\id)"']
+  \arrow[r, "\tot_g(P_S)"]
+  & \Sigma B P_B.
 \end{tikzcd}
 #+end_center
-and a family with descent data $(P_A, P_B, P_S) \correspDD P$, construct the *total cocone*
+#+end_constr
+
+#+begin_constr
+Given a span $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $(P_A, P_B, P_S) \correspDD P$, construct the *total cocone* \TODO[($\Sigma c$ ?)] under the total span
 #+begin_center
 \begin{tikzcd}[column sep=huge]
   \Sigma S (P_A \comp f)
@@ -683,26 +912,90 @@ and a family with descent data $(P_A, P_B, P_S) \correspDD P$, construct the *to
 #+end_center
 where the coherence $H'$ at $s : S$, $p : P_A(f s)$ is given by
 \begin{align*}
-  H'_1 &:= H(s) &&: (i (f s)) = (j (g s)) \\
-  H'_2 &:= e_S(s, p)^{-1} &&: \tr_P(H(s), e_A(s, p)) = e_B(P_S(s, p)).
+  H'_1 &\defeq H(s) &&: (i (f s)) = (j (g s)) \\
+  H'_2 &\defeq e_S(s, p)^{-1} &&: \tr_P(H(s), e_A(s, p)) = e_B(P_S(s, p)).
 \end{align*}
 \TODO[An identification in $\Sigma$ is a $\Sigma$ of identifications].
 #+end_constr
 
 #+name: lemma:flattening-base
 #+begin_lemma
-Given a pushout square
-#+begin_center
-\begin{tikzcd}
-  S \arrow[d, "f"'] \arrow[r, "g"] \arrow[dr, phantom, "\ulcorner", at end] & B \arrow[d, "j"] \\
-  A \arrow[r, "i"'] \arrow[ur, phantom, "H"] & X
-\end{tikzcd}
-#+end_center
-and a type family $P : X \to \UU$, the total cocone of $(P \comp i, P \comp j, \tr_P(H)) \correspDD P$ is a pushout.
+Given a pushout square $(i, j, H)$ on $X$ and a type family $P : X \to \UU$, the total cocone of $(P \comp i, P \comp j, \tr_P(H)) \correspDD P$ is a pushout.
 #+end_lemma
 
 #+begin_proof
-\TODO
+The goal is to prove that for any type $Y$, the map
+\begin{displaymath}
+  \coconeMap_{\Sigma c} : (\Sigma X P \to Y) \to \cocone(\Sigma c, Y)
+\end{displaymath}
+is an equivalence. We achieve that by forming a commuting pentagon, in which all other maps are equivalences:
+#+begin_center
+\begin{tikzcd}[ampersand replacement=\&]
+  (\Sigma X P \to Y)
+  \arrow[r, "\coconeMap_{\Sigma c}"]
+  \&
+  \begin{aligned}
+    \Sigma
+    &(h_A : \Sigma A (P \comp i) \to Y) \\
+    &(h_B : \Sigma B (P \comp j) \to Y). \\
+    &((s, p) : \Sigma S (P \comp i \comp f)) \to \\
+    &h_A(f s, p) = h_B(g s, \tr_P(H s, p))
+  \end{aligned}
+  \arrow[dd, "\term{ev-pair}^3", "\simeq"'] \\
+  (x : X) \to P(x) \to Y
+  \arrow[u, "\uncurry", "\simeq"']
+  \arrow[d, "\depCoconeMap_c"', "\simeq"] \\
+  \begin{aligned}
+    \Sigma
+    &(h_A : (a : A) \to P(i a) \to Y) \\
+    &(h_B : (b : B) \to P(j b) \to Y). \\
+    &(s : S) \to \\
+    &\tr_{(\lambda x \to (P(x) \to Y))}(H s, h_A(f s)) = h_B(g s)
+  \end{aligned}
+  \&
+  \begin{aligned}
+    \Sigma
+    &(h_A : (a : A) \to P(i a) \to Y) \\
+    &(h_B : (b : B) \to P(j b) \to Y). \\
+    &(s : S) (p : P(i(f s))) \to \\
+    &h_A(f s, p) = h_B(g s, \tr_P(H s, p)).
+  \end{aligned}
+  \arrow[l, "\tot(\tot(\varphi))", "\simeq"']
+\end{tikzcd}
+#+end_center
+
+The types $\cocone(\Sigma \S, Y)$ and $\depCocone(c, (\lambda x \to (P(x) \to Y)))$ were expanded in the diagram. The pentagon commutes by reflexivity on the first two components. To finish the proof, we need to define an equivalence
+\begin{displaymath}
+  \varphi : (h_A(f s) \htpy h_B(g s) \comp \tr_P(H s)) \simeq (\tr_{(\lambda x \to (P(x) \to Y))}(H s, h_A(f s)) = h_B(g s))
+\end{displaymath}
+such that $\apd_h(H s) = \varphi(\lambda p \to \ap_{\uncurry(h)}((H s, \refl)))$ \TODO[implicitly applying eq-$\Sigma$-eq-pair]. This map and its computation rule is defined in the next lemma in more generality, which finishes the proof.
+#+end_proof
+
+#+begin_lemma
+Given maps $i, j : S \to X$ with a homotopy $H : i \htpy j$, a type family $P : X \to \UU$, a type $Y$, and two dependent maps
+\begin{align*}
+  k &: (s : S) \to P(i s) \to Y\\
+  l &: (s : S) \to P(j s) \to Y,
+\end{align*}
+there is for every $s : S$ an equivalence
+\begin{displaymath}
+  \varphi : (k(s) \htpy l(s) \comp \tr_P(H s)) \simeq (\tr_{(\lambda x \to (P(x) \to Y))}(H s, k(s)) = l(s))
+\end{displaymath}
+
+Additionally, for $k \judeq (h \comp i)$ and $l \judeq (h \comp j)$ where $h : (x : X) \to P(x) \to Y$ is any dependent map, it computes as
+\begin{displaymath}
+  \varphi(\lambda p \to \ap_{\uncurry(h)}((H s, \refl))) = \apd_h(H s).
+\end{displaymath}
+#+end_lemma
+
+#+begin_proof
+By homotopy induction \TODO[define homotopy induction], it suffices to consider the case where $j \judeq i$ and $H$ is the reflexivity homotopy. The goal is
+\begin{displaymath}
+  (k(s) \htpy l(s)) \simeq (k(s) = l(s)),
+\end{displaymath}
+which holds by function extensionality.
+
+The computation rule follows again by induction on $H$. Then it suffices to show that $\varphi(\reflhtpy) = \refl$. By computation of homotopy induction $\varphi(\reflhtpy)$ computes to $\eqHtpy(\reflhtpy)$, which computes to $\refl$.
 #+end_proof
 
 #+name: lemma:flattening-cube
@@ -712,7 +1005,7 @@ Given a type family $P : X \to \UU$ with corresponding descent data $(P_A, P_B, 
 \begin{tikzcd}[column sep=huge, row sep=huge]
   & \Sigma S (P_A \comp f)
   \arrow[dl, "\tot_f(\id)"']
-  \arrow[d, "\tot(e_A \comp f)"]
+  \arrow[d, "\tot(e_A)"]
   \arrow[dr, "\tot_g(P_S)"]
   & \\
   \Sigma A P_A
@@ -737,23 +1030,23 @@ where the top square is the coherence of the total cocone of $(P_A, P_B, P_S) \c
 #+end_lemma
 
 #+begin_proof
-\TODO
+\TODO[Can I get away with noting which computation rules it uses?]
+\begin{displaymath}
+  (H s, (e_S(s, p))^{-1}) = (H s, \refl) \concat (\refl, (e_S(s, p))^{-1})
+\end{displaymath}
+\begin{displaymath}
+  \ap_{\tot_j(\id)}((\refl, (e_S(s, p))^{-1})) = (\refl, (e_S(s, p))^{-1})
+\end{displaymath}
+\TODO[It might be fun to explain actually].
 #+end_proof
 
 #+name: lemma:flattening-lemma
-#+begin_lemma
-Given a pushout
-#+begin_center
-\begin{tikzcd}
-  S \arrow[d, "f"'] \arrow[r, "g"] & B \arrow[d, "j"] \\
-  A \arrow[r, "i"'] \arrow[ur, phantom, "H"] & X
-\end{tikzcd}
-#+end_center
-and a family with descent data $(P_A, P_B, P_S) \correspDD P$, the total cocone is a pushout.
-#+end_lemma
+#+begin_thm
+Given a pushout $c$ and a family with descent data $(P_A, P_B, P_S) \correspDD P$, the total cocone is a pushout.
+#+end_thm
 
 #+begin_proof
-\TODO[By [[lemma:flattening-base]], the bottom square in [[lemma:flattening-cube]] is a pushout, and all of $e_A(a)$, $e_A(f s)$, $e_B(b)$ and $\id$ are equivalences, so it follows by [[lemma:is-pushout-bottom-ff-is-pushout-top]] that the top square is a pushout].
+By [[lemma:flattening-base]], the bottom square in [[lemma:flattening-cube]] is a pushout, and all of $e_A(a)$, $e_A(f s)$, $e_B(b)$ and $\id$ are equivalences, so it follows by [[lemma:is-pushout-bottom-ff-is-pushout-top]] that the top square is a pushout.
 #+end_proof
 
 ** Identity systems
@@ -763,7 +1056,7 @@ and a family with descent data $(P_A, P_B, P_S) \correspDD P$, the total cocone 
 
 We define a universal property of descent data for the identity types of pushouts, which allows their alternative characterizations. The property is analogous to a pointed type family being an identity system \TODO[Define pointed-type-family identity systems somewhere]; in fact, we show that a type family over a pushout is an identity system if and only if the corresponding descent data satisfies this universal property.
 
-Given descent data $(P_A, P_B, P_S)$ for a span diagram $\S := (f, g)$ and a point $p_0 : P_A a_0$ over a basepoint $a_0 : A$, we would like to mirror the definition of identity systems. A naïve translation would lead us to define dependent descent data and its sections. We choose to sidestep building that technical infrastructure.
+Given descent data $(P_A, P_B, P_S)$ for a span diagram $\S \judeq (f, g)$ and a point $p_0 : P_A a_0$ over a basepoint $a_0 : A$, we would like to mirror the definition of identity systems. A naïve translation would lead us to define dependent descent data and its sections. We choose to sidestep building that technical infrastructure.
 
 By the descent property, there is a unique type family $P : X → \UU$ corresponding to $(P_A, P_B, P_S)$. Observe that the type of dependent type families $(x : X) → P x → \UU$ is equivalent to the uncurried form $(\Sigma X P) → \UU$. By the flattening lemma, the total space $\Sigma X P$ is the pushout of the span diagram of total spaces
 #+begin_center
@@ -779,7 +1072,7 @@ By the descent property, there is a unique type family $P : X → \UU$ correspon
 so, again by the descent property, descent data over it correspond to type families over `\Sigma X P`. Hence we can talk about descent data $(R_{\Sigma A}, R_{\Sigma B}, R_{\Sigma S})$ over the total span diagram instead of dependent descent data.
 
 #+begin_constr
-Assume a span diagram $\S := (f, g)$, descent data $(P_A, P_B, P_S)$ over it, a basepoint $a_0 : A$ and a point $p_0 : P_A(a_0)$. For any descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span \TODO[Call it $\Sigma \S P$?], define the map
+Assume a span diagram $\S \judeq (f, g)$, descent data $(P_A, P_B, P_S)$ over it, a basepoint $a_0 : A$ and a point $p_0 : P_A(a_0)$. For any descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span \TODO[Call it $\Sigma \S P$?], define the map
 \begin{align*}
   \evreflidsystemDD : \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S}) &\to Q_{\Sigma A}(a_0, p_0) \\
   (t_A, t_B, t_S) &\mapsto t_A (a_0, p_0).
@@ -853,7 +1146,7 @@ Consider a type family with corresponding descent data $P \correspDD (P_A, P_B, 
   & ((u : \Sigma X P) \to Q_{\Sigma} u)
   \arrow[r, "\simeq"]
   & \term{sect}(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
-  \arrow[d, "\evreflidsystemDD"] \\
+  \arrow[d, "\evreflidsystemDD"'] \\
   Q_{\Sigma}(i a_0, p_0')
   \arrow[rr, "e^Q_A(a_0{,} p_0)"', "\simeq"]
   &
@@ -924,6 +1217,10 @@ torsorial. A type family is
 torsorial if it is an identity system, and we have shown that $(P_A, P_B, P_S)$
 being an identity system implies that $P$ is an identity system].
 #+end_proof
+
+** van Kampen squares?
+
+\TODO[Just an informal exposition on the relation to Mathers's cube theorems] [cite:@Mat76], First cube theorem (descent), Second cube theorem (flattening).
 
 * Other colimits
 
@@ -1167,4 +1464,5 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 # org-latex-classes: (("report" "\\documentclass{report}" ("\\chapter{%s}" . "\\chapter*{%1$s}\\addcontentsline{toc}{chapter}{%1$s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 # org-latex-reference-command: "\\autoref{%s}"
 # eval: (general-define-key :states 'normal :keymaps 'local "C-c C-f" #'hl-todo-next "C-c C-b" #'hl-todo-previous)
+# eval: (general-define-key :states 'insert :keymaps 'local "C-c C-." #'latex-insert-block)
 # End:
