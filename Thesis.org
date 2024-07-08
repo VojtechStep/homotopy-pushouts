@@ -62,6 +62,7 @@
 
 #+LATEX_HEADER: \DeclareBinOperator{\htpy}{\sim}
 #+LATEX_HEADER: \DeclareMathOperator{\reflhtpy}{refl-htpy}
+#+LATEX_HEADER: \DeclareBinOperator{\hconcat}{\concat_h}
 #+LATEX_HEADER: \DeclareMathOperator{\eqHtpy}{eq-htpy}
 #+LATEX_HEADER: \DeclareBinOperator{\lwhisk}{\cdot_{l}}
 #+LATEX_HEADER: \DeclareBinOperator{\rwhisk}{\cdot_{r}}
@@ -91,6 +92,13 @@
 #+LATEX_HEADER: \newcommand{\POData}[2]{\typeformer{Pushout}\;#1\;#2}
 #+LATEX_HEADER: \newcommand{\PO}[3]{#2 \sqcup_{#1} #3}
 #+LATEX_HEADER: \renewcommand{\S}{\mathcal{S}}
+
+#+LATEX_HEADER: \newcommand{\D}{\mathcal{D}}
+#+LATEX_HEADER: \DeclareMathOperator{\cofork}{cofork}
+#+LATEX_HEADER: \DeclareMathOperator{\coforkMap}{cofork-map}
+#+LATEX_HEADER: \DeclareMathOperator{\depCofork}{dep-cofork}
+#+LATEX_HEADER: \DeclareMathOperator{\depCoforkMap}{dep-cofork-map}
+#+LATEX_HEADER: \DeclareMathOperator{\spanDoubleArrow}{span-double-arrow}
 
 # Universes
 #+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
@@ -752,6 +760,7 @@ is characterized by the descent data
 \end{alignat*}
 #+end_lemma
 
+#+name: thm:equivDD-equiv
 #+begin_thm
 Consider a span $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
 \begin{displaymath}
@@ -869,9 +878,9 @@ However, the induction principle speaks about dependent type families of the sor
 
 ** Flattening lemma
 
-\TODO[The flattening lemma for pushouts states that pushouts commute with dependent pair types --- a total space over a pushout is a pushout of total spaces].
+The flattening lemma for pushouts effectively states that pushouts commute with dependent pair types --- the total space of a type family over a pushout is a pushout of total spaces of the corresponding descent data.
 
-\TODO[Outline proof - first for just $P$, then with descent data using a cube].
+The presented proof is split into two parts. First we prove the statement specifically for a type family and the descent data it induces, which reduces the amount of data we need to make coherent. Then we relate the cocone for descent data induced by the family to the cocone for arbitrary corresponding descent data, in a way that preserves being a pushout.
 
 #+name: lemma:is-pushout-bottom-ff-is-pushout-top
 #+begin_lemma
@@ -1030,17 +1039,24 @@ where the top square is the coherence of the total cocone of $(P_A, P_B, P_S) \c
 #+end_lemma
 
 #+begin_proof
-\TODO[Can I get away with noting which computation rules it uses?]
-\begin{displaymath}
-  (H s, (e_S(s, p))^{-1}) = (H s, \refl) \concat (\refl, (e_S(s, p))^{-1})
-\end{displaymath}
-\begin{displaymath}
-  \ap_{\tot_j(\id)}((\refl, (e_S(s, p))^{-1})) = (\refl, (e_S(s, p))^{-1})
-\end{displaymath}
-\TODO[It might be fun to explain actually].
+The back left, front left, and front right squares commute by $\reflhtpy$. The back right square commutes by $(\refl, (e_s)^{-1})$. The commuting cube is therefore an element of the type
+\begin{align*}
+  &(\tot_i(\id) \lwhisk \reflhtpy) \hconcat (\reflhtpy \rwhisk \tot_f(\id)) \hconcat (\id \lwhisk (H, e_S^{-1})) = \\
+  &((H, \reflhtpy) \rwhisk \tot(e_A)) \hconcat (\tot_j(\id) \lwhisk (\reflhtpy, e_S^{-1})) \hconcat (\reflhtpy \rwhisk \tot_g(P_S)).
+\end{align*}
+
+The left homotopy computes to $\id \lwhisk (H, e_S^{-1})$, which is identical to $(H, e_S^{-1})$. The last concatenant \TODO[is that a word?] of the right homotopy is $\reflhtpy$, so we can compute it away.
+
+The new goal is
+\begin{align*}
+  (H, e_S^{-1}) = (H, \reflhtpy) \hconcat (\tot_j(\id) \lwhisk (\reflhtpy, e_S^{-1})).
+\end{align*}
+
+The total map $\tot_j(\id)$ acts on $(\reflhtpy, e_S^{-1})$ component-wise, so it can be further computed to $(\reflhtpy, \id \lwhisk (e_S^{-1}))$, which is identical to $(\reflhtpy, e_S^{-1})$. To finish the proof, we note that any identification $(p, q) : (s, t) = (s', t')$ in a $\Sigma$ type can be decomposed as $(p, \refl) \concat (\refl, q)$.
 #+end_proof
 
 #+name: lemma:flattening-lemma
+#+attr_latex: :options [Flattening lemma]
 #+begin_thm
 Given a pushout $c$ and a family with descent data $(P_A, P_B, P_S) \correspDD P$, the total cocone is a pushout.
 #+end_thm
@@ -1054,11 +1070,11 @@ By [[lemma:flattening-base]], the bottom square in [[lemma:flattening-cube]] is 
 :CUSTOM_ID: sec:identity-systems
 :END:
 
-We define a universal property of descent data for the identity types of pushouts, which allows their alternative characterizations. The property is analogous to a pointed type family being an identity system \TODO[Define pointed-type-family identity systems somewhere]; in fact, we show that a type family over a pushout is an identity system if and only if the corresponding descent data satisfies this universal property.
+We define a universal property of descent data for the identity types of pushouts, which allows their alternative characterizations. The property is analogous to a pointed type family being an identity system, which manifests it as the homotopy-initial pointed type family \TODO[Define pointed-type-family identity systems somewhere]; in fact, we show that a type family over a pushout is an identity system if and only if the corresponding descent data satisfies this universal property.
 
-Given descent data $(P_A, P_B, P_S)$ for a span diagram $\S \judeq (f, g)$ and a point $p_0 : P_A a_0$ over a basepoint $a_0 : A$, we would like to mirror the definition of identity systems. A naïve translation would lead us to define dependent descent data and its sections. We choose to sidestep building that technical infrastructure.
+Given descent data $(P_A, P_B, P_S)$ for a span diagram $\S \judeq (f, g)$ and a point ${p_0 : P_A(a_0)}$ over a basepoint $a_0 : A$, we would like to mirror the definition of identity systems. A naïve translation would lead us to define dependent descent data and its sections. We choose to sidestep building that technical infrastructure.
 
-By the descent property, there is a unique type family $P : X → \UU$ corresponding to $(P_A, P_B, P_S)$. Observe that the type of dependent type families $(x : X) → P x → \UU$ is equivalent to the uncurried form $(\Sigma X P) → \UU$. By the flattening lemma, the total space $\Sigma X P$ is the pushout of the span diagram of total spaces
+By the descent property, there is a unique type family $P : X → \UU$ corresponding to $(P_A, P_B, P_S)$. Observe that the type of dependent type families $(x : X) → P(x) → \UU$ is equivalent to the uncurried form $(\Sigma X P) → \UU$. By the flattening lemma, the total space $\Sigma X P$ is the pushout of the span diagram of total spaces
 #+begin_center
 \begin{tikzcd}[column sep=large]
   \Sigma A P_A
@@ -1069,10 +1085,10 @@ By the descent property, there is a unique type family $P : X → \UU$ correspon
 \end{tikzcd}
 #+end_center
 
-so, again by the descent property, descent data over it correspond to type families over `\Sigma X P`. Hence we can talk about descent data $(R_{\Sigma A}, R_{\Sigma B}, R_{\Sigma S})$ over the total span diagram instead of dependent descent data.
+so, again by the descent property, descent data over it correspond to type families over $\Sigma X P$. Hence we can talk about descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span diagram instead of dependent descent data. We write a $\Sigma$ in the indices of $Q$ to remind ourselves that it is descent data over the total span diagram.
 
 #+begin_constr
-Assume a span diagram $\S \judeq (f, g)$, descent data $(P_A, P_B, P_S)$ over it, a basepoint $a_0 : A$ and a point $p_0 : P_A(a_0)$. For any descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span \TODO[Call it $\Sigma \S P$?], define the map
+Assume a span diagram $\S \judeq (f, g)$, descent data $(P_A, P_B, P_S)$ over it, a basepoint $a_0 : A$ and a point $p_0 : P_A(a_0)$. For any descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span, define the map
 \begin{align*}
   \evreflidsystemDD : \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S}) &\to Q_{\Sigma A}(a_0, p_0) \\
   (t_A, t_B, t_S) &\mapsto t_A (a_0, p_0).
@@ -1084,11 +1100,10 @@ Descent data $(P_A, P_B, P_S)$ equipped with a point $p_0 : P_A(a_0)$ satisfies 
 \begin{equation*}
   \indidsystemDD : Q_{\Sigma A}(a_0, p_0) \to \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
 \end{equation*}
-and a path
-#+name: eq:is-section-ind-id-system-DD
-\begin{equation}
-  (\indidsystemDD q_0)_A (a_0, p_0) = q_0
-\end{equation}
+and an identification
+\begin{equation*}
+  (\indidsystemDD(q_0))_A (a_0, p_0) = q_0
+\end{equation*}
 for all $q_0 : Q_{\Sigma A}(a_0, p_0)$.
 
 Such descent data is called an *identity system* at $p_0$.
@@ -1098,7 +1113,7 @@ Such descent data is called an *identity system* at $p_0$.
 terminology clash between "sections of descent data" and "sections of a map"].
 
 #+begin_remark
-Note that this development is biased towards the left \mdash we pick a basepoint in the domain $a_0 : A$, a point in the left type family $p_0 : P_A a_0$, and the evaluation map evaluates the left map of the section. By symmetry of pushouts we could just as well work with the points $b_0 : B$, $p_0 : P_B b_0$, and the evaluation map evaluating the right map of the section.
+Note that this development is biased towards the left --- we pick a basepoint in the domain $a_0 : A$, a point in the left type family $p_0 : P_A(a_0)$, and the evaluation map evaluates the left map of the section. By symmetry of pushouts we could just as well work with the points $b_0 : B$, $p_0 : P_B(b_0)$, and the evaluation map evaluating the right map of the section.
 #+end_remark
 
 #+begin_remark
@@ -1136,18 +1151,17 @@ We first show a result relating identity systems stated as pointed type families
 
 #+name: lemma:square-id-system-id-system-DD
 #+begin_lemma
-\TODO[Expand on the role of implicit cocones in this definition, elaborate some types].
-Consider a type family with corresponding descent data $P \correspDD (P_A, P_B, P_S)$ and a point $p_0 : P_A(a_0)$. Then for any type family with corresponding descent data $Q_{\Sigma} \correspDD (Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ there is a commuting diagram
+Consider a pushout cocone $c$ on $X$, a type family with corresponding descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and a point $p_0 : P_A(a_0)$. Then for any type family with corresponding descent data $e^Q : Q_{\Sigma} \correspDD (Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ there is a commuting diagram
 #+begin_equation
 \begin{tikzcd}[row sep=large, column sep=small]
-  ((x : X) (p : P x) \to Q_{\Sigma} (x , p))
+  ((x : X) (p : P(x)) \to Q_{\Sigma} (x , p))
   \arrow[r, "\simeq"]
   \arrow[d, "\term{ev-refl-id-system}"']
   & ((u : \Sigma X P) \to Q_{\Sigma} u)
   \arrow[r, "\simeq"]
-  & \term{sect}(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
+  & \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
   \arrow[d, "\evreflidsystemDD"'] \\
-  Q_{\Sigma}(i a_0, p_0')
+  Q_{\Sigma}(i a_0, (e^P_A(a_0))^{-1}(p_0))
   \arrow[rr, "e^Q_A(a_0{,} p_0)"', "\simeq"]
   &
   & Q_{\Sigma A}(a_0, p_0).
@@ -1156,106 +1170,165 @@ Consider a type family with corresponding descent data $P \correspDD (P_A, P_B, 
 #+end_lemma
 
 #+begin_proof
-\TODO
+The top equivalences are, from left to right, $\uncurry$ and $\term{sect-sect}_{\Sigma c}$. To see that the square commutes, note that the first component of $\term{sect-sect}_{\Sigma c}(\uncurry(h))$ sends $(a, p) : \Sigma A P_A$ to $e^Q_A(h(ia, (e^P_A(a))^{-1}(p)))$ by definition of the total cocone. The square commutes by $\reflhtpy$.
 #+end_proof
 
 #+name: lemma:is-id-system-DD-is-id-system
 #+begin_corol
-Assume $P \correspDD (P_A, P_B, P_S)$ where $P$ is an identity system at \linebreak $(e^P_A(a_0))^{-1}(p_0) : P(i a_0)$. Then $(P_A, P_B, P_S)$ is an identity system at $p_0$.
+Assume $e : P \correspDD (P_A, P_B, P_S)$ where $P$ is an identity system at $(e_A(a_0))^{-1}(p_0) : P(i a_0)$. Then $(P_A, P_B, P_S)$ is an identity system at $p_0$.
 #+end_corol
 
 #+begin_proof
 For every $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ there is a corresponding type family $Q_{\Sigma}$. Then we may apply [[lemma:square-id-system-id-system-DD]]. The top and bottom maps are equivalences, and the left maps has a section by assumption, hence the right map has a section.
 #+end_proof
 
+#+name: lemma:is-id-system-is-id-system-DD
 #+begin_corol
-Analogously, if $(P_A, P_B, P_S)$ is an identity system at $p_0 : P_A(a_0)$, then $P$ is an identity system at $(e^P_A(a_0))^{-1}(p_0)$.
+Analogously, if $(P_A, P_B, P_S)$ is an identity system at $p_0 : P_A(a_0)$, then $P$ is an identity system at $(e_A(a_0))^{-1}(p_0)$.
 #+end_corol
 
-#+begin_lemma
-\TODO[$(I_A, I_B, I_S)$ is an identity system].
-#+end_lemma
+#+begin_thm
+Given a span $\S$, a point $a_0 : A$, and a pushout cocone $c$ on $X$, the descent data $(I_A, I_B, I_S)$ is an identity system at $\refl_{i a_0}$.
+#+end_thm
 
 #+begin_proof
-By [[lemma:fam-with-dd-id]] and [[lemma:is-id-system-DD-is-id-system]], the descent data $(I_A, I_B, I_S)$ is an identity system at $\refl : (i a_0) = (i a_0)$ if and only if the corresponding type family $\Id (i a_0) : X → 𝒰$ is an identity system at $\refl$, which is established in \TODO[Lemma XXX].
+By [[lemma:fam-with-dd-id]] and [[lemma:is-id-system-DD-is-id-system]], the descent data $(I_A, I_B, I_S)$ is an identity system at $\refl : (i a_0) = (i a_0)$ if and only if the corresponding type family $\Id (i a_0) : X → 𝒰$ is an identity system at $\refl$, which is established in \TODO[ref].
 #+end_proof
 
 The induction principle of identity systems is stated in terms of an evaluation map having a section, which makes it consistent with statements of other induction principles in Homotopy Type Theory. However, the following lemma shows that the condition on the converse map of being a section is redundant.
 
 #+begin_lemma
-To show that $(P_A, P_B, P_S)$ is an identity system at $p₀ : P_A(a_0)$, it suffices
-to provide an element of
+Consider a span diagram $\S$ and its pushout cocone $c$ on $X$. To show that $(P_A, P_B, P_S)$ is an identity system at $p₀ : P_A(a_0)$, it suffices to provide a map
 \begin{displaymath}
-  Q_{\Sigma A}(a_0, p_0) \to \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
+  H : Q_{\Sigma A}(a_0, p_0) \to \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
 \end{displaymath}
 for every descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span diagram.
 #+end_lemma
 
 #+begin_proof
-\TODO[
-Consider the unique family $P : X → \UU$ for $(P_A, P_B, P_S)$. It suffices to show that $P$ is an identity system. As above, we can do that by showing that it is torsorial. By definition, that means that the total space $\Sigma X P$ is contractible. We can prove that using the property that a type is contractible if we provide a point, here $(i a_0, (e^P_A a)^{-1} p_0)$, and a map
+Construct the unique type family $P : X → \UU$ for $(P_A, P_B, P_S)$. It suffices to show that $P$ is an identity system. Equivalently, it suffices to show that the total space $\Sigma X P$ is contractible. We can prove that using the property that a type is contractible if we provide a point, here $(i a_0, (e^P_A a_0)^{-1}(p_0))$, and a map
 \begin{equation*}
-  H' : (R_{\Sigma} : \Sigma X P → \UU) → (r_0 : R_{\Sigma} (i a_0, (e^P_A a)^{-1} p_0)) → (u : \Sigma X P) → R_{\Sigma} u.
+  H' : (Q_{\Sigma} : \Sigma X P → \UU) → (q_0 : Q_{\Sigma} (i a_0, (e^P_A a)^{-1} p_0)) → (u : \Sigma X P) → Q_{\Sigma}(u).
 \end{equation*}
-Assume such $R_{\Sigma}$ and $r_0$. A section $(u : \Sigma X P) → R_{\Sigma} u$ is given by a section
-of $(R_{\Sigma A}, R_{\Sigma B}, R_{\Sigma S})$, and we can get one by applying $H$ to
-$e^R_A (a_0, p_0) r_0 : R_{\Sigma A} (a_0, p_0)$.
-]
+Assume such $Q_{\Sigma}$ and $q_0$. A section $(u : \Sigma X P) → Q_{\Sigma}(u)$ is given by a section
+of $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, and we can get one by applying $H$ to
+$e^Q_A ((a_0, p_0), q_0): Q_{\Sigma A} (a_0, p_0)$.
 #+end_proof
 
-#+begin_lemma
-\TODO[For any identity system $(P_A, P_B, P_S)$ at $p_0$, there is a unique equivalence of descent data $(I_A, I_B, I_S) \simeq (P_A, P_B, P_S)$ sending $refl$ to $p_0$].
-#+end_lemma
+#+begin_remark
+Note that the pushout $c$ is not used in the statement of the lemma. We include it as a parameter to avoid assuming existence of all pushouts.
+#+end_remark
+
+#+begin_thm
+Consider a span diagram $\S$, a point $a_0 : A$, and a pushout cocone $c$. For any identity system $(P_A, P_B, P_S)$ at $p_0 : P_A(a_0)$, there is a unique equivalence of descent data
+\begin{displaymath}
+  e : (I_A, I_B, I_S) \simeq (P_A, P_B, P_S)
+\end{displaymath}
+such that $e_A(\refl) = p_0$.
+#+end_thm
 
 #+begin_proof
-\TODO[Consider the unique type family $P : X → \UU$ corresponding to
-$(P_A, P_B, P_S)$. The type of point preserving equivalences between $(I_A, I_B, I_S)$
-and $(P_A, P_B, P_S)$ is equivalent to the type of
-fiberwise equivalences
-$(x : X) → ((i a_0) = x) \simeq P(x)$ that send $\refl$ to $(e^P_A a_0)^{-1} p_0$. To show that this type is contractible, it suffices to show that $P$ is
-torsorial. A type family is
-torsorial if it is an identity system, and we have shown that $(P_A, P_B, P_S)$
-being an identity system implies that $P$ is an identity system].
+Construct the unique type family $P : X → \UU$ corresponding to $(P_A, P_B, P_S)$. By [[thm:equivDD-equiv]] the type of point preserving equivalences between $(I_A, I_B, I_S)$ and $(P_A, P_B, P_S)$ is equivalent to the type of fiberwise equivalences $(x : X) → ((i a_0) = x) \simeq P(x)$ that send $\refl$ to $(e^P_A a_0)^{-1}(p_0)$. To show that this type is contractible, it suffices to show that the total space $\Sigma X P$ is contractible \TODO[ref]. It is contractible if $P$ is an identity system, which it is by [[lemma:is-id-system-is-id-system-DD]] and the assumption that $(P_A, P_B, P_S)$ is an identity system.
 #+end_proof
 
-** van Kampen squares?
+Unfolding the data of the equivalence, we get
+\begin{align*}
+  e_A &: (a : A) \to (i a_0 = i a) \simeq P_A(a) \\
+  e_B &: (b : B) \to (i a_0 = j b) \simeq P_B(b) \\
+  e_S &: (s : S) (p : i a_0 = i(f s)) \to e_B(g s, p \concat (H s)) = P_S(s, e_A(f s, p)).
+\end{align*}
 
-\TODO[Just an informal exposition on the relation to Mathers's cube theorems] [cite:@Mat76], First cube theorem (descent), Second cube theorem (flattening).
+** van Kampen squares
+
+\TODO[Should I finish this section? It gets wishy-washy kinda quickly].
+
+There is an alternative description of descent and flattening, one that doesn't mention universes and is phrased only with pushouts and pullbacks. This section is meant to be an informal exposition of the relationship between the type-theoretic and homotopy-theoretic perspectives. The material hasn't been formalized yet in the {{{AU}}} library at the time of writing.
+
+[cite/t:@LS04] define van Kampen squares as pushout squares satisfying the first and second cube theorems of [cite/t:@Mat76]. We will see that the first cube theorem corresponds to type-theoretic descent, and the second cube theorem corresponds to the flattening lemma, a results that [cite/t:@War24] hints at is folklore (\TODO[verify this, but I haven't found any explanation]). [cite/t:@Rij19 proof of Theorem 2.2.11] shows that the second cube theorem follows from the flattening lemma.
+
+#+begin_defn
+Consider a pushout square
+#+begin_center
+\begin{tikzcd}
+  S
+  \arrow[r, "g"]
+  \arrow[d, "f"']
+  \arrow[dr, phantom, "\ulcorner", at end]
+  & B
+  \arrow[d, "j"] \\
+  A
+  \arrow[r, "i"']
+  \arrow[ur, phantom, "H"]
+  & X.
+\end{tikzcd}
+#+end_center
+If for all commuting cubes
+#+begin_center
+\begin{tikzcd}[]
+  & S' \arrow[dl] \arrow[d] \arrow[dr] \\
+  A' \arrow[d]
+  & S \arrow[dl, "f"', near start] \arrow[dr, "g", near start]
+  & B' \arrow[dl, crossing over] \arrow[d] \\
+  A \arrow[dr, "i"']
+  & X' \arrow[from=ul, crossing over] \arrow[d]
+  & B \arrow[dl, "j"] \\
+  & X
+\end{tikzcd}
+#+end_center
+where the bottom square is $H$ and the two back faces are pullback squares, it holds that
+1. if the top square is a pushout, then the two front faces are pullbacks; then $H$ satisfies the *first cube axiom*
+2. if the two front faces are pullbacks, then the top square is a pushout; then $H$ satisfies the *second cube axiom*.
+#+end_defn
+
+#+begin_defn
+A pushout square is *van Kampen* if it satisfies both the first and second cube axioms.
+#+end_defn
 
 * Other colimits
 
-\TODO[The zigzag construction requires a formalization of sequential colimits. Existence and properties of sequential colimits can be derived from pushouts, and it factors through coequalizers. As a side-product of formalizing sequential colimits, some basic theory of coequalizers was formalized].
+Pushouts and the empty type suffice to construct many other kinds of colimits. We are particularly interested in sequential colimits, which figure prominently in the zigzag construction in [[#sec:zigzag-constr]]. Sequential colimits and some of their properties may be derived from pushouts. Their construction is more natural if we first formalize a basic theory of coequalizers on top of pushouts, and then we formalize sequential colimits on top of coequalizers.
 
 ** Coequalizers
 
 #+begin_defn
-\TODO[Double arrows].
+A *double arrow* is a pair of types $A : \UU$, $B : \UV$, equipped with a pair of maps $f, g : A \to U$.
 #+end_defn
 
 #+begin_defn
-\TODO[Coforks].
+Given a double arrow $\D \judeq (f, g)$ and a type $X : \UU$, a *cofork* under $\D$ on $X$ is a pair $(i, H)$, where $i : B \to X$ is a map, and $H$ is a homotopy of type $i \comp f \htpy i \comp g$.
+
+We write $\cofork(\D, X)$ for the type of coforks under $\D$ on $X$.
 #+end_defn
+
+#+begin_constr
+Given a cofork $c \judeq (i, H) : \cofork(\D, X)$ on $X$ and a type $Y : \UV$, we construct a map
+\begin{displaymath}
+  \coforkMap_c^Y : (X \to Y) \to \cofork(\D, Y)
+\end{displaymath}
+which sends $h$ to $(h \comp i, h \lwhisk H)$.
+#+end_constr
 
 #+begin_defn
-\TODO[Universal property of coequalizers]
+A cofork $c$ under $\D$ on $X$ satisfies the *universal property of coequalizers* if for all $Y : \UV$, the map $\coforkMap_c^Y$ is an equivalence.
+
+A cocone satisfying the universal property of coequalizers is called a *coequalizer*.
 #+end_defn
 
-The standard coequalizer may be obtained as a pushout of the span diagram
+#+begin_constr
+Construct the map $\spanDoubleArrow$ by
 #+begin_center
 \begin{tikzcd}
-  A
-  & A + A
-  \arrow[l, "\nabla"']
-  \arrow[r, "{[f, g]}"]
-  & B
+  A \arrow[r, shift left, "g"] \arrow[r, shift right, "f"'] & B
+\end{tikzcd}
+\hspace{3em} $\mapsto$ \hspace{3em}
+\begin{tikzcd}
+  A & A + A \arrow[l, "\nabla"'] \arrow[r, "{[f, g]}"] & B,
 \end{tikzcd}
 #+end_center
 where the left map is the codiagonal map, sending $\inl(a)$ and $\inr(a)$ to $a$, and the right map is defined by the universal property of coproducts to send $\inl(a)$ to $f(a)$ and $\inr(a)$ to $g(a)$.
+#+end_constr
 
-\TODO[The pushout thus constructed will consist of a copy of $B$, a copy of $A$, and
-for every point $a : A$ there will be a path from $f(a)$ to $a$ and to
-$g(a)$, which corresponds to having a copy of $B$ with paths connecting every
-$f(a)$ to $g(a)$.]
+The standard coequalizer of $\D$ may be obtained as the pushout of $\spanDoubleArrow(\D)$. The pushout thus constructed can be visualized as consisting of a copy of $B$, a copy of $A$, and for every point $a : A$ there will be a path from $f(a)$ to $a$ and to $g(a)$, which corresponds to having a copy of $B$ with paths connecting every $f(a)$ to $g(a)$.
 
 \TODO[Maybe present all of this infrastructure informally?]
 
@@ -1274,6 +1347,10 @@ $f(a)$ to $g(a)$.]
 #+begin_lemma
 \TODO[DUP $\leftrightarrow$ UP].
 #+end_lemma
+
+#+begin_thm
+\TODO[Flattening?]
+#+end_thm
 
 ** Sequential colimits
 
@@ -1365,6 +1442,9 @@ The standard sequential colimit may be obtained as a coequalizer of
 #+end_defn
 
 ** The zigzag construction
+:PROPERTIES:
+:CUSTOM_ID: sec:zigzag-constr
+:END:
 
 #+begin_center
 \begin{tikzcd}[column sep=6em]
