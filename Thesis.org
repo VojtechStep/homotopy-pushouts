@@ -75,7 +75,8 @@
 # Pushouts/coproducts
 #+LATEX_HEADER: \DeclareMathOperator{\inl}{inl}
 #+LATEX_HEADER: \DeclareMathOperator{\inr}{inr}
-# #+LATEX_HEADER: \DeclareMathOperator{\spanDiag}{span-diagram}
+#+LATEX_HEADER: \newcommand{\codiag}{\nabla}
+#+LATEX_HEADER: \newcommand{\coprodM}[2]{\left[#1, #2\right]}
 #+LATEX_HEADER: \DeclareMathOperator{\cocone}{cocone}
 #+LATEX_HEADER: \DeclareMathOperator{\coconeMap}{cocone-map}
 #+LATEX_HEADER: \DeclareMathOperator{\depCocone}{dep-cocone}
@@ -1322,19 +1323,109 @@ Construct the map $\spanDoubleArrow$ by
 \end{tikzcd}
 \hspace{3em} $\mapsto$ \hspace{3em}
 \begin{tikzcd}
-  A & A + A \arrow[l, "\nabla"'] \arrow[r, "{[f, g]}"] & B,
+  A & A + A \arrow[l, "\codiag"'] \arrow[r, "\coprodM{f}{g}"] & B,
 \end{tikzcd}
 #+end_center
 where the left map is the codiagonal map, sending $\inl(a)$ and $\inr(a)$ to $a$, and the right map is defined by the universal property of coproducts to send $\inl(a)$ to $f(a)$ and $\inr(a)$ to $g(a)$.
 #+end_constr
 
-The standard coequalizer of $\D$ may be obtained as the pushout of $\spanDoubleArrow(\D)$. The pushout thus constructed can be visualized as consisting of a copy of $B$, a copy of $A$, and for every point $a : A$ there will be a path from $f(a)$ to $a$ and to $g(a)$, which corresponds to having a copy of $B$ with paths connecting every $f(a)$ to $g(a)$.
+The standard coequalizer of $\D$ may be obtained as the pushout of $\spanDoubleArrow(\D)$.
 
-\TODO[Maybe present all of this infrastructure informally?]
-
+#+name: lemma:cofork-cocone
 #+begin_lemma
-\TODO[Cofork is a coequalizer iff the corresponding cocone is a pushout].
+For any double arrow $\D$ and a type $X$, there is an equivalence
+\begin{displaymath}
+  \term{cofork-cocone} : \cocone(\spanDoubleArrow(\D), X) \simeq \cofork(\D, X)
+\end{displaymath}
+which fits into the following commuting triangle for every cofork $c : \cofork(\D, X)$
+#+begin_center
+\begin{tikzcd}
+  (X \to Y)
+  \arrow[rr, "\coconeMap_{\term{cofork-cocone}^{-1}(c)}"]
+  \arrow[dr, "\coforkMap_c"']
+  && \cocone(\spanDoubleArrow(\D), Y)
+  \arrow[dl, "\term{cofork-cocone}", "\simeq"'] \\
+  & \cofork(\D, Y)
+\end{tikzcd}
+#+end_center
 #+end_lemma
+
+#+begin_proof
+To define the forward map, assume a cocone $(i, j, H)$ where $i : A \to X$, $j : B \to X$, and $H$ witnesses commutativity of the square
+#+begin_center
+\begin{tikzcd}
+  A + A
+  \arrow[r, "\coprodM{f}{g}"]
+  \arrow[d, "\codiag"']
+  & B
+  \arrow[d, "j"] \\
+  A
+  \arrow[r, "i"']
+  & X.
+\end{tikzcd}
+#+end_center
+
+Since the codomain of the homotopy is a coproduct, it corresponds to a pair of homotopies $H_1 : i \htpy j \comp f$ and $H_2 : i \htpy j \comp g$. To construct the cofork under $\D$, take $j$ to be the first component, and the concatenation $H_1^{-1} \hconcat H_2 : j \comp f \htpy j \comp g$ for the second component.
+
+To define the inverse map, assume a cofork $(j, H)$, where $j : B \to X$ and $H : j \comp f \htpy j \comp g$. To construct the cocone under $\spanDoubleArrow(\D)$, take $j \comp f : A \to X$ to be the first component and $j$ to be the second component. It remains to construct a homotopy
+#+begin_center
+\begin{tikzcd}
+  A + A
+  \arrow[r, "\coprodM{f}{g}"]
+  \arrow[d, "\codiag"']
+  & B
+  \arrow[d, "j"] \\
+  A
+  \arrow[r, "j \comp f"']
+  & X.
+\end{tikzcd}
+#+end_center
+On $\inl(a) : A + A$ the square commutes by $\refl$, and on $\inr(a) : A + A$ it commutes by $H : j \comp f \htpy j \comp g$.
+
+\TODO[We need to show that they are mutual inverses. It requires homotopies of cocones and coforks, which I want to avoid, so maybe skip that?]
+
+To show commutativity of the triangle, chase a map $h : X \to Y$:
+#+begin_center
+\begin{tikzcd}[ampersand replacement=\&, column sep=small]
+  h
+  \arrow[rr, mapsto]
+  \arrow[dr, mapsto]
+  \&\&\left(
+  \begin{aligned}
+    &h \comp j \comp f, \\
+    &h \comp j, \\
+    &h \lwhisk (\reflhtpy, H)
+  \end{aligned}
+  \right)
+  \arrow[dl, mapsto] \\
+  \&\left(
+  \begin{aligned}
+    &h \comp j, \\
+    &h \lwhisk H
+  \end{aligned}
+  \right)
+  \judeq\left(
+  \begin{aligned}
+    &h \comp j, \\
+    &h \lwhisk (\reflhtpy^{-1} \hconcat H)
+  \end{aligned}
+  \right).
+\end{tikzcd}
+#+end_center
+
+The diagram then commutes by $\reflhtpy$.
+#+end_proof
+
+#+name: lemma:coeq-pushout
+#+begin_lemma
+The equivalence $\term{cofork-cocone}$ restricts to an equivalence between \linebreak pushouts of $\spanDoubleArrow(\D)$ and coequalizers of $\D$. In other words, a cofork $c$ satisfies the universal property of coequalizers if and only if the cocone $\term{cofork-cocone}^{-1}(c)$ satisfies the universal property of pushouts.
+#+end_lemma
+
+#+begin_proof
+By the commuting triangle in [[lemma:cofork-cocone]] and the 3-for-2 property of equivalences, $\coforkMap_c$ is an equivalence if and only if the corresponding $\coconeMap$ is an equivalence.
+#+end_proof
+
+We define dependent coforks, the dependent universal property of coequalizers, and an equivalence between dependent coforks and certain dependent cocones analogously. 
 
 #+begin_defn
 \TODO[Dependent coforks].
@@ -1344,16 +1435,102 @@ The standard coequalizer of $\D$ may be obtained as the pushout of $\spanDoubleA
 \TODO[Dependent universal property of coequalizers].
 #+end_defn
 
+#+name: lemma:coeq-pushout-dup
 #+begin_lemma
-\TODO[DUP $\leftrightarrow$ UP].
+\TODO[DUP coequalizer iff DUP pushout]
 #+end_lemma
 
+#+begin_lemma
+A cofork satisfies the universal property of coequalizers if and only if it satisfies the dependent universal property of coequalizers.
+#+end_lemma
+
+#+begin_proof
+Given a cofork $c$, there is a sequence of logical equivalences
+\begin{align*}
+  & \text{$c$ satisfies the universal property of coequalizers} \\
+  & \leftrightarrow \text{$\term{cofork-cocone^{-1}(c)}$ satisfies the universal property of pushouts} \\
+  & \leftrightarrow \text{$\term{cofork-cocone^{-1}(c)}$ satisfies the dependent universal property of pushouts} \\
+  & \leftrightarrow \text{$c$ satisfies the dependent universal property of coequalizers}.
+\end{align*}
+
+The equivalences are, in order: [[lemma:coeq-pushout]], [[lemma:dup-iff-up-pushout]], and [[lemma:coeq-pushout-dup]].
+#+end_proof
+
+Coequalizers also satisfy descent, but we do not explore it in the thesis. It is simple enough to derive for different colimits from the univalence axiom. We do, however, prove the flattening lemma for coequalizers, which we will use to prove the flattening lemma for sequential colimits.
+
+#+begin_constr
+Given a double arrow $\D \judeq (f, g)$, a cofork $(i, H)$ on $X$, and a type family $P : X \to \UU$, define the *total cofork* to be
+#+begin_center
+\begin{tikzcd}[column sep=huge]
+  \Sigma A (P \comp i \comp f)
+  \arrow[r, shift left, "\tot_g(\tr_P(H))"]
+  \arrow[r, shift right, "\tot_f(\id)"']
+  & \Sigma B (P \comp i)
+  \arrow[r, "\tot_i(\id)"]
+  & \Sigma X P,
+\end{tikzcd}
+#+end_center
+where the homotopy is
+\begin{displaymath}
+  (H, \reflhtpy) : (\tot_i(\id) \comp \tot_f(\id)) \htpy (\tot_i(\id) \comp \tot_g(\tr_P(H))).
+\end{displaymath}
+#+end_constr
+
+#+attr_latex: :options [Flattening lemma for coequalizers]
 #+begin_thm
-\TODO[Flattening?]
+Given a coequalizer $c$ on $X$ and a type family $P : X \to \UU$, the total cofork is also a coequalizer.
 #+end_thm
+
+#+begin_proof
+To show that the total cocone is a coequalizer, it suffices to show that the corresponding cocone is a pushout. Construct the cube
+#+begin_center
+\begin{tikzcd}[column sep=huge, row sep=large]
+  & \Sigma (A + A) (P \comp i \comp f \comp \codiag)
+  \arrow[dl, "\tot_\codiag(\id)"']
+  \arrow[d, "\psi", "\simeq"']
+  \arrow[dr, "\tot_{\coprodM{f}{g}}(\tr_P\coprodM{\reflhtpy}{H})"] \\
+  \Sigma A (P \comp i \comp f)
+  \arrow[d, "\id"']
+  & (\Sigma A (P \comp i \comp f)) + (\Sigma A (P \comp i \comp f))
+  \arrow[dl, "\codiag", near start]
+  \arrow[dr, "\coprodM{\tot_f(\id)}{\tot_g(\tr_P(H))}"', near start]
+  & \Sigma B (P \comp i)
+  \arrow[dl, crossing over, "\tot_i(\id)", near end]
+  \arrow[d, "\id"] \\
+  \Sigma A (P \comp i \comp f)
+  \arrow[dr, "\tot_i(\id) \comp \tot_f(\id)"']
+  & \Sigma X P
+  \arrow[from=ul, crossing over, "\tot_{i \comp f}(\id)"', near end]
+  \arrow[d, "\id"]
+  & \Sigma B (P \comp i)
+  \arrow[dl, "\tot_i(\id)"] \\
+  & \Sigma X P
+\end{tikzcd}
+#+end_center
+where the homotopy
+\begin{displaymath}
+  \coprodM{\reflhtpy}{H} : (i \comp f \comp \codiag) \htpy (i \comp \coprodM{f}{g})
+\end{displaymath}
+is defined by sending $\inl(a)$ to $\reflhtpy(a) : i(f a) = i(f a)$ and $\inr(a)$ to $H(a) : i(f a) = i(g a)$. The equivalence
+\begin{displaymath}
+  \psi : (\Sigma (A + A) (P \comp i \comp f \comp \codiag)) \simeq ((\Sigma A (P \comp i \comp f)) + (\Sigma A (P \comp i \comp f)))
+\end{displaymath}
+sends $(\inl(a), p)$ to $\inl(a, p)$ and $(\inr(a), p)$ to $\inr(a, p)$.
+
+The bottom square is the cocone corresponding to the total cofork, \linebreak $\term{cofork-cocone}^{-1}(\Sigma c)$ \TODO[the notation hasn't been established], and the top square is the total cocone of the corresponding cocone, $\Sigma (\term{cofork-cocone}^{-1}(c))$. The two front squares commute by $\reflhtpy$, and the back two squares commute by $(\coprodM{\reflhtpy}{\reflhtpy}, \reflhtpy)$.
+
+Since $c$ is a coequalizer by assumption, it holds that the corresponding cocone is a pushout, and by [[lemma:flattening-lemma]] the top square of the cube is a pushout. Note that all the vertical maps are equivalences, and the goal is to show that the bottom square is a pushout. Hence it suffices to show that the cube commutes.
+
+To show that the cube commutes, we proceed by cases: for elements of the form $(\inl(a), p)$, all the identifications collapse to $\refl$, so in the fiber the cube commutes by $\refl$. For elements of the form $(\inr(a), p)$, we need an identification
+\begin{displaymath}
+  \refl \concat \refl \concat (\ap_{\id} (H(a), \refl)) = (H(a), \refl) \concat \refl \concat \refl,
+\end{displaymath}
+which we can get by unit laws for concatenating $\refl$'s and whiskering by $\id$.
+#+end_proof
 
 ** Sequential colimits
 
+\TODO[I formalized sections 3 and 4 from SvDR20, and the main theorem for the special case of equifibered sequencial diagrams].
 [cite/t/cf:@SvDR20]
 
 \TODO[Note that AFAIK descent and flattening aren't necessary for the main result of this thesis, but flattening and esp. generalized flattening are used in SvDR20 to prove connectivity results, which are then used in applications].
