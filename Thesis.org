@@ -100,6 +100,8 @@
 #+LATEX_HEADER: \DeclareMathOperator{\depCofork}{dep-cofork}
 #+LATEX_HEADER: \DeclareMathOperator{\depCoforkMap}{dep-cofork-map}
 #+LATEX_HEADER: \DeclareMathOperator{\spanDoubleArrow}{span-double-arrow}
+#+LATEX_HEADER: \DeclareMathOperator{\coconeCofork}{cocone-cofork}
+#+LATEX_HEADER: \DeclareMathOperator{\depCoconeDepCofork}{dep-cocone-dep-cofork}
 
 # Universes
 #+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
@@ -164,22 +166,22 @@ DEDICATION
  Homotopy Type Theory [cite//b:@UF13] is a logical framework built on Martin-Löf's type theory and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory, in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite//b:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization". The validity of the constructions is verified by type-checking the programs.
 
  In this setting, one can define higher inductive types (HITs), by specifying both /point/ constructors, and higher /path/ constructors of the type. Homotopy pushouts are examples of HITs — given types $S, A, B$ and maps $f : S → A$, $g : S → B$, we define $\POData{f}{g}$ to be the higher inductive type with point constructors
- 
+
  \begin{align*}
    \constructor{inl} &: A \to \POData{f}{g} \\
    \constructor{inr} &: B \to \POData{f}{g}
  \end{align*}
- 
+
  and a path constructor
- 
+
  \begin{align*}
    \constructor{glue} : (s : S) \to \constructor{inl}(f s) =_{\POData{f}{g}} \constructor{inr}(g s)
  \end{align*}
 
  This work focuses on homotopy pushouts \mdash specifically we provide an exposition and formalization of the descent property and flattening lemma, and use the built infrastructure to formally prove correctness of Wärn's zigzag construction of identity types of pushouts.
- 
+
  \TODO[We build more infrastructure than strictly necessary for sequential colimits, since we anticipate it will be useful when formalizing applications of the zigzag construction. The formalized material comes from SvDR20, and as a byproduct we started an effort to collect pages for formalization of results from the literature. Even though it is not of mathematical nature, it is relevant to the formalization aspect, as it builds more documentation, makes the development accessible, and sets an example for beginning formalizers].
- 
+
  \TODO[Mention that David writes "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile". But it's in the categorical paper?]
 
 * Homotopy Type Theory
@@ -1331,27 +1333,42 @@ where the left map is the codiagonal map, sending $\inl(a)$ and $\inr(a)$ to $a$
 
 The standard coequalizer of $\D$ may be obtained as the pushout of $\spanDoubleArrow(\D)$.
 
-#+name: lemma:cofork-cocone
+#+name: lemma:cocone-cofork
 #+begin_lemma
 For any double arrow $\D$ and a type $X$, there is an equivalence
 \begin{displaymath}
-  \term{cofork-cocone} : \cocone(\spanDoubleArrow(\D), X) \simeq \cofork(\D, X)
+  \coconeCofork : \cofork(\D, X) \simeq \cocone(\spanDoubleArrow(\D), X)
 \end{displaymath}
 which fits into the following commuting triangle for every cofork $c : \cofork(\D, X)$
 #+begin_center
-\begin{tikzcd}
+\begin{tikzcd}[column sep=small]
   (X \to Y)
-  \arrow[rr, "\coconeMap_{\term{cofork-cocone}^{-1}(c)}"]
-  \arrow[dr, "\coforkMap_c"']
-  && \cocone(\spanDoubleArrow(\D), Y)
-  \arrow[dl, "\term{cofork-cocone}", "\simeq"'] \\
-  & \cofork(\D, Y)
+  \arrow[rr, "\coforkMap_c"]
+  \arrow[dr, "\coconeMap_{\coconeCofork(c)}"']
+  && \cofork(\D, Y)
+  \arrow[dl, "\coconeCofork", "\simeq"'] \\
+  & \cocone(\spanDoubleArrow(\D), Y)
 \end{tikzcd}
 #+end_center
 #+end_lemma
 
 #+begin_proof
-To define the forward map, assume a cocone $(i, j, H)$ where $i : A \to X$, $j : B \to X$, and $H$ witnesses commutativity of the square
+To define the forward map, assume a cofork $(j, H)$, where $j : B \to X$ and $H : j \comp f \htpy j \comp g$. To construct the cocone under $\spanDoubleArrow(\D)$, take $j \comp f : A \to X$ to be the first component and $j$ to be the second component. It remains to construct a homotopy
+#+begin_center
+\begin{tikzcd}
+  A + A
+  \arrow[r, "\coprodM{f}{g}"]
+  \arrow[d, "\codiag"']
+  & B
+  \arrow[d, "j"] \\
+  A
+  \arrow[r, "j \comp f"']
+  & X.
+\end{tikzcd}
+#+end_center
+On $\inl(a) : A + A$ the square commutes by $\refl$, and on $\inr(a) : A + A$ it commutes by $H : j \comp f \htpy j \comp g$, which we write as $\coprodM{\reflhtpy}{H}$.
+
+To define the inverse map, assume a cocone $(i, j, H)$ where $i : A \to X$, $j : B \to X$, and $H$ witnesses commutativity of the square
 #+begin_center
 \begin{tikzcd}
   A + A
@@ -1367,21 +1384,6 @@ To define the forward map, assume a cocone $(i, j, H)$ where $i : A \to X$, $j :
 
 Since the codomain of the homotopy is a coproduct, it corresponds to a pair of homotopies $H_1 : i \htpy j \comp f$ and $H_2 : i \htpy j \comp g$. To construct the cofork under $\D$, take $j$ to be the first component, and the concatenation $H_1^{-1} \hconcat H_2 : j \comp f \htpy j \comp g$ for the second component.
 
-To define the inverse map, assume a cofork $(j, H)$, where $j : B \to X$ and $H : j \comp f \htpy j \comp g$. To construct the cocone under $\spanDoubleArrow(\D)$, take $j \comp f : A \to X$ to be the first component and $j$ to be the second component. It remains to construct a homotopy
-#+begin_center
-\begin{tikzcd}
-  A + A
-  \arrow[r, "\coprodM{f}{g}"]
-  \arrow[d, "\codiag"']
-  & B
-  \arrow[d, "j"] \\
-  A
-  \arrow[r, "j \comp f"']
-  & X.
-\end{tikzcd}
-#+end_center
-On $\inl(a) : A + A$ the square commutes by $\refl$, and on $\inr(a) : A + A$ it commutes by $H : j \comp f \htpy j \comp g$.
-
 \TODO[We need to show that they are mutual inverses. It requires homotopies of cocones and coforks, which I want to avoid, so maybe skip that?]
 
 To show commutativity of the triangle, chase a map $h : X \to Y$:
@@ -1390,55 +1392,95 @@ To show commutativity of the triangle, chase a map $h : X \to Y$:
   h
   \arrow[rr, mapsto]
   \arrow[dr, mapsto]
-  \&\&\left(
-  \begin{aligned}
-    &h \comp j \comp f, \\
-    &h \comp j, \\
-    &h \lwhisk (\reflhtpy, H)
-  \end{aligned}
-  \right)
+  \&\&(h \comp j, h \lwhisk H)
   \arrow[dl, mapsto] \\
   \&\left(
   \begin{aligned}
+    &h \comp j \comp f, \\
     &h \comp j, \\
-    &h \lwhisk H
+    &h \lwhisk \coprodM{\reflhtpy}{H}
   \end{aligned}
   \right)
-  \judeq\left(
+  =
+  \left(
   \begin{aligned}
+    &h \comp j \comp f, \\
     &h \comp j, \\
-    &h \lwhisk (\reflhtpy^{-1} \hconcat H)
+    &\coprodM{\reflhtpy}{h \lwhisk H}
   \end{aligned}
   \right).
 \end{tikzcd}
 #+end_center
 
-The diagram then commutes by $\reflhtpy$.
+The first two components are identical, so it suffices to show that for all $a : A + A$, the identifications $\ap_h(\coprodM{\reflhtpy}{H}(a))$ and $\coprodM{\reflhtpy}{\ap_h(H(a))}$ agree. On elements of the form $\inl(a)$ they both compute to $\refl$, and on elements of the form $\inr(a)$ they compute to $\ap_h(H(a))$, so they are identified by $\refl$.
 #+end_proof
 
 #+name: lemma:coeq-pushout
 #+begin_lemma
-The equivalence $\term{cofork-cocone}$ restricts to an equivalence between \linebreak pushouts of $\spanDoubleArrow(\D)$ and coequalizers of $\D$. In other words, a cofork $c$ satisfies the universal property of coequalizers if and only if the cocone $\term{cofork-cocone}^{-1}(c)$ satisfies the universal property of pushouts.
+The equivalence $\coconeCofork$ restricts to an equivalence between \linebreak pushouts of $\spanDoubleArrow(\D)$ and coequalizers of $\D$. In other words, a cofork $c$ satisfies the universal property of coequalizers if and only if the cocone $\coconeCofork(c)$ satisfies the universal property of pushouts.
 #+end_lemma
 
 #+begin_proof
-By the commuting triangle in [[lemma:cofork-cocone]] and the 3-for-2 property of equivalences, $\coforkMap_c$ is an equivalence if and only if the corresponding $\coconeMap$ is an equivalence.
+By the commuting triangle in [[lemma:cocone-cofork]] and the 3-for-2 property of equivalences, $\coforkMap_c$ is an equivalence if and only if the corresponding $\coconeMap$ is an equivalence.
 #+end_proof
 
-We define dependent coforks, the dependent universal property of coequalizers, and an equivalence between dependent coforks and certain dependent cocones analogously. 
+We define dependent coforks and the dependent universal property of coequalizers analogously to the case of dependent cocones.
 
 #+begin_defn
-\TODO[Dependent coforks].
+Consider a cofork $c \judeq (i, H) : \cofork(\D, X)$ and a type family $P : X \to \UU$. A *dependent cofork* over $c$ on $P$ is a pair $(i', H')$, where
+\begin{align*}
+  &i' : (b : B) \to P(i b) \\
+  &H' : (a : A) \to \tr_P(H a) (i(f a)) = i(g a).
+\end{align*}
+
+We write $\depCofork(c, P)$ for the type of dependent coforks over $c$ on $P$.
 #+end_defn
 
+#+begin_constr
+Given a cofork $c \judeq (i, H) : \cofork(\D, X)$ and a type family $P : X \to \UU$, define a map
+\begin{displaymath}
+  \depCoforkMap_c^P : ((x : X) \to P(x)) \to \depCofork(c, P)
+\end{displaymath}
+which sends $h$ to $(h \comp i, \lambda a \to \apd_h(H a))$.
+#+end_constr
+
 #+begin_defn
-\TODO[Dependent universal property of coequalizers].
+A cofork $c$ satisfies the *dependent universal property of coequalizers* if for all $P : X \to \UU$, the map $\depCoforkMap_c^P$ is an equivalence.
 #+end_defn
+
+#+name: lemma:dep-cocone-dep-cofork
+#+begin_lemma
+For any cofork $c : \cofork(\D, X)$, there is an equivalence
+\begin{align*}
+  \depCoconeDepCofork
+  &: \depCofork(c, X) \\
+  & \simeq \depCocone(\coconeCofork(c), P)
+\end{align*}
+such that the following diagram commutes for every cofork $c : \cofork(\D, X)$
+#+begin_center
+\begin{tikzcd}[column sep=tiny]
+  (X \to Y)
+  \arrow[rr, "\depCoforkMap_c"]
+  \arrow[dr, "\depCoconeMap_{\coconeCofork(c)}"']
+  && \depCofork(c, P)
+  \arrow[dl, "\depCoconeDepCofork", "\simeq"'] \\
+  & \depCocone(\coconeCofork(c), P)
+\end{tikzcd}
+#+end_center
+#+end_lemma
+
+#+begin_proof
+Completely analogous to the proof of [[lemma:cocone-cofork]].
+#+end_proof
 
 #+name: lemma:coeq-pushout-dup
 #+begin_lemma
-\TODO[DUP coequalizer iff DUP pushout]
+A cofork $c : \cofork(\D, X)$ satisfies the dependent universal property of coequalizers if and only if the cocone $\coconeCofork(c)$ satisfies the dependent universal property of pushouts.
 #+end_lemma
+
+#+begin_proof
+By the commuting triangle in [[lemma:dep-cocone-dep-cofork]], the map $\depCoforkMap_c$ is an equivalence if and only if $\depCoconeMap_{\coconeCofork(c)}$ is an equivalence.
+#+end_proof
 
 #+begin_lemma
 A cofork satisfies the universal property of coequalizers if and only if it satisfies the dependent universal property of coequalizers.
@@ -1448,8 +1490,8 @@ A cofork satisfies the universal property of coequalizers if and only if it sati
 Given a cofork $c$, there is a sequence of logical equivalences
 \begin{align*}
   & \text{$c$ satisfies the universal property of coequalizers} \\
-  & \leftrightarrow \text{$\term{cofork-cocone^{-1}(c)}$ satisfies the universal property of pushouts} \\
-  & \leftrightarrow \text{$\term{cofork-cocone^{-1}(c)}$ satisfies the dependent universal property of pushouts} \\
+  & \leftrightarrow \text{$\coconeCofork(c)$ satisfies the universal property of pushouts} \\
+  & \leftrightarrow \text{$\coconeCofork(c)$ satisfies the dependent universal property of pushouts} \\
   & \leftrightarrow \text{$c$ satisfies the dependent universal property of coequalizers}.
 \end{align*}
 
@@ -1517,11 +1559,11 @@ is defined by sending $\inl(a)$ to $\reflhtpy(a) : i(f a) = i(f a)$ and $\inr(a)
 \end{displaymath}
 sends $(\inl(a), p)$ to $\inl(a, p)$ and $(\inr(a), p)$ to $\inr(a, p)$.
 
-The bottom square is the cocone corresponding to the total cofork, \linebreak $\term{cofork-cocone}^{-1}(\Sigma c)$ \TODO[the notation hasn't been established], and the top square is the total cocone of the corresponding cocone, $\Sigma (\term{cofork-cocone}^{-1}(c))$. The two front squares commute by $\reflhtpy$, and the back two squares commute by $(\coprodM{\reflhtpy}{\reflhtpy}, \reflhtpy)$.
+The bottom square is the cocone corresponding to the total cofork, \linebreak $\coconeCofork(\Sigma c)$ \TODO[the notation hasn't been established], and the top square is the total cocone of the corresponding cocone, $\Sigma (\coconeCofork(c))$. The two front squares commute by $\reflhtpy$, and the back two squares commute by $(\coprodM{\reflhtpy}{\reflhtpy}, \reflhtpy)$.
 
-Since $c$ is a coequalizer by assumption, it holds that the corresponding cocone is a pushout, and by [[lemma:flattening-lemma]] the top square of the cube is a pushout. Note that all the vertical maps are equivalences, and the goal is to show that the bottom square is a pushout. Hence it suffices to show that the cube commutes.
+Since $c$ is a coequalizer by assumption, it holds that the corresponding cocone is a pushout, so by [[lemma:flattening-lemma]] the top square of the cube is a pushout. Note that all the vertical maps are equivalences, and the goal is to show that the bottom square is a pushout. Hence it suffices to show that the cube commutes.
 
-To show that the cube commutes, we proceed by cases: for elements of the form $(\inl(a), p)$, all the identifications collapse to $\refl$, so in the fiber the cube commutes by $\refl$. For elements of the form $(\inr(a), p)$, we need an identification
+To show that the cube commutes, we proceed by cases: for elements of the form $(\inl(a), p)$, all the identifications collapse to $\refl$, so in that fiber the cube commutes by $\refl$. For elements of the form $(\inr(a), p)$, we need an identification
 \begin{displaymath}
   \refl \concat \refl \concat (\ap_{\id} (H(a), \refl)) = (H(a), \refl) \concat \refl \concat \refl,
 \end{displaymath}
@@ -1693,7 +1735,7 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 - {{{PR(1148,characterization-families-pushouts)}}}
 - {{{PR(1150,identity-systems-descent-pushouts)}}}
 
-  
+
 * COMMENT Battle plan
 - [cite:@BW22] 2.5 for straightening/unstraightening
 
