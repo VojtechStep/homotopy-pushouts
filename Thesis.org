@@ -184,6 +184,8 @@ DEDICATION
 
  \TODO[Mention that David writes "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile". But it's in the categorical paper?]
 
+ \TODO[Contributions: Chapter 1 and first section of chapter 2 consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The uniform treatment of sections of descent data, its application to identity systems in terms of descent data, the presented proof of the flattening lemma, and the proof of correctness of the zigzag construction is original research.]
+
 * Homotopy Type Theory
 
 #+NAME: lemma:is-equiv-concat
@@ -292,7 +294,7 @@ A cocone $c$ under $\S$ on $X$ satisfies the *universal property of pushouts* if
 A cocone satisfying the universal property of pushouts is called a *pushout*. We will sometimes abuse notation and call just the type $X$ the pushout.
 #+end_defn
 
-\TODO[The universal property characterizes simple maps out of the colimit. In dependent type theory, we can also ask about characterizations of /dependent/ maps out of the colimit. To that end we introduce dependent cocones and the dependent universal property].
+The universal property characterizes simple maps out of the colimit. In dependent type theory, we can also ask about characterizations of /dependent/ maps out of the colimit. To that end we introduce dependent cocones and the dependent universal property.
 
 #+begin_defn
 Consider a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UV$. A *dependent cocone* over $c$ on $P$ is a triple $(i', j', H')$, where $i' : (a : A) \to P(i a)$ and $j' : (b : B) \to P(j b)$ are dependent maps over $i$ and $j$, respectively, and $H$ is a \TODO[dependent homotopy] between $i' \comp f$ and $j' \comp g$, \ie a family of identifications
@@ -320,7 +322,7 @@ A cocone $c : \cocone(\S, X)$ satisfies the *dependent universal property of pus
 
 Note that the dependent universal property isn't a property of dependent cocones, but rather a property of cocones and their extensions by dependent functions.
 
-\TODO[We don't introduce a new name for cocones satisfying the dependent universal property, because curiously enough, the two properties are equivalent, as claimed by the following lemma.]
+We don't introduce a new name for cocones satisfying the dependent universal property, because the two properties turn out to be equivalent. The proof relies on the pullback property and the dependent pullback property of pushouts, which relate
 
 #+name: lemma:dup-iff-up-pushout
 #+begin_lemma
@@ -384,7 +386,7 @@ We use the notation $\DD(\S)$ for the type of descent data over a span diagram $
 
 It may not be immediately clear why "descent data" is an appropriate name for this concept, because there is no apparent downward motion. Traditionally, descent is studied in the context of a collection of objects $X_i$ covering a single object $X$, and local structure on the individual $X_i$'s descending onto $X$, collecting into a global structure, given that the pieces are appropriately compatible on any "overlaps". A pushout $X$ of $\S$ is covered by $A$ and $B$, and the overlaps are encoded in $f$ and $g$. Structure on $A$ and $B$, expressed as type families $P_A$ and $P_B$, "descends" to a structure on $X$ (a type family over $X$). Two elements "overlap" in $X$ if there is an identification between them coming from $S$, and the gluing/compatibility condition exactly requires the local structure of $P_A$ and $P_B$ to agree on such elements, i.e. asks for an equivalence $P_A(f s) \simeq P_B(g s)$.
 
-The first task is to establish an equivalence between type families over a pushout and descent data over its defining span. A map from type families to descent data is easy enough to construct: 
+The first task is to establish an equivalence between type families over a pushout and descent data over its defining span. A map from type families to descent data is easy enough to construct:
 
 #+begin_constr
 Given a cocone $c \judeq (i, j, H)$ on $X$, construct a map
