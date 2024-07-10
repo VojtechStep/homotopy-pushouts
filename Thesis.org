@@ -87,6 +87,7 @@
 # so use the "fixed" mupSigma command
 # https://tex.stackexchange.com/questions/477662/fontspec-breaks-capital-greek-letters-in-declaremathoperator
 #+LATEX_HEADER: \DeclareMathOperator{\uncurry}{ind-\mupSigma}
+#+LATEX_HEADER: \DeclareMathOperator{\curry}{ev-pair}
 #+LATEX_HEADER: \DeclareMathOperator{\tot}{tot}
 
 # Object macros
@@ -94,6 +95,7 @@
 #+LATEX_HEADER: \newcommand{\PO}[3]{#2 \sqcup_{#1} #3}
 #+LATEX_HEADER: \renewcommand{\S}{\mathcal{S}}
 
+# Coequalizers
 #+LATEX_HEADER: \newcommand{\D}{\mathcal{D}}
 #+LATEX_HEADER: \DeclareMathOperator{\cofork}{cofork}
 #+LATEX_HEADER: \DeclareMathOperator{\coforkMap}{cofork-map}
@@ -102,6 +104,16 @@
 #+LATEX_HEADER: \DeclareMathOperator{\spanDoubleArrow}{span-double-arrow}
 #+LATEX_HEADER: \DeclareMathOperator{\coconeCofork}{cocone-cofork}
 #+LATEX_HEADER: \DeclareMathOperator{\depCoconeDepCofork}{dep-cocone-dep-cofork}
+
+# Sequential colimits
+#+LATEX_HEADER: \newcommand{\A}{\mathcal{A}}
+#+LATEX_HEADER: \DeclareMathOperator{\coconeN}{cocone\N}
+#+LATEX_HEADER: \DeclareMathOperator{\coconeNMap}{cocone\N-map}
+#+LATEX_HEADER: \DeclareMathOperator{\depCoconeN}{dep-cocone\N}
+#+LATEX_HEADER: \DeclareMathOperator{\depCoconeNMap}{dep-cocone\N-map}
+#+LATEX_HEADER: \DeclareMathOperator{\doubleArrowSeq}{double-arrow-seq}
+#+LATEX_HEADER: \DeclareMathOperator{\coforkCoconeN}{cofork-cocone\N}
+#+LATEX_HEADER: \DeclareMathOperator{\depCoforkDepCoconeN}{dep-cofork-dep-cocone\N}
 
 # Universes
 #+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
@@ -185,6 +197,8 @@ DEDICATION
  \TODO[Mention that David writes "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile". But it's in the categorical paper?]
 
  \TODO[Contributions: Chapter 1 and first section of chapter 2 consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The uniform treatment of sections of descent data, its application to identity systems in terms of descent data, the presented proof of the flattening lemma, and the proof of correctness of the zigzag construction is original research.]
+
+ \TODO[The bulk of the work is the reusable and documented formalization of the presented material in the {{{AU}}} library. The relevant proofs were "unformalized" into English and are presented below.]
 
 * Homotopy Type Theory
 
@@ -294,6 +308,10 @@ A cocone $c$ under $\S$ on $X$ satisfies the *universal property of pushouts* if
 A cocone satisfying the universal property of pushouts is called a *pushout*. We will sometimes abuse notation and call just the type $X$ the pushout.
 #+end_defn
 
+#+begin_lemma
+\TODO[Uniqueness of mediating map].
+#+end_lemma
+
 The universal property characterizes simple maps out of the colimit. In dependent type theory, we can also ask about characterizations of /dependent/ maps out of the colimit. To that end we introduce dependent cocones and the dependent universal property.
 
 #+begin_defn
@@ -322,15 +340,25 @@ A cocone $c : \cocone(\S, X)$ satisfies the *dependent universal property of pus
 
 Note that the dependent universal property isn't a property of dependent cocones, but rather a property of cocones and their extensions by dependent functions.
 
-We don't introduce a new name for cocones satisfying the dependent universal property, because the two properties turn out to be equivalent. The proof relies on the pullback property and the dependent pullback property of pushouts, which relate
-
-#+name: lemma:dup-iff-up-pushout
 #+begin_lemma
-A cocone $c : \cocone(\S, X)$ satisfies the universal property of pushouts if and only if it satisfies the dependent universal property of pushouts.
+\TODO[Uniqueness of mediating map].
 #+end_lemma
 
+We don't introduce a new name for cocones satisfying the dependent universal property, because the two properties turn out to be equivalent. The proof relies on the pullback property and the dependent pullback property of pushouts, which relate pushouts and pullbacks of function types. As this thesis does not discuss pullbacks, we defer the proof to [cite/t:@Rij22Pre, Theorem 25.1.4].
+
+#+name: lemma:dup-iff-up-pushout
+#+begin_thm
+A cocone $c : \cocone(\S, X)$ satisfies the universal property of pushouts if and only if it satisfies the dependent universal property of pushouts.
+#+end_thm
+
 #+begin_proof
-\TODO[Figure out how to skip this proof].
+There is a chain of logical equivalences
+\begin{align*}
+  & \text{$c$ satisfies the universal property of pushouts} \\
+  & \leftrightarrow \text{$c$ satisfies the pullback property of pushouts} \\
+  & \leftrightarrow \text{$c$ satisfies the dependent pullback property of pushouts} \\
+  & \leftrightarrow \text{$c$ satisfies the dependent universal property of pushouts}.
+\end{align*}
 #+end_proof
 
 #+name: remark:universal-properties
@@ -955,7 +983,7 @@ is an equivalence. We achieve that by forming a commuting pentagon, in which all
     &((s, p) : \Sigma S (P \comp i \comp f)) \to \\
     &h_A(f s, p) = h_B(g s, \tr_P(H s, p))
   \end{aligned}
-  \arrow[dd, "\term{ev-pair}^3", "\simeq"'] \\
+  \arrow[dd, "\curry^3", "\simeq"'] \\
   (x : X) \to P(x) \to Y
   \arrow[u, "\uncurry", "\simeq"']
   \arrow[d, "\depCoconeMap_c"', "\simeq"] \\
@@ -1294,6 +1322,9 @@ A pushout square is *van Kampen* if it satisfies both the first and second cube 
 Pushouts and the empty type suffice to construct many other kinds of colimits. We are particularly interested in sequential colimits, which figure prominently in the zigzag construction in [[#sec:zigzag-constr]]. Sequential colimits and some of their properties may be derived from pushouts. Their construction is more natural if we first formalize a basic theory of coequalizers on top of pushouts, and then we formalize sequential colimits on top of coequalizers.
 
 ** Coequalizers
+:PROPERTIES:
+:CUSTOM_ID: sec:coequalizers
+:END:
 
 #+begin_defn
 A *double arrow* is a pair of types $A : \UU$, $B : \UV$, equipped with a pair of maps $f, g : A \to U$.
@@ -1316,14 +1347,14 @@ which sends $h$ to $(h \comp i, h \lwhisk H)$.
 #+begin_defn
 A cofork $c$ under $\D$ on $X$ satisfies the *universal property of coequalizers* if for all $Y : \UV$, the map $\coforkMap_c^Y$ is an equivalence.
 
-A cocone satisfying the universal property of coequalizers is called a *coequalizer*.
+A cofork satisfying the universal property of coequalizers is called a *coequalizer*.
 #+end_defn
 
 #+begin_constr
-Construct the map $\spanDoubleArrow$ by
+Construct the map $\spanDoubleArrow$ from double arrows to span diagrams by
 #+begin_center
 \begin{tikzcd}
-  A \arrow[r, shift left, "g"] \arrow[r, shift right, "f"'] & B
+  A \arrow[r, shift left=1.25, "g"] \arrow[r, shift right=1.25, "f"'] & B
 \end{tikzcd}
 \hspace{3em} $\mapsto$ \hspace{3em}
 \begin{tikzcd}
@@ -1349,7 +1380,7 @@ which fits into the following commuting triangle for every cofork $c : \cofork(\
   \arrow[dr, "\coconeMap_{\coconeCofork(c)}"']
   && \cofork(\D, Y)
   \arrow[dl, "\coconeCofork", "\simeq"'] \\
-  & \cocone(\spanDoubleArrow(\D), Y)
+  & \cocone(\spanDoubleArrow(\D), Y).
 \end{tikzcd}
 #+end_center
 #+end_lemma
@@ -1430,10 +1461,10 @@ We define dependent coforks and the dependent universal property of coequalizers
 
 #+begin_defn
 Consider a cofork $c \judeq (i, H) : \cofork(\D, X)$ and a type family $P : X \to \UU$. A *dependent cofork* over $c$ on $P$ is a pair $(i', H')$, where
-\begin{align*}
-  &i' : (b : B) \to P(i b) \\
-  &H' : (a : A) \to \tr_P(H a) (i(f a)) = i(g a).
-\end{align*}
+\begin{alignat*}{2}
+  &i' &&: (b : B) \to P(i b) \\
+  &H' &&: (a : A) \to \tr_P(H a) (i(f a)) = i(g a).
+\end{alignat*}
 
 We write $\depCofork(c, P)$ for the type of dependent coforks over $c$ on $P$.
 #+end_defn
@@ -1455,10 +1486,10 @@ A cofork $c$ satisfies the *dependent universal property of coequalizers* if for
 For any cofork $c : \cofork(\D, X)$, there is an equivalence
 \begin{align*}
   \depCoconeDepCofork
-  &: \depCofork(c, X) \\
+  &: \depCofork(c, P) \\
   & \simeq \depCocone(\coconeCofork(c), P)
 \end{align*}
-such that the following diagram commutes for every cofork $c : \cofork(\D, X)$
+such that the following diagram commutes
 #+begin_center
 \begin{tikzcd}[column sep=tiny]
   (X \to Y)
@@ -1466,7 +1497,7 @@ such that the following diagram commutes for every cofork $c : \cofork(\D, X)$
   \arrow[dr, "\depCoconeMap_{\coconeCofork(c)}"']
   && \depCofork(c, P)
   \arrow[dl, "\depCoconeDepCofork", "\simeq"'] \\
-  & \depCocone(\coconeCofork(c), P)
+  & \depCocone(\coconeCofork(c), P).
 \end{tikzcd}
 #+end_center
 #+end_lemma
@@ -1484,9 +1515,9 @@ A cofork $c : \cofork(\D, X)$ satisfies the dependent universal property of coeq
 By the commuting triangle in [[lemma:dep-cocone-dep-cofork]], the map $\depCoforkMap_c$ is an equivalence if and only if $\depCoconeMap_{\coconeCofork(c)}$ is an equivalence.
 #+end_proof
 
-#+begin_lemma
+#+begin_thm
 A cofork satisfies the universal property of coequalizers if and only if it satisfies the dependent universal property of coequalizers.
-#+end_lemma
+#+end_thm
 
 #+begin_proof
 Given a cofork $c$, there is a sequence of logical equivalences
@@ -1507,14 +1538,14 @@ Given a double arrow $\D \judeq (f, g)$, a cofork $(i, H)$ on $X$, and a type fa
 #+begin_center
 \begin{tikzcd}[column sep=huge]
   \Sigma A (P \comp i \comp f)
-  \arrow[r, shift left, "\tot_g(\tr_P(H))"]
-  \arrow[r, shift right, "\tot_f(\id)"']
+  \arrow[r, shift left=1.25, "\tot_g(\tr_P(H))"]
+  \arrow[r, shift right=1.25, "\tot_f(\id)"']
   & \Sigma B (P \comp i)
   \arrow[r, "\tot_i(\id)"]
   & \Sigma X P,
 \end{tikzcd}
 #+end_center
-where the homotopy is
+where the map $\tot_g(\tr_P(H))$ takes $(a, p)$ to $(g a, \tr_P(H a, p))$, and the homotopy is
 \begin{displaymath}
   (H, \reflhtpy) : (\tot_i(\id) \comp \tot_f(\id)) \htpy (\tot_i(\id) \comp \tot_g(\tr_P(H))).
 \end{displaymath}
@@ -1580,46 +1611,251 @@ which we can get by unit laws for concatenating $\refl$'s and whiskering by $\id
 \TODO[Note that AFAIK descent and flattening aren't necessary for the main result of this thesis, but flattening and esp. generalized flattening are used in SvDR20 to prove connectivity results, which are then used in applications].
 
 #+begin_defn
-\TODO[Sequential diagrams].
+A *sequential diagram* is a pair $(A, a)$ of a sequence of types $A : \N \to \UU$ and a family of maps $a : (n : \N) \to A(n) \to A(n + 1)$.
+
+We will often write $A_n$ and $a_n$ for $A(n)$ and $a(n)$, respectively.
 #+end_defn
 
 #+begin_remark
-\TODO[AKA cotowers --- we decided to use (inverse) sequential diagrams in agda-unimath].
+In the literature, sequential diagrams are also known as "cotowers". We decided to use "sequential diagrams" in the {{{AU}}} library, because we believe it to be a more approachable term.
 #+end_remark
 
 #+begin_defn
-\TODO[Cocones under sequential diagrams].
-#+end_defn
-
-The standard sequential colimit may be obtained as a coequalizer of
+Given a sequential diagram $\A \judeq (A, a)$ and a type $X$, a *cocone* under $\A$ on $X$ is a pair $(i, H)$ consisting of a family of maps ${i : (n : \N) \to A_n \to X}$ and a family of homotopies $H : (n : \N) \to i_n \htpy i_{n + 1} \comp a_n$.
 #+begin_center
-\begin{tikzcd}[column sep=large]
-  \Sigma \N A
-  \arrow[r, shift right=1.25, "\id"']
-  \arrow[r, shift left=1.25, "\tot_{\term{suc}}(a)"]
-  & \Sigma \N A
+\begin{tikzcd}
+  A_0 \arrow[r, "a_0"]
+  \arrow[dr, "i_0"', ""{name=I0, anchor=center}]
+  & A_1
+  \arrow[r, "a_1"]
+  \arrow[d, "i_1"]
+  \arrow[from=I0, phantom, "H_0"]
+  & A_2 \arrow[r, "a_2"]
+  \arrow[dl, "i_2", ""{name=I2, anchor=center}]
+  & \cdots \\
+  & X
+  \arrow[urr, phantom, "\cdots"]
+  \arrow[from=1-2, to=I2, phantom, "H_1"]
 \end{tikzcd}
 #+end_center
 
-#+begin_defn
-\TODO[Dependent cocones under sequential diagrams].
+We write $\coconeN(\A, X)$ for the type of cocones under the sequential diagram $\A$ on the type $X$.
 #+end_defn
 
-#+begin_defn
-\TODO[Universal property].
-#+end_defn
+#+begin_remark
+In the prose, we use "cocone" to mean both "cocone under a span diagram" and "cocone under a sequential diagram". The kind of diagram should be clear from the context.
+#+end_remark
+
+#+begin_constr
+Given a cocone $c \judeq (i, H) : \coconeN(\A, X)$ and a type $Y : \UU$, we construct a map
+\begin{displaymath}
+  \coconeNMap_c^Y : (X \to Y) \to \coconeN(\A, Y)
+\end{displaymath}
+which sends $h$ to $(\lambda n \to h \comp i_n, \lambda n \to h \lwhisk H_n)$.
+#+end_constr
 
 #+begin_defn
-\TODO[Dependent universal property].
+A cocone $c : \coconeN(\A, X)$ satisfies the *universal property of sequential colimits* if for all $Y : \UU$, the map $\coconeNMap_c^Y$ is an equivalence.
+
+A cocone satisfying the universal property of sequential colimits is called a *sequential colimit*.
 #+end_defn
 
 #+begin_lemma
-\TODO[DUP $\leftrightarrow$ UP].
+\TODO[Uniqueness of mediating map].
+#+end_lemma
+
+#+begin_constr
+Construct the map $\doubleArrowSeq$ from sequential diagrams to double arrows by
+#+begin_center
+\begin{tikzcd}[column sep=small]
+  A_0 \arrow[r, "a_0"] & A_1 \arrow[r, "a_1"] & \cdots
+\end{tikzcd}
+\hspace{2em} $\mapsto$ \hspace{2em}
+\begin{tikzcd}[column sep=large]
+  \Sigma \N A
+  \arrow[r, shift left=1.25, "\tot_{+1}(a_{\blank})"]
+  \arrow[r, shift right=1.25, "\id"']
+  & \Sigma \N A,
+\end{tikzcd}
+#+end_center
+where the map $\tot_{+1}(a_{\blank})$ takes $(n, x)$ to $(n + 1, a_n(x))$.
+#+end_constr
+
+The sequential colimit of $\A$ may be obtained as the pushout of $\doubleArrowSeq(\A)$. Proofs of some of the following lemmas mirror exactly their counterparts in [[#sec:coequalizers]], and are therefore omitted.
+
+#+begin_lemma
+For any sequential diagram $\A$ and a type $X$, there is an equivalence
+\begin{displaymath}
+  \coforkCoconeN : \coconeN(\A, X) \simeq \cofork(\doubleArrowSeq(\A), X)
+\end{displaymath}
+which fits into the following commuting triangle for every cocone $c : \coconeN(\A, X)$
+#+begin_center
+\begin{tikzcd}[column sep=0]
+  (X \to Y)
+  \arrow[rr, "\coconeNMap_c"]
+  \arrow[dr, "\coforkMap_{\coforkCoconeN(c)}"']
+  && \coconeN(\A, Y)
+  \arrow[dl, "\coforkCoconeN", "\simeq"'] \\
+  & \cofork(\doubleArrowSeq(\A), X).
+\end{tikzcd}
+#+end_center
+#+end_lemma
+
+#+begin_proof
+To define the forward map, assume a cocone $(i, H)$ where
+\begin{alignat*}{2}
+  &i &&: (n : \N) \to A_n \to X \\
+  &H &&: (n : \N) (x : A_n) \to i_n(x) = i_{n + 1}(a_n x).
+\end{alignat*}
+
+Uncurrying both components, we get
+\begin{alignat*}{2}
+  &\uncurry(i) &&: \Sigma \N A \to X \\
+  &\uncurry(H) &&: \uncurry(i) \htpy \uncurry(i) \comp \tot_{+1}(a_{\blank}),
+\end{alignat*}
+which is a cofork under $\doubleArrowSeq(\A)$.
+
+In reverse, assume a cofork $(j, K)$ where
+\begin{alignat*}{2}
+  &j &&: \Sigma \N A \to X \\
+  &K &&: j \htpy j \comp \tot_{+1}(a_{\blank}),
+\end{alignat*}
+and curry both components to get
+\begin{alignat*}{2}
+  &\curry(j) &&: (n : \N) \to A_n \to X \\
+  &\curry(K) &&: (n : \N) \to \curry(j)(n) \htpy \curry(j)(n + 1) \comp a_n,
+\end{alignat*}
+which is a cocone under $\A$.
+
+Since currying and uncurrying are judgmental inverses, we conclude that the forward and backward maps are inverses of each other by $\reflhtpy$ and $\reflhtpy$.
+
+To prove commutativity of the triangle, assume a cocone $(i, H)$ and compute the action on a map $h : X \to Y$. The resulting coforks we get are
+\begin{displaymath}
+\begin{aligned}
+  &h \comp \uncurry(i) \\
+  &h \lwhisk \uncurry(H)
+\end{aligned}
+\text{\hspace{2em} and \hspace{2em}}
+\begin{aligned}
+  &\uncurry(\lambda n \to h \comp i_n) \\
+  &\uncurry(\lambda n \to h \lwhisk H_n)
+\end{aligned}
+\end{displaymath}
+which both compute to
+\begin{align*}
+  &\lambda (n, x) \to h(i_n x) \\
+  &\lambda (n, x) \to \ap_h(H_n x),
+\end{align*}
+so the triangle also commutes by $\reflhtpy$.
+#+end_proof
+
+#+begin_lemma
+A cocone $c : \coconeN(\A, X)$ is a sequential colimit if and only if the cofork $\coforkCoconeN(c)$ is a coequalizer.
+#+end_lemma
+
+#+begin_proof
+Omitted.
+#+end_proof
+
+#+begin_defn
+Consider a cocone $c \judeq (i, H) : \coconeN(\A, X)$ and a type family $P : X \to \UU$. A *dependent cocone* over $c$ on $P$ is a pair $(i', H')$ where
+\begin{alignat*}{2}
+  &i' &&: (n : \N) (x : A_n) \to P(i_n x) \\
+  &H' &&: (n : \N) (x : A_n) \to \tr_P(H_n x, i'_n x) = i'_{n + 1} (a_n a).
+\end{alignat*}
+
+We write $\depCoconeN(c, P)$ for the type of dependent cocones over $c$ on $P$.
+#+end_defn
+
+#+begin_constr
+Given a cofork $c \judeq (i, H) : \coconeN(\A, X)$ and a type family $P : X \to \UU$, construct the map
+\begin{displaymath}
+  \depCoconeNMap_c^P : ((x : X) \to P(x)) \to \depCoconeN(c, P)
+\end{displaymath}
+which sends $h$ to $(\lambda n \to h \comp i_n, \lambda n, x \to \apd_h(H_n x))$.
+#+end_constr
+
+#+begin_defn
+A cocone $c$ satisfies the *dependent universal property of sequential colimits* if for all $P : X \to \UU$, the map $\depCoconeNMap_c^P$ is an equivalence.
+#+end_defn
+
+#+begin_lemma
+\TODO[Uniqueness of mediating map].
 #+end_lemma
 
 #+begin_lemma
+For any cocone $c : \coconeN(\A, X)$, there is an equivalence
+\begin{align*}
+  \depCoforkDepCoconeN
+  &: \depCoconeN(c, P) \\
+  &\simeq \depCofork(\coforkCoconeN(c), P)
+\end{align*}
+such that the following diagram commutes
+#+begin_center
+\begin{tikzcd}[column sep=0]
+  ((x : X) \to P(x))
+  \arrow[rr, "\depCoconeNMap_c"]
+  \arrow[dr, "\depCoforkMap_{\coforkCoconeN(c)}"']
+  && \depCoconeN(c, P)
+  \arrow[dl, "\depCoforkDepCoconeN"] \\
+  & \depCofork(\coforkCoconeN(c), P).
+\end{tikzcd}
+#+end_center
+#+end_lemma
+
+#+begin_proof
+Omitted.
+#+end_proof
+
+#+begin_lemma
+A cocone $c : \coconeN(\A, X)$ satisfies the dependent universal property of sequential colimits if and only if the cofork $\coforkCoconeN(c)$ satisfies the dependent universal property of coequalizers.
+#+end_lemma
+
+#+begin_proof
+Omitted.
+#+end_proof
+
+#+begin_thm
+A cocone $c : \coconeN(\A, X)$ satisfies the universal property of sequential colimits if and only if it satisfies the dependent universal property of sequential colimits.
+#+end_thm
+
+#+begin_proof
+Omitted.
+#+end_proof
+
+*** Functoriality
+
+\TODO[Uniformly constructing a sequential colimit of every sequential diagram amounts to having a map from the type of sequential diagrams to a universe type. We show that this action on objects extends to an action on morphisms, which takes a morphism of sequential diagrams to a map between the corresponding types. Additionally, this action on morphisms is functorial, \ie it takes the identity morphism to the identity map and composition of morphisms to composition of maps.
+
+To formally state this property, we first need to define morphisms of sequential diagrams and their composition. We also show that homotopies of morphisms of sequential diagrams induce homotopies of the appropriate maps between colimits.
+
+The theory does not assume a uniform construction of standard sequential colimits. Instead the constructions and proofs are parametric over a user-provided sequential colimit. This generality is important for later applications in [[#sec:zigzags]], where the colimit is not judgmentally equal to the standard one.]
+
+#+begin_defn
+\TODO[Morphisms of sequential diagrams].
+#+end_defn
+
+#+begin_constr
+\TODO[The identity morphism of sequential diagrams].
+#+end_constr
+
+#+begin_constr
+\TODO[Composition of sequential diagrams].
+#+end_constr
+
+#+begin_defn
+\TODO[Homotopies of morphisms of sequential diagrams].
+#+end_defn
+
+#+begin_defn
+\TODO[Equivalences of sequential diagrams?].
+#+end_defn
+
+#+begin_thm
 \TODO[Functoriality].
-#+end_lemma
+#+end_thm
+
+*** Colimits of shifted sequential diagrams
 
 \TODO[The initial motivation for shifts is to show that dropping a finite number of vertices from a sequential diagram preserves the colimit. It is also useful for showing that zigzags induce equivalences in the colimit].
 
@@ -1651,12 +1887,42 @@ The standard sequential colimit may be obtained as a coequalizer of
 \TODO[Unshifts of homotopies of cocones].
 #+end_constr
 
+*** Descent
+
+#+begin_defn
+\TODO[Descent data for sequential colimits]
+#+end_defn
+
+#+begin_remark
+All descent data arise as dependent diagrams, with maps replaced by equivalences. It can then be simplified by replacing a span of fiberwise equivalences with a single fiberwise equivalence. To take the example of pushout, an equifibered span diagram consists of the data
+\begin{align*}
+  P_S &: S \to \UU \\
+  P_A &: A \to \UU \\
+  P_B &: B \to \UU \\
+  P_f &: (s : S) \to P_S(s) \simeq P_A(f s) \\
+  P_g &: (s : S) \to P_S(s) \simeq P_B(g s).
+\end{align*}
+
+The type of equifibered span diagrams is equivalent to the type of descent data, since we can contract away the pair $(P_S, P_f)$[fn:1]. The simplification reduces the amount of data we have to track and make coherent, at the expense of introducing an arbitrary direction --- there is no reason to prefer the direction $P_A(f s) \simeq P_B(g s)$ over $P_B(g s) \simeq P_A(f s)$.
+
+Sequential diagrams do not contain any spans, so there is no simplification to be done.
+#+end_remark
+
+*** Flattening lemma
+
+#+begin_thm
+\TODO[Flattening lemma]
+#+end_thm
+
 * Proof of correctness of the zigzag construction
 
 \TODO[Mention that there are multiple versions].
 \TODO[Mention that ours is a slight variation by switching relations for spans].
 
 ** Zigzags of sequential diagrams
+:PROPERTIES:
+:CUSTOM_ID: sec:zigzags
+:END:
 
 #+begin_defn
 \TODO[Zigzags].
@@ -1759,6 +2025,10 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 - [ ] Link formal statements to the formalization
 
 # The local variable is necessary to setup hyperref correctly
+
+* Footnotes
+
+[fn:1] There is a slight inaccuracy caused by universe levels --- the type families $P_A$, $P_B$ and $P_S$ should be allowed to range over different universes $\UU$, $\UV$, $\UW$. This can be formally rectified by appropriately raising to the common universe $\UU \sqcup \UV \sqcup \UW$.
 
 # Local Variables:
 # org-latex-default-packages-alist: (("" "graphicx" t) ("" "wrapfig" nil) ("" "rotating" nil) ("normalem" "ulem" t) ("" "amsmath" t) ("" "amssymb" t) ("" "amsthm" t) ("" "capt-of" nil) ("rgb" "xcolor" nil) ("pdfa" "hyperref" nil) ("" "hyperxmp" nil) ("" "geometry" nil) ("nottoc" "tocbibind" nil) ("" "newpxtext" nil) ("" "unicode-math" nil) ("" "aliascnt") ("" "tikz-cd" t))
