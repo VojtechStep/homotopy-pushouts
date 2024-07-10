@@ -66,6 +66,7 @@
 #+LATEX_HEADER: \DeclareMathOperator{\eqHtpy}{eq-htpy}
 #+LATEX_HEADER: \DeclareBinOperator{\lwhisk}{\cdot_{l}}
 #+LATEX_HEADER: \DeclareBinOperator{\rwhisk}{\cdot_{r}}
+#+LATEX_HEADER: \DeclareMathOperator{\runithtpy}{runit-htpy}
 
 #+LATEX_HEADER: \newcommand{\N}{\mathbb{N}}
 
@@ -308,9 +309,100 @@ A cocone $c$ under $\S$ on $X$ satisfies the *universal property of pushouts* if
 A cocone satisfying the universal property of pushouts is called a *pushout*. We will sometimes abuse notation and call just the type $X$ the pushout.
 #+end_defn
 
+Having $\coconeMap$ be an equivalence means that we not only have the converse map, which maps cocones to functions, but in particular the converse map is a section, so the cocone induced by the obtained map is the same as the original cocone. However identifications of cocones are not very practical objects. Instead of using them directly, we characterize the identity types of cocones as homotopies of cocones.
+
+#+begin_defn
+Given a span diagram $\S \judeq (f, g)$ and two cocones $c \judeq (i, j, H)$ and $c' \judeq (i', j', H')$ on $X$, the type of *homotopies* between $c$ and $c'$, denoted $c \htpy c'$, is the type of triples $(K_A, K_B, \alpha)$, where $K_A$ and $K_B$ are homotopies
+\begin{align*}
+  K_A &: i \htpy i' \\
+  K_B &: j \htpy j' \\
+\end{align*}
+and $\alpha$ is a coherence witnessing that the square of following square of homotopies commutes
+#+begin_center
+\begin{tikzcd}
+  i \comp f
+  \arrow[r, squiggly, no head, "K_A \rwhisk f"]
+  \arrow[d, squiggly, no head, "H"']
+  & i' \comp f
+  \arrow[d, squiggly, no head, "H'"] \\
+  j \comp g
+  \arrow[r, squiggly, no head, "K_B \rwhisk g"']
+  & j' \comp g.
+\end{tikzcd}
+#+end_center
+#+end_defn
+
+#+begin_constr
+Given a cocone $c \judeq (i, j, H) : \cocone(\S, X)$, construct the *reflexivity homotopy* $\term{cocone-refl-htpy} : c \htpy c$ from the data
+\begin{alignat*}{2}
+  &\reflhtpy &&: i \htpy i \\
+  &\reflhtpy &&: j \htpy h \\
+  &\runithtpy &&: H \hconcat \reflhtpy \htpy H.
+\end{alignat*}
+#+end_constr
+
+#+name: lemma:htpy-eq-cocone
 #+begin_lemma
-\TODO[Uniqueness of mediating map].
+For a span diagram $\S$ and two cocones $c$ and $c'$ on $X$, there is an equivalence
+\begin{displaymath}
+  \term{htpy-eq-cocone} : (c = c') \simeq (c \htpy c')
+\end{displaymath}
+which sends $\refl$ to $\term{cocone-refl-htpy}$.
 #+end_lemma
+
+The proof is a prototypical application of the fundamental theorem of identity types and the structure identity principle. We only write this one out for demonstration, as other straightforward proofs of characterizations of identity types are omitted from the thesis.
+
+#+begin_proof
+The underlying map is defined by path induction to send $\refl$ to $\term{cocone-refl-htpy}$. We use [[lemma:fundamental-theorem-id]] to prove that it is an equivalence, so it suffices to show that the type of cocones $c'$ such that $c \htpy c'$ is contractible. Since $c \htpy c'$ is a $\Sigma$ type, we invoke the structure identity principle \TODO[ref], which leaves us to show that the type
+\begin{displaymath}
+  \Sigma (i' : A \to X).\, (i \htpy i')
+\end{displaymath}
+is contractible to some point $(i', L)$, which by function extensionality it is at $(i, \reflhtpy)$, and then that the type
+\begin{alignat*}{2}
+  &\Sigma\, &&(j' : B \to X) (H' : i \comp f \htpy j' \comp g). \\
+  &&&\Sigma\, (K_B : j \htpy j').\, (H \hconcat K_B \rwhisk g) \htpy (\reflhtpy \hconcat H')
+\end{alignat*}
+is contractible.
+
+We use the structure identity principle again, so the new goal is to show that
+\begin{displaymath}
+  \Sigma (j' : B \to X).\, (j \htpy j')
+\end{displaymath}
+is contractible, which it is at $(j, \reflhtpy)$, and that the type
+\begin{displaymath}
+  \Sigma (H' : i \comp f \htpy j \comp g).\, (H \hconcat \reflhtpy) \htpy H'
+\end{displaymath}
+is contractible. And it is contractible once again at $(H \hconcat \reflhtpy, \reflhtpy)$.
+#+end_proof
+
+#+begin_lemma
+Given a span diagram $\S \judeq (f, g)$, a pushout cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a cocone $c' \judeq (i', j', H') : \cocone(\S, Y)$, there is a unique map $h : X \to Y$ equipped with the homotopies
+\begin{align*}
+  K_A &: h \comp i \htpy i' \\
+  K_B &: h \comp j \htpy j'
+\end{align*}
+and the coherence $\alpha$ witnessing that the following square of homotopies commutes
+#+begin_center
+\begin{tikzcd}
+  h \comp i \comp f
+  \arrow[r, squiggly, no head, "K_A \rwhisk f"]
+  \arrow[d, squiggly, no head, "h \lwhisk H"']
+  & i' \comp f
+  \arrow[d, squiggly, no head, "H'"] \\
+  h \comp j \comp g
+  \arrow[r, squiggly, no head, "K_B \rwhisk g"']
+  & j' \comp g.
+\end{tikzcd}
+#+end_center
+#+end_lemma
+
+#+begin_proof
+The data claimed to be unique is an element of the type
+\begin{displaymath}
+  \Sigma (h : X \to Y).\, (\coconeMap_c(h) \htpy c'),
+\end{displaymath}
+which is equivalent to the type of fibers of $\coconeMap_c$ at $c'$, by [[lemma:htpy-eq-cocone]]. Since $\coconeMap_c$ is an equivalence by assumption, it has contractible fibers.
+#+end_proof
 
 The universal property characterizes simple maps out of the colimit. In dependent type theory, we can also ask about characterizations of /dependent/ maps out of the colimit. To that end we introduce dependent cocones and the dependent universal property.
 
