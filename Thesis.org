@@ -2069,6 +2069,8 @@ To formally state this property, we first need to define morphisms of sequential
 
 The theory does not assume a uniform construction of standard sequential colimits. Instead the constructions and proofs are parametric over a user-provided sequential colimit. This generality is important for later applications in [[#sec:zigzags]], where the colimit is not judgmentally equal to the standard one.]
 
+\TODO[The formalization covers Lemma 3.5. The text of the thesis skips the proof of preservation of equivalences.]
+
 #+begin_defn
 Given sequential diagrams $(A, a)$ and $(B, b)$, define the type of *morphisms* from $(A, a)$ to $(B, b)$, denoted $(A, a) \to (B, b)$, as the type of pairs $(f, H)$ consisting of a family of maps
 \begin{displaymath}
@@ -2124,10 +2126,6 @@ and pasting of commuting squares
 
 #+begin_defn
 \TODO[Homotopies of morphisms of sequential diagrams? Apparently I use it in zigzags; come back later].
-#+end_defn
-
-#+begin_defn
-\TODO[Equivalences of sequential diagrams?].
 #+end_defn
 
 To construct a map $X \to Y$ between sequential colimits, we can use the universal property of $X$. That requires us to construct a cocone under $X$'s diagram on $Y$.
@@ -2241,7 +2239,7 @@ The map $\fmapHomN$ preserves composition, in the sense that for morphisms $f : 
 #+end_lemma
 
 #+begin_proof
-As in the identity case, suffices to give a homotopy of cocones
+As in the identity case, it suffices to give a homotopy of cocones
 \begin{displaymath}
   \coconeNMap(g_{\infty} \comp f_{\infty}) \htpy \precompHomN(g \comp f).
 \end{displaymath}
@@ -2328,17 +2326,89 @@ and the prisms
 Putting the squares side-by-side and stacking the prisms atop each other gives the desired homotopy.
 #+end_proof
 
+The last property we will need is that taking a sequential colimit also extends to an action on homotopies.
+
+#+begin_defn
+Given two sequential diagrams $\A \judeq (A, a)$ and $\B \judeq (B, b)$, and two morphisms $f \judeq (i, H), g \judeq (i', H') : \A \to \B$, a *homotopy* between $f$ and $g$ is a pair $(K, \alpha)$ consisting of a family of homotopies
+\begin{displaymath}
+  K : (n : \N) \to i_n \htpy i'_n
+\end{displaymath}
+and a family of commuting squares of homotopies indexed by $n : \N$
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  b_n \comp i_n
+  \arrow[r, squiggly, no head, "b_n \lwhisk K_n"]
+  \arrow[d, squiggly, no head, "H_n"']
+  & b_n \comp i'_n
+  \arrow[d, squiggly, no head, "H'_n"] \\
+  i_{n + 1} \comp a_n
+  \arrow[r, squiggly, no head, "K_{n + 1} \rwhisk a_n"']
+  & i'_{n + 1} \comp a_n.
+\end{tikzcd}
+#+end_center
+
+We write $f \htpy g$ for the type of homotopies between $f$ and $g$.
+#+end_defn
+
 #+begin_lemma
-\TODO[Preservation of equivalences]?
+For any two morphisms of sequential diagrams $f, g : \A \to \B$, there is an equivalence
+\begin{displaymath}
+  \term{htpy-eq-hom\N} : (f = g) \simeq (f \htpy g).
+\end{displaymath}
 #+end_lemma
+
+#+begin_lemma
+Taking sequential colimits of sequential diagrams preserves homotopies. Specifically, given sequential diagrams $\A, \B$ and morphisms $f, g : \A \to \B$, there is a map
+\begin{displaymath}
+  \term{hmap-hom\N} : (f \htpy g) \to (f_{\infty} \htpy g_{\infty}).
+\end{displaymath}
+#+end_lemma
+
+#+begin_proof
+Turn the homotopy $H : f \htpy g$ into an identification of morphisms of sequential diagrams $H' : f = g$, apply $\fmapHomN$ on the identification to get $H'' : f_{\infty} = g_{\infty}$, which begets (\TODO[that's a big word]) a homotopy of type $f_{\infty} \htpy g_{\infty}$.
+#+end_proof
 
 *** Colimits of shifted sequential diagrams
 
-\TODO[The initial motivation for shifts is to show that dropping a finite number of vertices from a sequential diagram preserves the colimit. It is also useful for showing that zigzags induce equivalences in the colimit].
+Sequential diagrams consist of an infinite amount of data, represented by an infinite sequence of types and maps between them. It is natural to ask how much individual vertices of that sequence influence the resulting colimit, and one might expect that removing a vertex from the sequence does not change the colimit at all. That is in fact true for any finite amount of vertices removed from the sequence. Here we limit ourselves to removing vertices from the beginning of the sequence, which is described by an operation called "shifting".
+
+A shift of a sequential diagram is a sequential diagram consisting of the types and maps shifted by one. It is also denoted $\A[1]$. This shifting can be iterated for any natural number $k$; then the resulting sequential diagram is denoted $\A[k]$.
+
+Similarly, a shift of a morphism of sequential diagrams is a morphism from the shifted domain into the shifted codomain. In symbols, given a morphism $f : \A \to \B$, we have $f[k] : \A[k] \to \B[k]$.
+
+We also define shifts of cocones and homotopies of cocones, which can additionally be "unshifted".
+
+Importantly the type of cocones under a sequential diagram is equivalent to the type of cocones under its shift, which implies that the sequential colimit of a shifted sequential diagram is equivalent to the colimit of the original diagram.
+
+In the later chapters we only ever need to shift by one, but arbitrary shifts are used in the statement and proof of the main theorem from [cite//b:@SvDR20], which they use to prove connectivity and truncation results for sequential colimits, which in turn is necessary for proving some of the applications of the zigzag construction of identity types of pushouts.
 
 #+begin_constr
-\TODO[Shifts of sequential diagrams].
+Given a sequential diagram $\A \judeq (A, a)$, construct its *shift* by one as the diagram
+#+begin_center
+\begin{tikzcd}
+  A_1 \arrow[r, "a_1"] & A_2 \arrow[r, "a_2"] & \cdots.
+\end{tikzcd}
+#+end_center
+Call this $\A[1]$.
+
+Then construct arbitrary shifts by induction
+\begin{alignat*}{2}
+  &\A[0] &&\defeq \A \\
+  &\A[k + 1] &&\defeq (\A[k])[1].
+\end{alignat*}
 #+end_constr
+
+#+begin_remark
+The constructions of shifts are defined by first defining a shift by one, and then recursively shifting by one according to the argument $k$. An alternative would be to shift all data using addition on the natural numbers.
+
+However, addition computes only on one side, so we have a choice to make: given a shift $k$, do we define the \(n\)-th level of the shifted structure to be the \((n+k)\)-th, or \((k+n)\)-th level of the original?
+
+The former runs into issues already when defining the shifted sequence, since $a_{n + k}$ has the type $A_{n + k} \to A_{(n + k) + 1}$, but we need a map of type $A_{n + k} \to A_{(n + 1) + k}$, which forces us to introduce a transport.
+
+On the other hand, the latter requires transport when proving anything by induction on $k$ and doesn't satisfy the judgmental equality $\A[0] \judeq \A$, because $A_{(k + 1) + n}$ is not $A_{(k + n) + 1}$ and $A_{0 + n}$ is not $A_n$, and it requires more infrastructure for working with horizontal compositions in sequential diagrams to be formalized in terms of addition.
+
+To contrast, defining the operations by induction does satisfy $\A[0] \judeq \A$, it computes when proving properties by induction, which is the expected primary use-case, and no further infrastructure is necessary.
+#+end_remark
 
 #+begin_constr
 \TODO[Inclusion morphisms into shifts].
@@ -2451,6 +2521,9 @@ Sequential diagrams do not contain any spans, so there is no simplification to b
 Future work:
 - more abstract proof of the last coherence: using the calculus of dependent identifications, and/or a more general lemma about coherent sections over zigzags; although that might have limited applications
 - formalize applications
+  - some of them require connectivity results about sequential colimits
+  - those in turn require the generalized flattening lemma
+  - and that needs arbitrary shifts
 - formalize categorical statement
 
 #+PRINT_BIBLIOGRAPHY: :heading bibintoc
