@@ -108,6 +108,8 @@
 
 # Sequential colimits
 #+LATEX_HEADER: \newcommand{\A}{\mathcal{A}}
+#+LATEX_HEADER: \newcommand{\B}{\mathcal{B}}
+#+LATEX_HEADER: \newcommand{\C}{\mathcal{C}}
 #+LATEX_HEADER: \DeclareMathOperator{\coconeN}{cocone\N}
 #+LATEX_HEADER: \DeclareMathOperator{\coconeNMap}{cocone\N-map}
 #+LATEX_HEADER: \DeclareMathOperator{\depCoconeN}{dep-cocone\N}
@@ -115,6 +117,8 @@
 #+LATEX_HEADER: \DeclareMathOperator{\doubleArrowSeq}{double-arrow-seq}
 #+LATEX_HEADER: \DeclareMathOperator{\coforkCoconeN}{cofork-cocone\N}
 #+LATEX_HEADER: \DeclareMathOperator{\depCoforkDepCoconeN}{dep-cofork-dep-cocone\N}
+#+LATEX_HEADER: \DeclareMathOperator{\precompHomN}{precomp-hom\N}
+#+LATEX_HEADER: \DeclareMathOperator{\fmapHomN}{fmap-hom\N}
 
 # Universes
 #+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
@@ -1797,15 +1801,15 @@ A cocone $c : \coconeN(\A, X)$ satisfies the *universal property of sequential c
 A cocone satisfying the universal property of sequential colimits is called a *sequential colimit*.
 #+end_defn
 
-#+begin_comment
-This probably isn't necessary, since we only care about computation with dependent universal property.
-,#+begin_defn
+To provide usable computation rules for maps out of sequential colimits, we introduce homotopies of cocones under sequential diagrams.
+
+#+begin_defn
 Given a sequential diagram $\A \judeq (A, a)$ and two cocones $c \judeq (i, H)$ and $c' \judeq (i', H')$ on $X$, a *homotopy* between $c$ and $c'$ is a pair $(K, \alpha)$ consisting of a family of homotopies
 \begin{displaymath}
   K : (n : \N) \to i_n \htpy i'_n
 \end{displaymath}
 and a family of commuting squares of homotopies, one for each $n : \N$,
-,#+begin_center
+#+begin_center
 \begin{tikzcd}[column sep=large]
   i_n
   \arrow[r, squiggly, no head, "K_n"]
@@ -1816,25 +1820,26 @@ and a family of commuting squares of homotopies, one for each $n : \N$,
   \arrow[r, squiggly, no head, "K_{n + 1} \rwhisk a_n"']
   & i'_{n + 1} \comp a_n.
 \end{tikzcd}
-,#+end_center
+#+end_center
 
 We write $c \htpy c'$ for the type of homotopies between $c$ and $c'$.
-,#+end_defn
+#+end_defn
 
-,#+begin_lemma
+#+begin_lemma
 For a sequential diagram $\A$ and two cocones $c, c' : \coconeN(\A, X)$, there is an equivalence
 \begin{displaymath}
   \term{htpy-eq-cocone\N} : (c = c') \simeq (c \htpy c').
 \end{displaymath}
-,#+end_lemma
+#+end_lemma
 
-,#+begin_lemma
+#+name: lemma:comp-up-sequential-colimit
+#+begin_lemma
 Given a sequential diagram $\A \judeq (A, a)$, a sequential colimit $c \judeq (i, H) : \coconeN(\A, X)$ and a cocone $c' \judeq (i', H') : \coconeN(\A, Y)$, there is a unique map $h : X \to Y$ equipped with a family of homotopies
 \begin{displaymath}
   K : (n : \N) \to h \comp i_n \htpy i'_n
 \end{displaymath}
 and a family of commuting squares of homotopies, indexed by $n : \N$
-,#+begin_center
+#+begin_center
 \begin{tikzcd}[column sep=huge]
   h \comp i_n
   \arrow[r, squiggly, no head, "K_n"]
@@ -1845,9 +1850,10 @@ and a family of commuting squares of homotopies, indexed by $n : \N$
   \arrow[r, squiggly, no head, "K_{n + 1} \rwhisk a_n"']
   & i'_{n + 1} \comp a_n
 \end{tikzcd}
-,#+end_center
-,#+end_lemma
-#+end_comment
+#+end_center
+#+end_lemma
+
+We proceed to build sequential colimits out of coequalizers.
 
 #+begin_constr
 Construct the map $\doubleArrowSeq$ from sequential diagrams to double arrows by
@@ -1866,7 +1872,7 @@ Construct the map $\doubleArrowSeq$ from sequential diagrams to double arrows by
 where the map $\tot_{+1}(a_{\blank})$ takes $(n, x)$ to $(n + 1, a_n(x))$.
 #+end_constr
 
-The sequential colimit of $\A$ may be obtained as the pushout of $\doubleArrowSeq(\A)$. Proofs of some of the following lemmas mirror exactly their counterparts in [[#sec:coequalizers]], and are therefore omitted.
+The sequential colimit of $\A$ may be obtained as the coequalizer of \linebreak $\doubleArrowSeq(\A)$. Proofs of some of the following lemmas mirror exactly their counterparts in [[#sec:coequalizers]], and are therefore omitted.
 
 #+begin_lemma
 For any sequential diagram $\A$ and a type $X$, there is an equivalence
@@ -2064,28 +2070,267 @@ To formally state this property, we first need to define morphisms of sequential
 The theory does not assume a uniform construction of standard sequential colimits. Instead the constructions and proofs are parametric over a user-provided sequential colimit. This generality is important for later applications in [[#sec:zigzags]], where the colimit is not judgmentally equal to the standard one.]
 
 #+begin_defn
-\TODO[Morphisms of sequential diagrams].
+Given sequential diagrams $(A, a)$ and $(B, b)$, define the type of *morphisms* from $(A, a)$ to $(B, b)$, denoted $(A, a) \to (B, b)$, as the type of pairs $(f, H)$ consisting of a family of maps
+\begin{displaymath}
+  f : (n : \N) \to A_n \to B_n
+\end{displaymath}
+and a family of homotopies witnessing that the following squares of maps, indexed by $n : \N$, commute
+#+begin_center
+\begin{tikzcd}
+  A_n \arrow[r, "a_n"] \arrow[d, "f_n"']
+  & A_{n + 1} \arrow[d, "f_{n + 1}"] \\
+  B_n \arrow[r, "b_n"'] \arrow[ur, phantom, "H_n"]
+  & B_{n + 1}.
+\end{tikzcd}
+#+end_center
 #+end_defn
 
-#+begin_constr
-\TODO[The identity morphism of sequential diagrams].
-#+end_constr
+All sequential diagrams come equipped with an identity morphism.
 
 #+begin_constr
-\TODO[Composition of sequential diagrams].
+Given a sequential diagram $(A, a)$, construct the *identity morphism* $(A, a) \to (A, a)$ consisting of the data
+\begin{alignat*}{2}
+  &(\lambda n \to \id) &&: (n : \N) \to A_n \to A_n \\
+  &(\lambda n \to \reflhtpy) &&: (n : \N) \to a_n \htpy a_n.
+\end{alignat*}
+#+end_constr
+
+Morphisms can be composed.
+
+#+begin_constr
+Given sequential diagrams $(A, a)$, $(B, b)$ and $(C, c)$, and morphisms
+\begin{align*}
+  F \judeq (f, H) &: (A, a) \to (B, b) \\
+  G \judeq (g, K) &: (B, b) \to (C, c),
+\end{align*}
+construct the *composed morphism* $G \comp F : (A, a) \to (C, c)$ by function composition
+\begin{displaymath}
+  (\lambda n \to g_n \comp f_n) : (n : \N) \to A_n \to C_n
+\end{displaymath}
+and pasting of commuting squares
+#+begin_center
+\begin{tikzcd}
+  A_n \arrow[r, "a_n"] \arrow[d, "f_n"']
+  & A_{n + 1} \arrow[d, "f_{n + 1}"] \\
+  B_n \arrow[r, "b_n"'] \arrow[d, "g_n"']
+  \arrow[ur, phantom, "H_n"]
+  & B_{n + 1} \arrow[d, "g_{n + 1}"] \\
+  C_n \arrow[r, "c_n"']
+  \arrow[ur, phantom, "K_n"]
+  & C_{n + 1}.
+\end{tikzcd}
+#+end_center
 #+end_constr
 
 #+begin_defn
-\TODO[Homotopies of morphisms of sequential diagrams].
+\TODO[Homotopies of morphisms of sequential diagrams? Apparently I use it in zigzags; come back later].
 #+end_defn
 
 #+begin_defn
 \TODO[Equivalences of sequential diagrams?].
 #+end_defn
 
-#+begin_thm
-\TODO[Functoriality].
-#+end_thm
+To construct a map $X \to Y$ between sequential colimits, we can use the universal property of $X$. That requires us to construct a cocone under $X$'s diagram on $Y$.
+
+#+begin_constr
+Given a sequential diagram $\B$ and a cocone $c \judeq (i, H) : \coconeN(\B, Y)$, define for every sequential diagram $\A$ the map
+\begin{displaymath}
+  \precompHomN_c^{\A} : (\A \to \B) \to \coconeN(\A, Y)
+\end{displaymath}
+which sends a morphism $(f, K)$ to the cocone
+#+begin_center
+\begin{tikzcd}[column sep=tiny]
+  A_n \arrow[rr, "a_n"] \arrow[d, "f_n"']
+  && A_{n + 1} \arrow[d, "f_{n + 1}"] \\
+  B_n \arrow[rr, "b_n"]
+  \arrow[dr, "i_n"', ""{name=IN, anchor=center}]
+  \arrow[urr, phantom, "K_n"]
+  && B_{n + 1} \arrow[dl, "i_{n + 1}"] \\
+  & Y.
+  \arrow[from=IN, to=2-3, phantom, "H_n"]
+\end{tikzcd}
+#+end_center
+#+end_constr
+
+#+begin_remark
+This construction is in a sense dual to $\coconeNMap$ --- $\coconeNMap$ extends a cocone by postcomposing a map $X \to Y$ on the right, and \linebreak $\precompHomN$ extends a cocone by "precomposing" a morphism $(B, b) \to (A, a)$ on the left.
+#+end_remark
+
+#+begin_constr
+Given sequential diagrams $\A$ and $\B$, a sequential colimit $c : \coconeN(\A, X)$, and a cocone $c' : \coconeN(\B, Y)$, construct the map
+\begin{displaymath}
+  \fmapHomN : (\A \to \B) \to (X \to Y)
+\end{displaymath}
+using the universal property of $c$, as the map taking a morphism $f : \A \to \B$ to the unique map induced by the cocone $\precompHomN_{c'}(f) : \cocone(\A, Y)$.
+
+We often write $f_{\infty} : X \to Y$ for the map induced by a morphism $f : \A \to \B$.
+#+end_constr
+
+#+begin_lemma
+The map $f_{\infty}$ fits into commuting squares
+#+begin_center
+\begin{tikzcd}
+  A_n \arrow[r, "f_n"] \arrow[d, "i_n"']
+  & B_n \arrow[d, "i'_n"] \\
+  X \arrow[r, "f_{\infty}"']
+  & Y.
+\end{tikzcd}
+#+end_center
+which in turn fit into commuting prisms
+#+begin_center
+\begin{tikzcd}[column sep=tiny, row sep=small]
+  A_n
+  \arrow[dd, "f_n"']
+  \arrow[rr, "a_n"]
+  \arrow[dr, "i_n"', near end]
+  && A_{n + 1}
+  \arrow[dd, "f_{n + 1}"]
+  \arrow[dl, "i_{n + 1}", near end] \\
+  & X \\
+  B_n \arrow[rr, "b_n", very near start]
+  \arrow[dr, "i'_n"']
+  && B_{n + 1} \arrow[dl, "i'_{n + 1}"] \\
+  & Y.
+  \arrow[from=uu, dotted, crossing over]
+\end{tikzcd}
+#+end_center
+#+end_lemma
+
+#+begin_proof
+The data is obtained from the extra computation rules stated in [[lemma:comp-up-sequential-colimit]]. The commuting squares are kept as-is, which causes the unexpected change of orientation --- the computation rules provide a homotopy $\coconeNMap_c(f_{\infty}) \htpy \precompHomN(f)$, not the other way around.
+
+The type of prisms as above is equivalent to the type of coherences of homotopies $\coconeNMap_c(f_{\infty}) \htpy \precompHomN(f)$ by mechanical homotopy algebra.
+#+end_proof
+
+#+begin_remark
+\TODO[Some theory of commuting prisms was built for the library as part of this thesis. The theory is not elaborated on in the text].
+#+end_remark
+
+#+begin_lemma
+The map $\fmapHomN$ preserves identity morphisms. That is to say, given a sequential diagram $\A$ and its colimit $X$, the identity morphism $\id : \A \to \A$ induces the map $\id_{\infty} : X \to X$, which is homotopic to the identity function $\id : X \to X$.
+#+end_lemma
+
+#+begin_proof
+By [[lemma:comp-up-sequential-colimit]], the map $\id_{\infty}$ is the unique map such that the cocone $\coconeNMap(\id_{\infty})$ is homotopic to the cocone $\precompHomN(\id)$. Hence to show that $\id_{\infty} \htpy \id$, it suffices to show that $\coconeNMap(\id)$ is homotopic to $\precompHomN(\id)$. In other words, the goal is to provide a homotopy
+#+begin_center
+\begin{tikzcd}[column sep=tiny]
+  A_n \arrow[rr, "a_n"] \arrow[dr, "i_n"']
+  && A_{n + 1} \arrow[dl, "i_{n + 1}"] \\
+  & X \arrow[d, "\id"] \\
+  & X
+\end{tikzcd}
+$\htpy$ \hspace{1em}
+\begin{tikzcd}[column sep=tiny]
+A_n \arrow[rr, "a_n"] \arrow[d, "\id"']
+&& A_{n + 1} \arrow[d, "\id"] \\
+A_n \arrow[rr, "a_n"] \arrow[dr, "i_n"']
+&& A_{n + 1} \arrow[dl, "i_{n + 1}"] \\
+& X.
+\end{tikzcd}
+#+end_center
+
+The homotopy on maps is satisfied by $\reflhtpy : i_n \htpy i_n$, and for coherences we need to give
+\begin{displaymath}
+  \alpha_n : ((\id \lwhisk H_n) \hconcat \reflhtpy) \htpy (H_n \hconcat \reflhtpy),
+\end{displaymath}
+which follows from the left unit law of whiskering by $\id$.
+#+end_proof
+
+#+begin_lemma
+The map $\fmapHomN$ preserves composition, in the sense that for morphisms $f : \A \to \B$ and $g : \B \to \C$, colimits $c \judeq (i, H) : \coconeN(\A, X)$ and $c' \judeq (i', H') : \coconeN(\B, Y)$ and a cocone $c'' \judeq (i'', H'') : \coconeN(\C, Z)$, there is a homotopy $(g \comp f)_{\infty} \htpy (g_{\infty} \comp f_{\infty})$.
+#+end_lemma
+
+#+begin_proof
+As in the identity case, suffices to give a homotopy of cocones
+\begin{displaymath}
+  \coconeNMap(g_{\infty} \comp f_{\infty}) \htpy \precompHomN(g \comp f).
+\end{displaymath}
+
+This is equivalent to providing a family of commuting squares
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  A_n \arrow[r, "g_n \comp f_n"] \arrow[d, "i_n"']
+  & C_n \arrow[d, "i''_n"] \\
+  X \arrow[r, "g_{\infty} \comp f_{\infty}"']
+  & Z
+\end{tikzcd}
+#+end_center
+and fitting them into a family of commuting prisms
+#+begin_center
+\begin{tikzcd}[column sep=small, row sep=small]
+  A_n
+  \arrow[dd, "g_n \comp f_n"']
+  \arrow[rr, "a_n"]
+  \arrow[dr]
+  && A_{n + 1}
+  \arrow[dd, "g_{n + 1} \comp f_{n + 1}"]
+  \arrow[dl] \\
+  & X \\
+  C_n \arrow[rr, "c_n", very near start]
+  \arrow[dr, "i''_n"']
+  && C_{n + 1} \arrow[dl, "i''_{n + 1}"] \\
+  & Z.
+  \arrow[from=uu, "g_{\infty} \comp f_{\infty}", very near start, crossing over]
+\end{tikzcd}
+#+end_center
+
+Since $f_\infty$ and $g_\infty$ are both constructed from morphisms of sequential diagrams, they come equipped with their respective homotopies
+#+begin_center
+\begin{tikzcd}
+  A_n \arrow[r, "f_n"] \arrow[d, "i_n"']
+  & B_n \arrow[d, "i'_n"] \\
+  X \arrow[r, "f_{\infty}"']
+  & Y
+\end{tikzcd}
+\hspace{1em} and \hspace{1em}
+\begin{tikzcd}
+  B_n \arrow[r, "g_n"] \arrow[d, "i'_n"']
+  & C_n \arrow[d, "i''_n"] \\
+  Y \arrow[r, "g_{\infty}"']
+  & Z,
+\end{tikzcd}
+#+end_center
+and the prisms
+#+begin_center
+\begin{tikzcd}[column sep=tiny, row sep=small]
+  A_n
+  \arrow[dd, "f_n"']
+  \arrow[rr, "a_n"]
+  \arrow[dr, "i_n"', near end]
+  && A_{n + 1}
+  \arrow[dd, "f_{n + 1}"]
+  \arrow[dl, "i_{n + 1}", near end] \\
+  & X \\
+  B_n \arrow[rr, "b_n", very near start]
+  \arrow[dr, "i'_n"']
+  && B_{n + 1} \arrow[dl, "i'_{n + 1}"] \\
+  & Y
+  \arrow[from=uu, "f_{\infty}", near start, crossing over]
+\end{tikzcd}
+\hspace{1em} and \hspace{1em}
+\begin{tikzcd}[column sep=tiny, row sep=small]
+  B_n
+  \arrow[dd, "g_n"']
+  \arrow[rr, "b_n"]
+  \arrow[dr, "i'_n"', near end]
+  && B_{n + 1}
+  \arrow[dd, "g_{n + 1}"]
+  \arrow[dl, "i'_{n + 1}", near end] \\
+  & Y \\
+  C_n \arrow[rr, "c_n", very near start]
+  \arrow[dr, "i''_n"']
+  && C_{n + 1} \arrow[dl, "i''_{n + 1}"] \\
+  & Z.
+  \arrow[from=uu, "g_{\infty}", near start, crossing over]
+\end{tikzcd}
+#+end_center
+
+Putting the squares side-by-side and stacking the prisms atop each other gives the desired homotopy.
+#+end_proof
+
+#+begin_lemma
+\TODO[Preservation of equivalences]?
+#+end_lemma
 
 *** Colimits of shifted sequential diagrams
 
