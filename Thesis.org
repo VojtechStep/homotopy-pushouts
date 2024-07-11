@@ -315,9 +315,9 @@ Having $\coconeMap$ be an equivalence means that we not only have the converse m
 Given a span diagram $\S \judeq (f, g)$ and two cocones $c \judeq (i, j, H)$ and $c' \judeq (i', j', H')$ on $X$, the type of *homotopies* between $c$ and $c'$, denoted $c \htpy c'$, is the type of triples $(K_A, K_B, \alpha)$, where $K_A$ and $K_B$ are homotopies
 \begin{align*}
   K_A &: i \htpy i' \\
-  K_B &: j \htpy j' \\
+  K_B &: j \htpy j'
 \end{align*}
-and $\alpha$ is a coherence witnessing that the square of following square of homotopies commutes
+and $\alpha$ is a coherence witnessing that the following square of homotopies commutes
 #+begin_center
 \begin{tikzcd}
   i \comp f
@@ -432,8 +432,53 @@ A cocone $c : \cocone(\S, X)$ satisfies the *dependent universal property of pus
 
 Note that the dependent universal property isn't a property of dependent cocones, but rather a property of cocones and their extensions by dependent functions.
 
+#+begin_defn
+Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (\_, \_, H) : \cocone(\S, X)$ and two dependent cocones $d \judeq (i, j, L)$ and $d' \judeq (i', j', L')$ on $P$, the type of *homotopies* between $d$ and $d'$, denoted $d \judeq d'$, is the type of triples $(K_A, K_B, \alpha)$, where $K_A$ and $K_B$ are homotopies
+\begin{align*}
+  K_A &: i \htpy i' \\
+  K_B &: j \htpy j'
+\end{align*}
+and $\alpha$ is a coherence witnessing that the following square of identifications commutes for every $s : S$
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  \tr_P(H s)(i(f s))
+  \arrow[r, equal, "\ap_{\tr_P(H s)}(K_A(f s))"]
+  \arrow[d, equal, "L(s)"']
+  & \tr_P(H s)(i'(f s))
+  \arrow[d, equal, "L'(s)"] \\
+  j (g s)
+  \arrow[r, equal, "K_B(g s)"']
+  & j' (g s).
+\end{tikzcd}
+#+end_center
+#+end_defn
+
 #+begin_lemma
-\TODO[Uniqueness of mediating map].
+For every pair of dependent cocones $d, d' : \depCocone(c, P)$, there is an equivalence
+\begin{displaymath}
+  \term{htpy-eq-dep-cocone}: (d = d') \simeq (d \htpy d').
+\end{displaymath}
+#+end_lemma
+
+#+begin_lemma
+Given a span diagram $\S \judeq (f, g)$, a pushout cocone $c \judeq (i, j, H) : \cocone(\S, X)$, and a dependent cocone $d \judeq (i', j', H') : \depCocone(c, P)$, there is a unique dependent map $h : (x : X) \to P(x)$ equipped homotopies
+\begin{align*}
+  K_A &: h \comp i \htpy i' \\
+  K_B &: h \comp j \htpy j'
+\end{align*}
+and a coherence $\alpha$ witnessing that the following square of identifications commutes for all $s : S$
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  \tr_P(H s)(h(i(f s)))
+  \arrow[r, equals, "\ap_{\tr_P(H s)}(K_A(f s))"]
+  \arrow[d, equals, "\apd_h(H s)"']
+  & \tr_P(H s)(i'(f s))
+  \arrow[d, "H'(s)"] \\
+  h(j(g s))
+  \arrow[r, equals, "K_B(g s)"']
+  & j'(g s).
+\end{tikzcd}
+#+end_center
 #+end_lemma
 
 We don't introduce a new name for cocones satisfying the dependent universal property, because the two properties turn out to be equivalent. The proof relies on the pullback property and the dependent pullback property of pushouts, which relate pushouts and pullbacks of function types. As this thesis does not discuss pullbacks, we defer the proof to [cite/t:@Rij22Pre, Theorem 25.1.4].
@@ -470,7 +515,7 @@ In the dependent case, we get a map
   \term{dep-ev-map}_{(X, s)}^P : ((x : X) \to P(x)) \to \term{dep-structure}((X, s), P).
 \end{equation*}
 
-When talking about pushouts, we take the base objects to be types, dependent objects to be type families, and maps and dependent maps to be ordinary functions and dependent functions. The functorial structure on a type $X$ is the structure of a cocone on $X$ under a fixed span $\S$, and the dependent structure on a type family $P : X \to \UV$ over a cocone $c$ on $X$ is the structure of a dependent cocone on $P$ over $c$. The evaluation maps are $\coconeMap$ and $\depCoconeMap$, respectively.
+When talking about pushouts, we take the base objects to be types, dependent objects to be type families, and maps and dependent maps to be ordinary functions and dependent functions. The functorial structure on a type $X$ is the structure of a cocone on $X$ under a fixed span diagram $\S$, and the dependent structure on a type family $P : X \to \UV$ over a cocone $c$ on $X$ is the structure of a dependent cocone on $P$ over $c$. The evaluation maps are $\coconeMap$ and $\depCoconeMap$, respectively.
 
 With these general definitions in place, consider a structured object $(X, s)$; we may ask for the following properties to be satisfied:
 - Universal property: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ is an equivalence
@@ -628,7 +673,7 @@ The type of quadruples $(P, e_A, e_B, e_S)$ is exactly the type of type families
 When relating concepts from the world of type families with concepts from the world of descent data, it can be beneficial to be parametric over the data of a type family $P$ and its "corresponding descent data", meaning some descent data $(P_A, P_B, P_S)$ which is equivalent to the descent data induced by $P$. Of course, by the descent theorem this data is completely determined by either $P$ or $(P_A, P_B, P_S)$ up to identification, but this level of generality allows users to provide their own equivalences for potentially better computational properties. We introduce a shorthand notation.
 
 #+begin_defn
-Given a span $\S$ and a cocone $c$ on $X$, we define the type of *families with descent data* to be the type of triples $(P, P', e)$ consisting of a type family $P : X \to \UU$, descent data $P' : \DD(\S)$, and an equivalence of descent data $e : \ddFam_c(P) \simeq P'$.
+Given a span diagram $\S$ and a cocone $c$ on $X$, we define the type of *families with descent data* to be the type of triples $(P, P', e)$ consisting of a type family $P : X \to \UU$, descent data $P' : \DD(\S)$, and an equivalence of descent data $e : \ddFam_c(P) \simeq P'$.
 
 We write $e : P \correspDD P'$ for a family $P$ with descent data $P'$ related by an equivalence $e$. We also say that $P$ is characterized by $P'$.
 #+end_defn
@@ -644,7 +689,7 @@ We write $e : P \correspDD P'$ for a family $P$ with descent data $P'$ related b
 As a first example of a family with descent data, we characterize the type family of based identity types.
 
 #+begin_constr
-Given a span $\S \judeq (f, g)$, a cocone $(i, j, H)$ on $X$ and a point $x_0 : X$, construct the descent data $(I_A, I_B, I_S)$ as \TODO[typesetting]
+Given a span diagram $\S \judeq (f, g)$, a cocone $(i, j, H)$ on $X$ and a point $x_0 : X$, construct the descent data $(I_A, I_B, I_S)$ as \TODO[typesetting]
 \begin{align*}
   I_A &\defeq (\lambda a \to x = (i a)) &&: A \to \UU \\
   I_B &\defeq (\lambda b \to x = (j b)) &&: B \to \UU \\
@@ -687,7 +732,7 @@ By definition, $I_A(a) \judeq (x_0 = (i a))$ and $I_B(b) \judeq (x_0 = (j b))$, 
 For any given type family $P$ over $X$, we can talk about its /sections/, elements of the type $(x : X) \to P(x)$. We define an analogous concept of /sections of descent data/, and show that indeed they correspond to sections of type families over pushouts.
 
 #+begin_defn
-Given a span $\S$ and descent data $(P_A, P_B, P_S)$ over it, a *section* of $(P_A, P_B, P_S)$ is a triple $(t_A, t_B, t_S)$ consisting of sections
+Given a span diagram $\S$ and descent data $(P_A, P_B, P_S)$ over it, a *section* of $(P_A, P_B, P_S)$ is a triple $(t_A, t_B, t_S)$ consisting of sections
 \begin{align*}
   t_A &: (a : A) \to P_A(a) \\
   t_B &: (b : B) \to P_B(b)
@@ -700,7 +745,7 @@ We write $\sectDD(P_A, P_B, P_S)$ for the type of sections of $(P_A, P_B, P_S)$.
 
 #+name: def:sect-sect
 #+begin_constr
-Given a span $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $e : P \correspDD (P_A, P_B, P_S)$, construct a map
+Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $e : P \correspDD (P_A, P_B, P_S)$, construct a map
 \[
   \term{sect-sect}_c : ((x : X) \to P(x)) \to \sectDD(P_A, P_B, P_S)
 \]
@@ -715,7 +760,7 @@ by assigning to a dependent function $h$ the section
 
 #+name: lemma:is-equiv-sect-sect
 #+begin_lemma
-Consider a span $\S$, a pushout cocone $c$ on $X$ and a family with descent data $P \correspDD (P_A, P_B, P_S)$. Then the map $\term{sect-sect}_c$ is an equivalence.
+Consider a span diagram $\S$, a pushout cocone $c$ on $X$ and a family with descent data $P \correspDD (P_A, P_B, P_S)$. Then the map $\term{sect-sect}_c$ is an equivalence.
 #+end_lemma
 
 #+begin_proof
@@ -829,7 +874,7 @@ The type of sections of the descent data defined in [[lemma:family-with-dd-funct
 #+end_proof
 
 #+begin_thm
-Consider a span $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
+Consider a span diagram $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
 \[
   \term{hom-map} : ((x : X) \to P(x) \to Q(x)) \simeq ((P_A, P_B, P_S) \to (Q_A, Q_B, Q_S)).
 \]
@@ -887,7 +932,7 @@ is characterized by the descent data
 
 #+name: thm:equivDD-equiv
 #+begin_thm
-Consider a span $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
+Consider a span diagram $\S$, a pushout cocone $c \judeq (i, j, H)$ on $X$, and two families with descent data $e^P : P \correspDD (P_A, P_B, P_S)$ and $e^Q : Q \correspDD (Q_A, Q_B, Q_S)$. Then there is an equivalence
 \begin{displaymath}
   \term{equivDD-equiv} : ((x : X) \to P(x) \simeq Q(x)) \simeq ((P_A, P_B, P_S) \simeq (Q_A, Q_B, Q_S)).
 \end{displaymath}
@@ -1030,7 +1075,7 @@ Given a span diagram $\S \judeq (f, g)$ and descent data $(P_A, P_B, P_S)$, cons
 #+end_constr
 
 #+begin_constr
-Given a span $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $(P_A, P_B, P_S) \correspDD P$, construct the *total cocone* \TODO[($\Sigma c$ ?)] under the total span
+Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $(P_A, P_B, P_S) \correspDD P$, construct the *total cocone* \TODO[($\Sigma c$ ?)] under the total span
 #+begin_center
 \begin{tikzcd}[column sep=huge]
   \Sigma S (P_A \comp f)
@@ -1313,7 +1358,7 @@ Analogously, if $(P_A, P_B, P_S)$ is an identity system at $p_0 : P_A(a_0)$, the
 #+end_corol
 
 #+begin_thm
-Given a span $\S$, a point $a_0 : A$, and a pushout cocone $c$ on $X$, the descent data $(I_A, I_B, I_S)$ is an identity system at $\refl_{i a_0}$.
+Given a span diagram $\S$, a point $a_0 : A$, and a pushout cocone $c$ on $X$, the descent data $(I_A, I_B, I_S)$ is an identity system at $\refl_{i a_0}$.
 #+end_thm
 
 #+begin_proof
@@ -1752,9 +1797,57 @@ A cocone $c : \coconeN(\A, X)$ satisfies the *universal property of sequential c
 A cocone satisfying the universal property of sequential colimits is called a *sequential colimit*.
 #+end_defn
 
-#+begin_lemma
-\TODO[Uniqueness of mediating map].
-#+end_lemma
+#+begin_comment
+This probably isn't necessary, since we only care about computation with dependent universal property.
+,#+begin_defn
+Given a sequential diagram $\A \judeq (A, a)$ and two cocones $c \judeq (i, H)$ and $c' \judeq (i', H')$ on $X$, a *homotopy* between $c$ and $c'$ is a pair $(K, \alpha)$ consisting of a family of homotopies
+\begin{displaymath}
+  K : (n : \N) \to i_n \htpy i'_n
+\end{displaymath}
+and a family of commuting squares of homotopies, one for each $n : \N$,
+,#+begin_center
+\begin{tikzcd}[column sep=large]
+  i_n
+  \arrow[r, squiggly, no head, "K_n"]
+  \arrow[d, squiggly, no head, "H_n"']
+  & i'_n
+  \arrow[d, squiggly, no head, "H'_n"] \\
+  i_{n + 1} \comp a_n
+  \arrow[r, squiggly, no head, "K_{n + 1} \rwhisk a_n"']
+  & i'_{n + 1} \comp a_n.
+\end{tikzcd}
+,#+end_center
+
+We write $c \htpy c'$ for the type of homotopies between $c$ and $c'$.
+,#+end_defn
+
+,#+begin_lemma
+For a sequential diagram $\A$ and two cocones $c, c' : \coconeN(\A, X)$, there is an equivalence
+\begin{displaymath}
+  \term{htpy-eq-cocone\N} : (c = c') \simeq (c \htpy c').
+\end{displaymath}
+,#+end_lemma
+
+,#+begin_lemma
+Given a sequential diagram $\A \judeq (A, a)$, a sequential colimit $c \judeq (i, H) : \coconeN(\A, X)$ and a cocone $c' \judeq (i', H') : \coconeN(\A, Y)$, there is a unique map $h : X \to Y$ equipped with a family of homotopies
+\begin{displaymath}
+  K : (n : \N) \to h \comp i_n \htpy i'_n
+\end{displaymath}
+and a family of commuting squares of homotopies, indexed by $n : \N$
+,#+begin_center
+\begin{tikzcd}[column sep=huge]
+  h \comp i_n
+  \arrow[r, squiggly, no head, "K_n"]
+  \arrow[d, squiggly, no head, "h \lwhisk H_n"']
+  & i'_n
+  \arrow[d, squiggly, no head, "H'"] \\
+  h \comp i_{n + 1} \comp a_n
+  \arrow[r, squiggly, no head, "K_{n + 1} \rwhisk a_n"']
+  & i'_{n + 1} \comp a_n
+\end{tikzcd}
+,#+end_center
+,#+end_lemma
+#+end_comment
 
 #+begin_constr
 Construct the map $\doubleArrowSeq$ from sequential diagrams to double arrows by
@@ -1871,8 +1964,55 @@ which sends $h$ to $(\lambda n \to h \comp i_n, \lambda n, x \to \apd_h(H_n x))$
 A cocone $c$ satisfies the *dependent universal property of sequential colimits* if for all $P : X \to \UU$, the map $\depCoconeNMap_c^P$ is an equivalence.
 #+end_defn
 
+We define homotopies of dependent cocones, because later on in [[#sec:zigzag-correct]] we work with the computation rules of dependent maps from sequential colimits induced by dependent cocones.
+
+#+begin_defn
+Given a sequential diagram $\A \judeq (A, a)$, a cocone $c \judeq (i, H)$ on $X$, and two dependent cocones $d \judeq (j, L)$ and $d' \judeq (j', L')$ on $P$, a *homotopy* between $d$ and $d'$ is a pair $(K, \alpha)$ of a family of homotopies
+\begin{displaymath}
+  K : (n : \N) \to j_n \htpy j'_n
+\end{displaymath}
+and a family of commuting squares of identifications, indexed by $n : \N$ and $x : A_n$
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  \tr_P(H_n x)(j_n x)
+  \arrow[r, equals, "\ap_{\tr_P(H_n x)}(K_n x)"]
+  \arrow[d, equals, "L_n(x)"']
+  & \tr_P(H_n x)(j'_n x)
+  \arrow[d, equals, "L'_n(x)"] \\
+  j_{n + 1}(a_n x)
+  \arrow[r, equals, "K_{n + 1}(a_n x)"']
+  & j'_{n + 1}(a_n x).
+\end{tikzcd}
+#+end_center
+
+We write $d \htpy d'$ for the type of homotopies between $d$ and $d'$.
+#+end_defn
+
 #+begin_lemma
-\TODO[Uniqueness of mediating map].
+For every pair of dependent cocones $d, d' : \depCoconeN(c, P)$, there is an equivalence
+\begin{displaymath}
+  \term{htpy-eq-dep-cocone\N} : (d = d') \simeq (d \htpy d').
+\end{displaymath}
+#+end_lemma
+
+#+begin_lemma
+Given a sequential diagram $\A \judeq (A, a)$, a sequential colimit $c \judeq (i, H) : \coconeN(\A, X)$ and a dependent cocone $d \judeq (i', H') : \depCoconeN(c, P)$, there is a unique dependent map $h : (x : X) \to P(x)$ equipped with a family of homotopies
+\begin{displaymath}
+  K : (n : \N) \to h \comp i_n \htpy i'_n
+\end{displaymath}
+and a family of commuting squares of identifications indexed by $n : \N$ and $x : A_n$
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  \tr_P(H_n x)(h(i_n x))
+  \arrow[r, equals, "\ap_{\tr_P(H_n x)}(K_n x)"]
+  \arrow[d, equals, "\apd_h(H_n x)"']
+  & \tr_P(H_n x)(i'_n x)
+  \arrow[d, equals, "H'(x)"] \\
+  h(i_{n + 1}(a_n x))
+  \arrow[r, equals, "K_{n + 1}(a_n x)"']
+  & i'_{n + 1}(a_n x)
+\end{tikzcd}
+#+end_center
 #+end_lemma
 
 #+begin_lemma
@@ -1981,6 +2121,8 @@ The theory does not assume a uniform construction of standard sequential colimit
 
 *** Descent
 
+\TODO[Descent might not actually be necessary. I did formalize the theory, but don't use it in path spaces of pushouts...; the remark about equifibered diagrams seems cool though].
+
 #+begin_defn
 \TODO[Descent data for sequential colimits]
 #+end_defn
@@ -2053,6 +2195,9 @@ Sequential diagrams do not contain any spans, so there is no simplification to b
 #+end_center
 
 ** Proof of correctness
+:PROPERTIES:
+:CUSTOM_ID: sec:zigzag-correct
+:END:
 
 \TODO[The objective is to show that the zigzag descent data is an identity system. To do that, assume "dependent" descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, and a point $q_0 : Q_{\Sigma A}(a_0, \iota_A^0(\refl))$ and conjure a section of $Q$. Explicitly (write out the type of a section), which in every case proceeds by induction on $P_\bullet^{\infty}$.]
 
