@@ -18,7 +18,12 @@ Thesis.tex: Thesis.org
 	    (org-latex-export-to-latex)))"
 
 Thesis.pdf: Thesis.tex tex/*.tex bibliography.bib
-	latexmk -interaction=nonstopmode -pdf -lualatex $<
+	latexmk -interaction=nonstopmode -pdf -lualatex $(PREVIEW_CONTINUOUSLY) $<
 
+.PHONY: watch
+watch: PREVIEW_CONTINUOUSLY=-pvc
+watch: Thesis.pdf
+
+.PHONY: docker-verify
 docker-verify: Thesis.pdf
 	docker run -v "${PWD}:/thesis" ghcr.io/vojtechstep/cuni-thesis-validator verify /thesis/Thesis.pdf
