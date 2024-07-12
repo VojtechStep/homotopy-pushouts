@@ -119,6 +119,7 @@
 #+LATEX_HEADER: \DeclareMathOperator{\depCoforkDepCoconeN}{dep-cofork-dep-cocone\N}
 #+LATEX_HEADER: \DeclareMathOperator{\precompHomN}{precomp-hom\N}
 #+LATEX_HEADER: \DeclareMathOperator{\fmapHomN}{fmap-hom\N}
+#+LATEX_HEADER: \DeclareMathOperator{\inclHomN}{incl-hom\N}
 
 # Universes
 #+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
@@ -2030,12 +2031,12 @@ For any cocone $c : \coconeN(\A, X)$, there is an equivalence
 \end{align*}
 such that the following diagram commutes
 #+begin_center
-\begin{tikzcd}[column sep=0]
+\begin{tikzcd}[column sep={8em,between origins}]
   ((x : X) \to P(x))
   \arrow[rr, "\depCoconeNMap_c"]
-  \arrow[dr, "\depCoforkMap_{\coforkCoconeN(c)}"']
+  \arrow[dr, "\depCoforkMap_{\coforkCoconeN(c)}"', near start]
   && \depCoconeN(c, P)
-  \arrow[dl, "\depCoforkDepCoconeN"] \\
+  \arrow[dl, "\depCoforkDepCoconeN", near start] \\
   & \depCofork(\coforkCoconeN(c), P).
 \end{tikzcd}
 #+end_center
@@ -2204,6 +2205,7 @@ The type of prisms as above is equivalent to the type of coherences of homotopie
 \TODO[Some theory of commuting prisms was built for the library as part of this thesis. The theory is not elaborated on in the text].
 #+end_remark
 
+#+name: lemma:colim-preserves-id
 #+begin_lemma
 The map $\fmapHomN$ preserves identity morphisms. That is to say, given a sequential diagram $\A$ and its colimit $X$, the identity morphism $\id : \A \to \A$ induces the map $\id_{\infty} : X \to X$, which is homotopic to the identity function $\id : X \to X$.
 #+end_lemma
@@ -2234,6 +2236,7 @@ The homotopy on maps is satisfied by $\reflhtpy : i_n \htpy i_n$, and for cohere
 which follows from the left unit law of whiskering by $\id$.
 #+end_proof
 
+#+name: lemma:colim-preserves-comp
 #+begin_lemma
 The map $\fmapHomN$ preserves composition, in the sense that for morphisms $f : \A \to \B$ and $g : \B \to \C$, colimits $c \judeq (i, H) : \coconeN(\A, X)$ and $c' \judeq (i', H') : \coconeN(\B, Y)$ and a cocone $c'' \judeq (i'', H'') : \coconeN(\C, Z)$, there is a homotopy $(g \comp f)_{\infty} \htpy (g_{\infty} \comp f_{\infty})$.
 #+end_lemma
@@ -2372,15 +2375,15 @@ Turn the homotopy $H : f \htpy g$ into an identification of morphisms of sequent
 
 Sequential diagrams consist of an infinite amount of data, represented by an infinite sequence of types and maps between them. It is natural to ask how much individual vertices of that sequence influence the resulting colimit, and one might expect that removing a vertex from the sequence does not change the colimit at all. That is in fact true for any finite amount of vertices removed from the sequence. Here we limit ourselves to removing vertices from the beginning of the sequence, which is described by an operation called "shifting".
 
-A shift of a sequential diagram is a sequential diagram consisting of the types and maps shifted by one. It is also denoted $\A[1]$. This shifting can be iterated for any natural number $k$; then the resulting sequential diagram is denoted $\A[k]$.
+A shift of a sequential diagram $\A$ is the sequential diagram consisting of the types and maps shifted by one to the left. It is denoted $\A[1]$. This shifting can be iterated for any natural number $k$; then the resulting sequential diagram is denoted $\A[k]$.
 
 Similarly, a shift of a morphism of sequential diagrams is a morphism from the shifted domain into the shifted codomain. In symbols, given a morphism $f : \A \to \B$, we have $f[k] : \A[k] \to \B[k]$.
 
 We also define shifts of cocones and homotopies of cocones, which can additionally be "unshifted".
 
-Importantly the type of cocones under a sequential diagram is equivalent to the type of cocones under its shift, which implies that the sequential colimit of a shifted sequential diagram is equivalent to the colimit of the original diagram.
+Importantly the type of cocones under a sequential diagram is equivalent to the type of cocones under its shift, as we will show by proving that shifting and unshifting are inverse operations. It follows that the sequential colimit of a shifted sequential diagram is equivalent to the colimit of the original diagram.
 
-In the later chapters we only ever need to shift by one, but arbitrary shifts are used in the statement and proof of the main theorem from [cite//b:@SvDR20], which they use to prove connectivity and truncation results for sequential colimits, which in turn is necessary for proving some of the applications of the zigzag construction of identity types of pushouts.
+In the later chapters we only ever need to shift by one, but arbitrary shifts are used in the statement and proof of the main theorem of [cite/t:@SvDR20], which they use to prove connectivity and truncation results for sequential colimits, which in turn is necessary for proving some of the applications of the zigzag construction of identity types of pushouts, studied by [cite/t:@War23].
 
 #+begin_constr
 Given a sequential diagram $\A \judeq (A, a)$, construct its *shift* by one as the diagram
@@ -2392,16 +2395,16 @@ Given a sequential diagram $\A \judeq (A, a)$, construct its *shift* by one as t
 Call this $\A[1]$.
 
 Then construct arbitrary shifts by induction
-\begin{alignat*}{2}
-  &\A[0] &&\defeq \A \\
-  &\A[k + 1] &&\defeq (\A[k])[1].
-\end{alignat*}
+\begin{align*}
+  &\A[0] \defeq \A \\
+  &\A[k + 1] \defeq (\A[k])[1].
+\end{align*}
 #+end_constr
 
 #+begin_remark
 The constructions of shifts are defined by first defining a shift by one, and then recursively shifting by one according to the argument $k$. An alternative would be to shift all data using addition on the natural numbers.
 
-However, addition computes only on one side, so we have a choice to make: given a shift $k$, do we define the \(n\)-th level of the shifted structure to be the \((n+k)\)-th, or \((k+n)\)-th level of the original?
+However, in our setting addition computes only on one side, so we have a choice to make: given a number $k$ to shift by, do we define the \(n\)-th level of the shifted structure to be the \((n+k)\)-th, or \((k+n)\)-th level of the original?
 
 The former runs into issues already when defining the shifted sequence, since $a_{n + k}$ has the type $A_{n + k} \to A_{(n + k) + 1}$, but we need a map of type $A_{n + k} \to A_{(n + 1) + k}$, which forces us to introduce a transport.
 
@@ -2411,28 +2414,365 @@ To contrast, defining the operations by induction does satisfy $\A[0] \judeq \A$
 #+end_remark
 
 #+begin_constr
-\TODO[Inclusion morphisms into shifts].
+Given a morphism of sequential diagrams $F \judeq (f, H) : \A \to \B$, construct its *shift* by one as the morphism
+#+begin_center
+\begin{tikzcd}
+  A_1 \arrow[r, "a_1"]
+  \arrow[d, "f_1"']
+  & A_2 \arrow[r, "a_2"]
+  \arrow[d, "f_2"]
+  & \cdots
+  \arrow[d, phantom, "\cdots"] \\
+  B_1 \arrow[r, "b_1"']
+  \arrow[ur, phantom, "H_1"]
+  & B_2 \arrow[r, "b_2"']
+  & \cdots,
+\end{tikzcd}
+#+end_center
+and call it $F[1] : \A[1] \to \B[1]$.
+
+Construct further shifts by induction
+\begin{alignat*}{2}
+  &F[0] \defeq F &&: \A[0] \to \B[0] \\
+  &F[k + 1] \defeq (F[k])[1] &&: \A[k + 1] \to \B[k + 1].
+\end{alignat*}
 #+end_constr
 
 #+begin_constr
-\TODO[Shifts of morphisms of sequential diagrams].
+Given a cocone $c : \coconeN(\A, X)$, construct its *shift* by one as the cocone
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  A_1 \arrow[r, "a_1"]
+  \arrow[dr, "i_1"', ""{name=I1, anchor=center}]
+  & A_2
+  \arrow[r, "a_2"]
+  \arrow[d, "i_2"]
+  \arrow[from=I1, phantom, "H_1"]
+  & A_3 \arrow[r, "a_3"]
+  \arrow[dl, "i_3", ""{name=I3, anchor=center}]
+  & \cdots \\
+  & X,
+  \arrow[urr, phantom, "\cdots"]
+  \arrow[from=1-2, to=I3, phantom, "H_2"]
+\end{tikzcd}
+#+end_center
+call it $c[1] : \coconeN(\A[1], X)$.
+
+Construct arbitrary shifts by induction
+\begin{alignat*}{2}
+  &c[0] \defeq c &&: \coconeN(\A[0], X) \\
+  &c[k + 1] \defeq (c[k])[1] &&: \coconeN(\A[k + 1], X).
+\end{alignat*}
 #+end_constr
 
-#+begin_constr
-\TODO[Shifts of cocones].
-#+end_constr
+Cocones can be "unshifted" as well. If shifting corresponds to forgetting data, then unshifting corresponds to recovering forgotten data. The data can be recovered, because the missing data has the type $\Sigma (i : A_0 \to X).\, (i \htpy i_0 \comp a_0)$, which is contractible at $(i_0 \comp a_0, \reflhtpy)$.
 
 #+begin_constr
-\TODO[Shifts of homotopies of cocones].
+Given a cocone $c : \coconeN(\A[1], X)$, \ie a diagram with the shape
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  A_1 \arrow[r, "a_1"]
+  \arrow[dr, "i_0"', ""{name=I0, anchor=center}]
+  & A_2
+  \arrow[r, "a_2"]
+  \arrow[d, "i_1"]
+  \arrow[from=I0, phantom, "H_0"]
+  & A_3 \arrow[r, "a_3"]
+  \arrow[dl, "i_2", ""{name=I2, anchor=center}]
+  & \cdots \\
+  & X,
+  \arrow[urr, phantom, "\cdots"]
+  \arrow[from=1-2, to=I2, phantom, "H_1"]
+\end{tikzcd}
+#+end_center
+construct its *unshift* by one as the cocone
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  A_0 \arrow[r, "a_0"]
+  \arrow[dr, "i_0 \comp a_0"', ""{name=I0, anchor=center}]
+  & A_1
+  \arrow[r, "a_1"]
+  \arrow[d, "i_0"']
+  & A_2 \arrow[r, "a_2"]
+  \arrow[dl, "i_1", ""{name=I1, anchor=center}]
+  & \cdots \\
+  & X,
+  \arrow[urr, phantom, "\cdots"]
+  \arrow[from=1-2, to=I1, phantom, "H_0"]
+\end{tikzcd}
+#+end_center
+where the left triangle is $\reflhtpy : (i_0 \comp a_0) \htpy (i_0 \comp a_0)$, and denote it \linebreak $c[-1] : \coconeN(\A, X)$.
+
+Then inductively define arbitrary unshifts
+\begin{alignat*}{3}
+  &c[-0] \defeq c &&: \coconeN(\A, X) &\quad& \text{for $c : \coconeN(\A[0], X)$} \\
+  &c[-(k + 1)] \defeq c[-1][-k] &&: \coconeN(\A, X) && \text{for $c : \coconeN(\A[k + 1], X)$.}
+\end{alignat*}
 #+end_constr
 
-#+begin_constr
-\TODO[Unshifts of cocones].
-#+end_constr
+#+begin_remark
+One might expect that, following the pattern of shifts, the inductive case should be $c[-k][-1]$. Note, however, that the construction only provides a way to unshift a cocone under $\A[n]$ by $n$; since the cocone $c$ in the inductive case is under $\A[k][1]$, we first need to unshift by $1$ to get $c[-1]$ under $\A[k]$, and only then we can unshift by $k$ to get $c[-1][-k]$ under $\A$.
+#+end_remark
+
+Shifting and unshifting homotopies will also be required to show that shifting and unshifting cocones are inverses to each other.
 
 #+begin_constr
-\TODO[Unshifts of homotopies of cocones].
+Given cocones $c \judeq (i, H)$ and $c' \judeq (i', H')$ under $\A$ on $X$, and a homotopy $\Kappa \judeq (K, \alpha) : c \htpy c'$, construct the *shift* by one of $\Kappa$ to be the homotopy between $c[1]$ and $c'[1]$ consisting of $(K', \alpha')$, where
+\begin{alignat*}{2}
+  &K' \defeq (\lambda n \to K_{n + 1}) &&: i_{n + 1} \htpy i'_{n + 1} \\
+  &\alpha' \defeq (\lambda n \to \alpha_{n + 1}) &&: (H_{n + 1} \hconcat (K_{n + 2} \rwhisk a_{n + 1})) \htpy (K_{n + 1} \hconcat H'_{n + 1}).
+\end{alignat*}
+Denote it by $\Kappa[1]$.
+
+Then define other shifts by induction
+\begin{alignat*}{2}
+  &\Kappa[0] \defeq \Kappa &&: c[0] \htpy c'[0] \\
+  &\Kappa[k + 1] \defeq (\Kappa[k])[1] &&: c[k + 1] \htpy c'[k + 1].
+\end{alignat*}
 #+end_constr
+
+Similarly to unshifting cocones, we can recover the first homotopy and coherence to unshift a homotopy of cocones.
+
+#+begin_constr
+Given cocones $c \judeq (i, H)$ and $c' \judeq (i', H')$ under $\A[1]$ on $X$, and a homotopy $\Kappa \judeq (K, \alpha) : c \htpy c'$, we construct the *unshift* by one of $\Kappa$, which is a homotopy $\Kappa[-1] : c[-1] \htpy c'[-1]$. The input data has the form
+#+begin_center
+\begin{tikzcd}[column sep=tiny]
+  A_{n + 1} \arrow[rr, "a_{n + 1}"]
+  \arrow[dr, "i_n"', ""{name=IN, anchor=center}]
+  && A_{n + 2} \arrow[dl, "i_{n + 1}"] \\
+  & X
+  \arrow[from=IN, to=ur, phantom, "H_n"]
+\end{tikzcd}
+$\htpy$
+\begin{tikzcd}[column sep=tiny]
+  A_{n + 1} \arrow[rr, "a_{n + 1}"]
+  \arrow[dr, "i'_n"', ""{name=IN, anchor=center}]
+  && A_{n + 2} \arrow[dl, "i'_{n + 1}"] \\
+  & X,
+  \arrow[from=IN, to=ur, phantom, "H'_n"]
+\end{tikzcd}
+#+end_center
+which we need to turn into a homotopy
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  A_0 \arrow[r, "a_0"]
+  \arrow[dr, "i_0 \comp a_0"']
+  & A_1
+  \arrow[r, "a_1"]
+  \arrow[d, "i_0"']
+  & A_2
+  \arrow[dl, "i_1", ""{name=I1, anchor=center}]
+  \arrow[d, phantom, "\cdots"] \\
+  & X, & {}
+  \arrow[from=1-2, to=I1, phantom, "H_0"]
+\end{tikzcd}
+$\htpy$
+\begin{tikzcd}[column sep=large]
+  A_0 \arrow[r, "a_0"]
+  \arrow[dr, "i'_0 \comp a_0"']
+  & A_1
+  \arrow[r, "a_1"]
+  \arrow[d, "i'_0"']
+  & A_2
+  \arrow[dl, "i_1", ""{name=I1, anchor=center}]
+  \arrow[d, phantom, "\cdots"] \\
+  & X. & {}
+  \arrow[from=1-2, to=I1, phantom, "H'_0"]
+\end{tikzcd}
+#+end_center
+
+Define $\Kappa[-1] \judeq (K', \alpha')$ by case splitting on the index
+\begin{alignat*}{2}
+  &K'_0 \defeq K_0 \rwhisk a_0 &&: (i_0 \comp a_0) \htpy (i'_0 \comp a_0) \\
+  &K'_{n + 1} \defeq K_n &&: i_n \htpy i'_n \\
+  &\alpha'_0 \defeq \runithtpy^{-1} &&: (\reflhtpy \hconcat (K_0 \rwhisk a_0)) \htpy ((K_0 \rwhisk a_0) \hconcat \reflhtpy) \\
+  &\alpha'_{n + 1} \defeq \alpha_n &&: (H_n \hconcat (K_{n + 1} \rwhisk a_n)) \htpy (K_n \hconcat H'_n).
+\end{alignat*}
+
+Then define arbitrary unshifts by induction on $k$
+\begin{alignat*}{2}
+  &\Kappa[0] \defeq \Kappa &&: c[-0] \htpy c'[-0] \\
+  &\Kappa[-(k + 1)] \defeq (\Kappa[-1])[-k] &&: c[-(k + 1)] \htpy c'[-(k + 1)].
+\end{alignat*}
+#+end_constr
+
+#+name: lemma:is-equiv-shift
+#+begin_lemma
+For every sequential diagram $\A$ and a natural number $k$, the map
+\begin{displaymath}
+  (\blank)[k] : \coconeN(\A, X) \to \coconeN(\A[k], X)
+\end{displaymath}
+is an equivalence, with the inverse
+\begin{displaymath}
+  (\blank)[-k] : \coconeN(\A[k], X) \to \coconeN(\A, X)
+\end{displaymath}
+#+end_lemma
+
+#+begin_proof
+The goal is to show that for any $k$, we have $c[-k][k] = c$ and $c[k][-k] = c$, for appropriately typed cocones $c$.
+
+First note that for any cocone $c : \cocone(\A[1], X)$, $c[-1][1]$ computes to the cocone $c$ --- $c[-1]$ is the cocone $c$ with synthesized data at the front, and $c[-1][1]$ forgets the new data. Inductively, we define the homotopy $c[-k][k] \htpy c$ for all $k$. We have $c[-0][0] \htpy c$ by the reflexive homotopy, and
+\begin{alignat*}{3}
+  c[-(k + 1)][k + 1] \,
+  &\judeq &\,& c[-1][-k][k][1] &\quad& \\
+  &\htpy && c[-1][1] &&\text{by shifting the induction hypothesis} \\
+  &&&&& \term{IH}: (c[-1])[-k][k] \htpy c[-1] \\
+  &\judeq && c.
+\end{alignat*}
+Since homotopies of cocones characterize their identity types, we obtain the desired identifications $c[-k][k] = c$.
+
+For the other direction, we begin by giving a homotopy $c \htpy c[1][-1]$ for every cocone $c : \coconeN(\A, X)$. We choose this orientation of the homotopy, because the first component of the homotopy now needs a proof of $i_0 \htpy i_1 \comp a_0$, which we can supply directly by $H_0$. Define the homotopy of cocones by case splitting as
+\begin{alignat*}{2}
+  &K_0 \defeq H_0 &&: i_0 \htpy i_1 \comp a_n \\
+  &K_{n + 1} \defeq \reflhtpy &&: i_{n + 1} \htpy i_{n + 1} \\
+  &\alpha_0 \defeq \reflhtpy &&: (H_0 \hconcat \reflhtpy) \htpy (H_0 \hconcat \reflhtpy) \\
+  &\alpha_{n + 1} \defeq \runithtpy &&: (H_{n + 1} \hconcat \reflhtpy) \htpy (\reflhtpy \hconcat H_{n + 1}).
+\end{alignat*}
+Then extend the homotopy by induction to all $k$. We again have $c \htpy c[0][-0]$ by the reflexivity homotopy, and in the inductive case we compose the homotopies
+\begin{alignat*}{3}
+  c \,
+  &\htpy &\,& c[k][-k] &&\text{by the inductive hypothesis} \\
+  &\htpy && c[k][1][-1][-k] &&\text{by unshifting the homotopy $c[k] \htpy c[k][1][-1]$ by $k$} \\
+  &\judeq && c[k + 1][-(k + 1)]. &\quad&
+\end{alignat*}
+This family of homotopies can be made into a family of identifications, and inverted to get the required $c[k][-k] = c$.
+#+end_proof
+
+#+name: thm:up-shift
+#+begin_thm
+Given a sequential diagram $\A$ and its colimit cocone $c : \coconeN(\A, X)$, the cocone $c[k] : \coconeN(\A[k], X)$ is a sequential colimit of the diagram $\A[k]$, for any natural number $k$.
+#+end_thm
+
+#+begin_proof
+We construct a commuting triangle
+#+begin_center
+\begin{tikzcd}
+  (X \to Y)
+  \arrow[rr, "\coconeNMap_c", "\simeq"']
+  \arrow[dr, "\coconeNMap_{c[k]}"', near start]
+  && \coconeN(\A, Y)
+  \arrow[dl, "{(\blank)[k]}", "\simeq"'] \\
+  & \coconeN(\A[k], Y),
+\end{tikzcd}
+#+end_center
+where the right map is an equivalence by [[lemma:is-equiv-shift]], and the top map is an equivalence by assumption. The it follows that the left map is an equivalence.
+
+The triangle is constructed by induction. Note that it commutes by $\reflhtpy$ for the case $k = 0$, since then the right map is an identity and the cocone maps are the same map, and also for the case $k = 1$, since then both paths map a function $h : X \to Y$ to the cocone $(\lambda n \to h \comp i_n, \lambda n \to h \lwhisk H_n)$. To show that the triangle commutes for $k + 1$, compose it out of the smaller triangles
+#+begin_center
+\begin{tikzcd}[row sep=large, column sep=large]
+  (X \to Y)
+  \arrow[rr, "\coconeNMap_c"]
+  \arrow[dr, "\coconeNMap_{c[k]}"', near end]
+  \arrow[ddr, bend right, "\coconeNMap_{c[k + 1]}"']
+  && \coconeN(\A, Y)
+  \arrow[dl, "{(\blank)[k]}"]
+  \arrow[ddl, bend left, "{(\blank)[k + 1]}"] \\
+  & \coconeN(\A[k], Y)
+  \arrow[d, "{(\blank)[1]}"] \\
+  & \coconeN(\A[k + 1], Y),
+\end{tikzcd}
+#+end_center
+where the top one is the induction hypothesis, the left one is the case for $k = 1$, and the right one is the definition of $(\blank)[k + 1]$.
+#+end_proof
+
+To conclude this section, we show that there are inclusion morphisms of sequential diagrams $\A \to \A[k]$, which induce the identity map on the colimit.
+
+#+begin_constr
+Given a sequential diagram $\A \judeq (A, a)$, construct the morphism of descent data
+\begin{displaymath}
+  \inclHomN[k] : \A \to \A[1]
+\end{displaymath}
+as the morphism
+\begin{alignat*}{2}
+  &f_n \defeq a_n &&: A_n \to A_{n + 1} \\
+  &H_n \defeq \reflhtpy &&: (a_{n + 1} \comp a_n) \htpy (a_{n + 1} \comp a_n).
+\end{alignat*}
+Diagrammatically, the morphism can be drawn as
+#+begin_center
+\begin{tikzcd}
+  A_0 \arrow[r, "a_0"]
+  \arrow[d, "a_0"']
+  & A_1 \arrow[r, "a_1"]
+  \arrow[d, "a_1"]
+  & \cdots
+  \arrow[d, phantom, "\cdots"] \\
+  A_1 \arrow[r, "a_1"']
+  & A_2 \arrow[r, "a_2"']
+  & \cdots.
+\end{tikzcd}
+#+end_center
+
+Extend the morphism by induction, where $\inclHomN[0] : \A \to \A[0]$ is the identity morphism, and $\inclHomN[k + 1] : \A \to \A[k + 1]$ is the composition of $\inclHomN[k] : \A \to \A[k]$ and then $\inclHomN[1] : \A[k] \to \A[k][1]$.
+#+end_constr
+
+These morphisms offer another way of unshifting cocones --- a cocone $c : \coconeN(\A[k], X)$ may be precomposed with the morphism $\inclHomN[k] : \A \to \A[k]$ to get a cocone $c' : \coconeN(\A, X)$. We show that these two constructions result in homotopic cocones. We limit ourselves to the case $k = 1$, as we do not need the general case in further development.
+
+#+begin_lemma
+Given a cocone $c \judeq (i, H) : \coconeN(\A[1], X)$, there is a homotopy of cocones
+\begin{displaymath}
+  c[-1] \htpy \precompHomN_c^{\A}(\inclHomN[1]).
+\end{displaymath}
+#+end_lemma
+
+#+begin_proof
+We need to show a homotopy between the cocones
+#+begin_center
+\begin{tikzcd}
+  A_0 \arrow[r, "a_0"]
+  \arrow[dr, "i_0 \comp a_0"']
+  & A_1
+  \arrow[r, "a_1"]
+  \arrow[d, "i_0"]
+  & A_2
+  \arrow[dl, "i_1"]
+  \arrow[d, phantom, "\cdots"] \\
+  & X & {}
+\end{tikzcd}
+and \hspace{1em}
+\begin{tikzcd}[column sep=tiny]
+A_n \arrow[rr, "a_n"] \arrow[d, "a_n"']
+&& A_{n + 1} \arrow[d, "a_{n + 1}"] \\
+A_{n + 1} \arrow[rr, "a_{n + 1}"] \arrow[dr, "i_n"']
+&& A_{n + 2} \arrow[dl, "i_{n + 1}"] \\
+& X.
+\end{tikzcd}
+#+end_center
+
+This homotopy can be constructed by induction on $n$ as
+\begin{alignat*}{2}
+  &K_0 \defeq \reflhtpy &&: (i_0 \comp a_0) \htpy (i_0 \comp a_0) \\
+  &K_{n + 1} \defeq H_n &&: i_n \htpy (i_{n + 1} \comp a_{n + 1}) \\
+  &\alpha_0 \defeq \runithtpy^{-1} &&: (\reflhtpy \hconcat H_0) \htpy (\reflhtpy \hconcat H_n \hconcat \reflhtpy) \\
+  &\alpha_{n + 1} \defeq H_n \lwhisk \runithtpy^{-1} &&: (H_n \hconcat (H_{n + 1} \rwhisk a_{n + 1})) \\
+  &&&\htpy (H_n \hconcat (H_{n + 1} \rwhisk a_{n + 1}) \hconcat \reflhtpy).
+\end{alignat*}
+#+end_proof
+
+#+name: corol:htpy-cocone-precomp
+#+begin_corol
+For any cocone $c : \coconeN(\A, X)$, there is a homotopy
+\begin{displaymath}
+  c \htpy \precompHomN_{c[1]}(\inclHomN[1]).
+\end{displaymath}
+#+end_corol
+
+#+begin_proof
+Compose the homotopies $c \htpy c[1][-1]$ from [[lemma:is-equiv-shift]] and $c[1][-1] \htpy \precompHomN_{c[1]}(\inclHomN[1])$ from the above lemma applied to $c[1]$.
+#+end_proof
+
+#+begin_thm
+Assume a sequential diagram $\A$ with its colimit $c : \coconeN(\A, X)$. Then for any natural number $k$, the morphism $\inclHomN[k] : \A \to \A[k]$ induces a map out of $X$. If we consider $c[k] : \coconeN(\A[k], X)$ as the colimit of $\A[k]$ by [[thm:up-shift]], this map's codomain is $X$. The induced map $\inclHomN[k]_{\infty} : X \to X$ is homotopic to the identity map $\id : X \to X$.
+#+end_thm
+
+#+begin_proof
+Proceed by induction on $k$. For $k = 0$, note that the morphism \linebreak $\inclHomN[0] : \A \to \A[0]$ is the identity morphism, hence it is mapped to the identity by [[lemma:colim-preserves-id]].
+
+For $k = k' + 1$, the inclusion morphism computes to the composition $\A \to \A[k] \to \A[k][1]$. By [[lemma:colim-preserves-comp]], passing to the colimit preserves composition, so there is a homotopy
+\begin{displaymath}
+  \inclHomN[k + 1]_{\infty} \htpy \inclHomN[1]_{\infty} \comp \inclHomN[k]_{\infty}.
+\end{displaymath}
+The map $\inclHomN[k]_{\infty}$ is homotopic to the identity map by the inductive hypothesis, so it remains to show that $\inclHomN[1] : \A[k] \to \A[k + 1]$ induces the identity map. The map $\inclHomN[1]_{\infty} : X \to X$ is constructed using the universal property of $c[k]$ being the colimit of $\A[k]$, by the cocone \linebreak $\precompHomN_{c[k + 1]}(\inclHomN[1])$. By [[corol:htpy-cocone-precomp]] this cocone is homotopic to the cocone $c[k]$. Hence it suffices to show that the map induced by the cocone $c[k]$ using the universal property of $c[k]$ is the identity map, which is lemma \TODO[ref].
+#+end_proof
 
 *** Descent
 
@@ -2458,6 +2798,8 @@ Sequential diagrams do not contain any spans, so there is no simplification to b
 #+end_remark
 
 *** Flattening lemma
+
+\TODO[We prove the flattening lemma phrased with descent data, which can be interpreted as a simpler case of the main theorem from SvDR20. The full theorem could reasonably be called "generalized flattening lemma", as it shows commutativity of taking the total space and sequential colimit of not just a type family induced by descent data, but for a more general case where the descent data is generated using shifts from an arbitrary dependent sequential diagram].
 
 #+begin_thm
 \TODO[Flattening lemma]
@@ -2578,6 +2920,7 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 
 - [ ] Link constructions in prose to their definitions
 - [ ] Link formal statements to the formalization
+- [ ] =column sep={between origins}= in wide diagrams
 
 # The local variable is necessary to setup hyperref correctly
 
