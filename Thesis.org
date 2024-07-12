@@ -13,7 +13,7 @@
 #+CITE_EXPORT: biblatex iso-numeric,sorting=nyt,maxcitenames=3,backref=true,useprefix=true
 #+LATEX_CLASS: report
 #+LATEX_CLASS_OPTIONS: [12pt,a4paper,twoside,openright]
-#+OPTIONS: title:nil toc:nil ':t
+#+OPTIONS: title:nil toc:nil ':t H:5
 
 # Package options, derived partially from the thesis template
 #+LATEX_HEADER: \geometry{margin=25mm,bindingoffset=14.2mm}
@@ -120,6 +120,8 @@
 #+LATEX_HEADER: \DeclareMathOperator{\precompHomN}{precomp-hom\N}
 #+LATEX_HEADER: \DeclareMathOperator{\fmapHomN}{fmap-hom\N}
 #+LATEX_HEADER: \DeclareMathOperator{\inclHomN}{incl-hom\N}
+#+LATEX_HEADER: \DeclareMathOperator{\DDN}{DD\N}
+#+LATEX_HEADER: \DeclareMathOperator{\ddNFam}{dd\N-fam}
 
 # Universes
 #+LATEX_HEADER: \newcommand{\UU}{\mathcal{U}}
@@ -202,10 +204,13 @@ DEDICATION
 
  \TODO[Mention that David writes "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile". But it's in the categorical paper?]
 
- \TODO[Contributions: Chapter 1 and first section of chapter 2 consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The uniform treatment of sections of descent data, its application to identity systems in terms of descent data, the presented proof of the flattening lemma, and the proof of correctness of the zigzag construction is original research.]
-
  \TODO[The bulk of the work is the reusable and documented formalization of the presented material in the {{{AU}}} library. The relevant proofs were "unformalized" into English and are presented below.]
 
+**** Organization
+
+**** Contributions
+
+ \TODO[Chapter 1 and first section of chapter 2 consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The uniform treatment of sections of descent data, its application to identity systems in terms of descent data, the presented proof of the flattening lemma, and the proof of correctness of the zigzag construction is original research.]
 * Homotopy Type Theory
 
 #+NAME: lemma:is-equiv-concat
@@ -1080,7 +1085,7 @@ Given a span diagram $\S \judeq (f, g)$ and descent data $(P_A, P_B, P_S)$, cons
 #+end_constr
 
 #+begin_constr
-Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $(P_A, P_B, P_S) \correspDD P$, construct the *total cocone* \TODO[($\Sigma c$ ?)] under the total span
+Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, and a family with descent data $(e_A, e_B, e_S) : (P_A, P_B, P_S) \correspDD P$, construct the *total cocone* \TODO[($\Sigma c$ ?)] under the total span diagram
 #+begin_center
 \begin{tikzcd}[column sep=huge]
   \Sigma S (P_A \comp f)
@@ -1096,7 +1101,7 @@ Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (i, j, H)$ on $X$, a
 #+end_center
 where the coherence $H'$ at $s : S$, $p : P_A(f s)$ is given by
 \begin{align*}
-  H'_1 &\defeq H(s) &&: (i (f s)) = (j (g s)) \\
+  H'_1 &\defeq H(s) &&: i (f s) = j (g s) \\
   H'_2 &\defeq e_S(s, p)^{-1} &&: \tr_P(H(s), e_A(s, p)) = e_B(P_S(s, p)).
 \end{align*}
 \TODO[An identification in $\Sigma$ is a $\Sigma$ of identifications].
@@ -2774,16 +2779,27 @@ For $k = k' + 1$, the inclusion morphism computes to the composition $\A \to \A[
 The map $\inclHomN[k]_{\infty}$ is homotopic to the identity map by the inductive hypothesis, so it remains to show that $\inclHomN[1] : \A[k] \to \A[k + 1]$ induces the identity map. The map $\inclHomN[1]_{\infty} : X \to X$ is constructed using the universal property of $c[k]$ being the colimit of $\A[k]$, by the cocone \linebreak $\precompHomN_{c[k + 1]}(\inclHomN[1])$. By [[corol:htpy-cocone-precomp]] this cocone is homotopic to the cocone $c[k]$. Hence it suffices to show that the map induced by the cocone $c[k]$ using the universal property of $c[k]$ is the identity map, which is lemma \TODO[ref].
 #+end_proof
 
-*** Descent
+*** Descent property and flattening lemma
 
-\TODO[Descent might not actually be necessary. I did formalize the theory, but don't use it in path spaces of pushouts...; the remark about equifibered diagrams seems cool though].
+\TODO[We prove the flattening lemma phrased with descent data, which can be seen as an elementary case of the main theorem from SvDR20. The full theorem could reasonably be called "generalized flattening lemma", as it shows commutativity of taking the total space and sequential colimit of not just a type family induced by descent data, but a more general case where the descent data is generated using shifts from an arbitrary dependent sequential diagram].
 
 #+begin_defn
-\TODO[Descent data for sequential colimits]
+Given a sequential diagram $\A \judeq (A, a)$, define the type of *descent data* over $\A$ to be the type of pairs $(B, b)$, where $B$ is a family of type families
+\begin{displaymath}
+  B : (n : \N) \to A_n \to \UU
+\end{displaymath}
+and $b$ is a family of fiberwise equivalences
+\begin{displaymath}
+  b : (n : \N) (x : A_n) \to B_n(x) \simeq B_{n + 1}(a_n x).
+\end{displaymath}
+
+We write $\DDN(\A)$ for the type of descent data over $\A$.
 #+end_defn
 
 #+begin_remark
-All descent data arise as dependent diagrams, with maps replaced by equivalences. It can then be simplified by replacing a span of fiberwise equivalences with a single fiberwise equivalence. To take the example of pushout, an equifibered span diagram consists of the data
+There is a principled way of looking at descent data over sequential diagrams --- as /equifibered/ sequential diagrams. A fibered (or dependent) sequential diagram consists of type families $B_n$ over $A_n$'s and connecting maps $b_n$ over $a_n$'s. An equifibered sequential diagram is one in which all connecting maps are equivalences.
+
+In fact, all descent data arise as dependent diagrams with maps replaced by equivalences. Sometimes the structure may be simplified by replacing a span of fiberwise equivalences with a single fiberwise equivalence. To take the example of pushout, an equifibered span diagram consists of the data[fn:1]
 \begin{align*}
   P_S &: S \to \UU \\
   P_A &: A \to \UU \\
@@ -2792,18 +2808,165 @@ All descent data arise as dependent diagrams, with maps replaced by equivalences
   P_g &: (s : S) \to P_S(s) \simeq P_B(g s).
 \end{align*}
 
-The type of equifibered span diagrams is equivalent to the type of descent data, since we can contract away the pair $(P_S, P_f)$[fn:1]. The simplification reduces the amount of data we have to track and make coherent, at the expense of introducing an arbitrary direction --- there is no reason to prefer the direction $P_A(f s) \simeq P_B(g s)$ over $P_B(g s) \simeq P_A(f s)$.
+The type of equifibered span diagrams is equivalent to the type of descent data over span diagrams, since we can contract away the pair $(P_S, P_f)$. The simplification reduces the amount of data we have to track and make coherent, at the expense of introducing an arbitrary direction --- there is no reason to prefer the direction $P_A(f s) \simeq P_B(g s)$ over $P_B(g s) \simeq P_A(f s)$.
 
-Sequential diagrams do not contain any spans, so there is no simplification to be done.
+Sequential diagrams do not contain any spans, so there is no simplification to be made.
 #+end_remark
 
-*** Flattening lemma
+#+begin_constr
+Given a sequential diagram $\A \judeq (A, a)$ and a cocone $c \judeq (i, H) : \coconeN(\A, X)$, construct the map
+\begin{displaymath}
+  \ddNFam_c : (X \to \UU) \to \DDN(\A)
+\end{displaymath}
+which sends a type family $B$ to the descent data
+\begin{alignat*}{2}
+  &(\lambda n, x \to B(i_n x)) &&: (n : \N) \to A_n \to \UU \\
+  &(\lambda n, x \to \tr_B(H_n x)) &&: (n : \N) (x : A_n) \to B(i_n x) \simeq B(i_{n + 1}(a_n x)).
+\end{alignat*}
+#+end_constr
 
-\TODO[We prove the flattening lemma phrased with descent data, which can be interpreted as a simpler case of the main theorem from SvDR20. The full theorem could reasonably be called "generalized flattening lemma", as it shows commutativity of taking the total space and sequential colimit of not just a type family induced by descent data, but for a more general case where the descent data is generated using shifts from an arbitrary dependent sequential diagram].
+#+begin_defn
+Given a sequential diagram $\A$ and a cocone \linebreak $c \judeq (i, H) : \coconeN(\A, X)$, a *type family with descent data* is a triple \linebreak $(B_{\infty}, B', e')$, where $B_{\infty} : X \to \UU$ is a type family, $B' \judeq (B, b) : \DD(\A)$ is descent data over $\A$, and $e' \judeq (e, K)$ is an equivalence of descent data consisting of a family of equivalences
+\begin{displaymath}
+  e : (n : \N)(x : A_n) \to B_{\infty}(i_n x) \simeq B_n(x)
+\end{displaymath}
+and a family of commuting squares indexed by $n$ and $x : A_n$
+#+begin_center
+\begin{tikzcd}
+  B_{\infty}(i_n x)
+  \arrow[r, "e_n(x)"]
+  \arrow[d, "\tr_{B_{\infty}}(H_n x)"']
+  & B_n(x)
+  \arrow[d, "b_n(x)"] \\
+  B_{\infty}(i_{n + 1}(a_n x))
+  \arrow[r, "e_{n + 1}(a_n x)"']
+  & B_{n + 1}(a_n x).
+\end{tikzcd}
+#+end_center
 
+We write $e' : B_{\infty} \correspDD B'$ for the triple $(B_{\infty}, B', e')$.
+#+end_defn
+
+#+attr_latex: :options [Descent property of sequential colimits]
 #+begin_thm
-\TODO[Flattening lemma]
+Consider a sequential diagram $\A \judeq (A, a)$ and its sequential colimit $c : \coconeN(\A, X)$. Then the map $\ddNFam_c$ is an equivalence.
 #+end_thm
+
+#+begin_proof
+We construct a commuting triangle of maps
+#+begin_center
+\begin{tikzcd}
+  (X \to Y)
+  \arrow[rr, "\coconeNMap_c", "\simeq"']
+  \arrow[dr, "\ddNFam_c"']
+  && \coconeN(\A, \UU)
+  \arrow[dl, "\simeq"] \\
+  & \DDN(\A).
+\end{tikzcd}
+#+end_center
+The right equivalence sends $(B, H)$ to $(B, \lambda n, x \to \equivEq(H_n(x)))$, and the triangle commutes by function extensionality and [[lemma:compute-equiv-eq-ap]].
+#+end_proof
+
+#+begin_corol
+Given a sequential diagram $\A \judeq (A, a)$, its colimit $c \judeq (i, H) : \coconeN(\A, X)$ and descent data $(B, b) : \DDN(\A)$, there is a unique type family $B_{\infty} : X \to \UU$ and an equivalence of descent data $e : B_{\infty} \correspDD (B, b)$.
+#+end_corol
+
+#+begin_constr
+Given a sequential diagram $\A \judeq (A, a)$ and descent data $(B, b) : \DDN(\A)$, take the *total sequential diagram* to be the diagram
+\begin{alignat*}{2}
+  &(\lambda n \to \Sigma A_n B_n) &&: \N \to \UU \\
+  &(\lambda n \to \tot_{a_n}(b_n)) &&: (n : \N) \to (\Sigma A_n B_n) \to (\Sigma A_{n + 1} B_{n + 1}).
+\end{alignat*}
+#+end_constr
+
+#+begin_constr
+Given a sequential diagram $\A \judeq (A, a)$, a cocone $c \judeq (i, H) : \coconeN(\A, X)$, and a family with descent data $(e, K) : (B, b) \correspDD B_{\infty}$, construct the *total cocone* under the total sequential diagram
+#+begin_center
+\begin{tikzcd}
+  \Sigma A_n B_n
+  \arrow[rr, "\tot_{a_n}(b_n)"]
+  \arrow[dr, "\tot_{i_n}(e_n)"']
+  && \Sigma A_{n + 1} B_{n + 1}
+  \arrow[dl, "\tot_{i_{n + 1}}(e_{n + 1})"] \\
+  & \Sigma X B_{\infty}
+\end{tikzcd}
+#+end_center
+which commutes by the homotopy $H'$ given at $x : A_n$, $y : B_n(a)$ by
+\begin{alignat*}{2}
+  &H'_1 \defeq H_n(x) &&: i_n(x) = i_{n + 1}(a_n x) \\
+  &H'_2 \defeq K_n(x, y) &&: \tr_{B_{\infty}}(H_n x)(e_n(y)) = e_{n + 1}(b_n(x, y)).
+\end{alignat*}
+#+end_constr
+
+We proceed similarly to the proof of the flattening lemma with descent data for pushouts --- we split the proof into two steps, one showing it holds for a type family $P : X \to \UU$ and its induced descent data, and one generalizing it to arbitrary families with descent data.
+
+The proofs lean on technical results regarding preservation of universal properties by equivalences of cocones and coforks (not to be confused with homotopies of cocones and coforks), which were introduced in the formalization but we don't cover them in the thesis text. The precise statements and proofs of those lemmas can be read off the attached Agda code.
+
+#+begin_remark
+The idea of those lemmas is that in the context of cocones under span diagrams, a commuting cube whose vertical maps are equivalences may be regarded as an equivalence of span diagrams and cocones under them. With this perspective, [[lemma:is-pushout-bottom-ff-is-pushout-top]] says being a pushout is preserved by equivalences of cocones. Adapting it to coforks yields the concept of an equivalence of double arrows and coforks under them, and the property of being a coequalizer is preserved by such an equivalence, because equivalences of coforks induce equivalences of the associated cocones. Going one step further, we get a notion of equivalences of sequential diagrams and cocones under those, and being a sequential colimit is preserved by equivalences of cocones, because they induce equivalences of the associated coforks.
+#+end_remark
+
+#+name: lemma:flattening-seq-family
+#+begin_lemma
+Given a sequential colimit $c : \cocone(\A, X)$ and a type family $B_{\infty} : X \to \UU$, the total cocone of the family with descent data $\id : \ddNFam_c(B_{\infty}) \correspDD B_{\infty}$ is a sequential colimit.
+#+end_lemma
+
+#+begin_proof
+Similarly to the proof of the flattening lemma for coequalizers, we leverage the fact that sequential colimits correspond to certain coequalizers.
+
+We construct an equivalence of coforks
+#+begin_center
+\begin{tikzcd}[row sep=large]
+  \Sigma (n : \N) (x : A_n).\, B_{\infty}(i_n x)
+  \arrow[rr, shift left=1.25, "\tot_{+1}(\tot_{a_{(\blank)}}(\tr_{B_{\infty}}(H_{(\blank)})))"]
+  \arrow[rr, shift right=1.25, "\id"']
+  \arrow[d, "\term{assoc-\mupSigma}"', "\simeq"]
+  && \Sigma (n : \N) (x : A_n).\, B_{\infty}(i_n x)
+  \arrow[r, "\uncurry(\tot_{i_{(\blank)}}(\id))", outer sep=4pt]
+  \arrow[d, "\term{assoc-\mupSigma}", "\simeq"']
+  & \Sigma X B_{\infty}
+  \arrow[d, "\id", "\simeq"'] \\
+  \Sigma ((n, x) : \Sigma \N A).\, B_{\infty}(i_n x)
+  \arrow[rr, shift left=1.25, "\tot_{\tot_{+1}(a_{(\blank)})}(\tr_{B_{\infty}}(H_{(\blank)}))"]
+  \arrow[rr, shift right=1.25, "\tot_{\id}(\id)"']
+  && \Sigma ((n, x) : \Sigma \N A).\, B_{\infty}(i_n x)
+  \arrow[r, "\tot_{\uncurry(i)}(\id)"', outer sep=6pt]
+  & \Sigma X B_{\infty}
+\end{tikzcd}
+#+end_center
+where the top cofork is the cofork associated to the total cocone, and on the bottom is the total cofork of the cofork associated to $c$ and $B_{\infty}$. All the squares commute by $\reflhtpy$, so the coherence is a combination of unit laws for concatenation with $\reflhtpy$ and whiskering by $\id$.
+
+Since the bottom cofork is a coequalizer by the flattening lemma for coequalizers, the top cofork is also a coequalizer, from which it follows that the total cocone is a sequential colimit.
+#+end_proof
+
+#+attr_latex: :options [Flattening lemma for sequential colimits]
+#+begin_thm
+Given a sequential colimit $c : \coconeN(\A, X)$ and a family with descent data $(B, b) \correspDD B_{\infty}$, the total cocone is a sequential colimit.
+#+end_thm
+
+#+begin_proof
+Put $\A \judeq (A, a)$ and $c \judeq (i, H)$. It suffices to show that there is an "equivalence of cocones"
+#+begin_center
+\begin{tikzcd}[row sep=small]
+  \Sigma A_n B_n
+  \arrow[dd, "\tot(e_n)"']
+  \arrow[rr, "\tot_{a_n}(b_n)"]
+  \arrow[dr, "\tot_{i_n}(e_n)"', near end]
+  && \Sigma A_{n + 1} B_{n + 1}
+  \arrow[dd, "\tot(e_{n + 1})"]
+  \arrow[dl, "\tot_{i_{n + 1}}(e_{n + 1})", near end] \\
+  & \Sigma X B_{\infty} \\
+  \Sigma A_n (B_{\infty} \comp i_n)
+  \arrow[rr, "\tr_{B_{\infty}}(H_n)", near start]
+  \arrow[dr, "\tot_{i_n}(\id)"']
+  && \Sigma A_{n + 1} (B_{\infty} \comp i_{n + 1})
+  \arrow[dl, "\tot_{i_{n + 1}}(\id)"] \\
+  & \Sigma X B_{\infty},
+  \arrow[from=uu, "\id", near start, crossing over]
+\end{tikzcd}
+#+end_center
+where the bottom cocone is the total cocone of $B_{\infty}$ and its induced descent data, and the top cocone is the total cocone of $(B, b) \correspDD B_{\infty}$. The vertical maps are equivalences, and the prisms commute by a homotopy algebra argument similar to [[lemma:flattening-cube]]. The bottom cocone is a sequential colimit by [[lemma:flattening-seq-family]], so it follows that the top cocone is a sequential colimit.
+#+end_proof
 
 * Proof of correctness of the zigzag construction
 
@@ -2902,8 +3065,6 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 
 
 * COMMENT Battle plan
-- [cite:@BW22] 2.5 for straightening/unstraightening
-
 - [X] $\Sigma$ -types over pushouts
   - [X] Flattening lemma
   - [X] Applications
@@ -2919,10 +3080,9 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
   - [X] More general functoriality of sequential colimits - not just standard ones, but formulated with UP
 
 - [ ] Link constructions in prose to their definitions
-- [ ] Link formal statements to the formalization
+- [ ] Link formal statements to the formalization (fix a commit)
 - [ ] =column sep={between origins}= in wide diagrams
-
-# The local variable is necessary to setup hyperref correctly
+- [ ] Check that there are no TODO's
 
 * Footnotes
 
