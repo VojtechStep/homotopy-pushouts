@@ -176,6 +176,7 @@ DEDICATION
 \def\corolautorefname{Corollary}
 \def\defnautorefname{Definition}
 \def\constructorautorefname{Construction}
+\def\chapterautorefname{Chapter}
 #+end_export
 
 * Introduction
@@ -208,10 +209,17 @@ DEDICATION
 
 **** Organization
 
+The thesis is divided into four chapters. [[#chap:hott]] provides an abridged introduction to homotopy type theory, presenting the necessary foundational results of homotopy type theory on which we build. Those results are taken either from the "HoTT Book" [cite//b:@UF13], or from Rijke's textbook [cite//b:@Rij22] and the formalization in the {{{AU}}} library. [[#chap:pushouts]] introduces pushouts as structures satisfying a universal property, and describes some of their elementary properties, namely formation of type families over pushouts, a universal property of total spaces of type families over pushouts, and a universal property of identity systems of pushouts. [[#chap:colimits]] defines coequalizers and sequential colimits as other kinds of colimits, and shows how their existence and properties can be derived from pushouts. The focus of the chapter is primarily on sequential colimits, as the constructions are used in the succeeding [[#chap:zigzag-construction]]. The latter describes an explicit construction claimed to be an identity system of pushouts, built up of sequential colimits of pushouts, due to [cite/t:@War23]. It then proceeds to a description of a formalized partial proof that the construction is indeed an identity system, which has been carried out for the thesis.
+
 **** Contributions
 
  \TODO[Chapter 1 and first section of chapter 2 consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The uniform treatment of sections of descent data, its application to identity systems in terms of descent data, the presented proof of the flattening lemma, and the proof of correctness of the zigzag construction is original research.]
+
 * Homotopy Type Theory
+:PROPERTIES:
+:CUSTOM_ID: chap:hott
+:END:
+
 
 #+NAME: lemma:is-equiv-concat
 #+begin_lemma
@@ -271,6 +279,9 @@ If any two of the maps are equivalences, then so is the third.
 \TODO[Does this even deserve a chapter? Or should it be assimilated into "Pushouts"?]
 
 * Pushouts
+:PROPERTIES:
+:CUSTOM_ID: chap:pushouts
+:END:
 
 \TODO[Decide how to treat and write "span" vs "span diagram"].
 
@@ -1465,6 +1476,9 @@ A pushout square is *van Kampen* if it satisfies both the first and second cube 
 #+end_defn
 
 * Other colimits
+:PROPERTIES:
+:CUSTOM_ID: chap:colimits
+:END:
 
 Pushouts and the empty type suffice to construct many other kinds of colimits. We are particularly interested in sequential colimits, which figure prominently in the zigzag construction in [[#sec:zigzag-constr]]. Sequential colimits and some of their properties may be derived from pushouts. Their construction is more natural if we first formalize a basic theory of coequalizers on top of pushouts, and then we formalize sequential colimits on top of coequalizers.
 
@@ -2130,10 +2144,6 @@ and pasting of commuting squares
 #+end_center
 #+end_constr
 
-#+begin_defn
-\TODO[Homotopies of morphisms of sequential diagrams? Apparently I use it in zigzags; come back later].
-#+end_defn
-
 To construct a map $X \to Y$ between sequential colimits, we can use the universal property of $X$. That requires us to construct a cocone under $X$'s diagram on $Y$.
 
 #+begin_constr
@@ -2365,6 +2375,7 @@ For any two morphisms of sequential diagrams $f, g : \A \to \B$, there is an equ
 \end{displaymath}
 #+end_lemma
 
+#+name: lemma:colim-preserves-htpy
 #+begin_lemma
 Taking sequential colimits of sequential diagrams preserves homotopies. Specifically, given sequential diagrams $\A, \B$ and morphisms $f, g : \A \to \B$, there is a map
 \begin{displaymath}
@@ -2683,7 +2694,7 @@ where the top one is the induction hypothesis, the left one is the case for $k =
 To conclude this section, we show that there are inclusion morphisms of sequential diagrams $\A \to \A[k]$, which induce the identity map on the colimit.
 
 #+begin_constr
-Given a sequential diagram $\A \judeq (A, a)$, construct the morphism of descent data
+Given a sequential diagram $\A \judeq (A, a)$, construct the morphism of sequential diagrams
 \begin{displaymath}
   \inclHomN[k] : \A \to \A[1]
 \end{displaymath}
@@ -2765,9 +2776,10 @@ For any cocone $c : \coconeN(\A, X)$, there is a homotopy
 Compose the homotopies $c \htpy c[1][-1]$ from [[lemma:is-equiv-shift]] and $c[1][-1] \htpy \precompHomN_{c[1]}(\inclHomN[1])$ from the above lemma applied to $c[1]$.
 #+end_proof
 
-#+begin_thm
+#+name: lemma:colim-incl-id
+#+begin_lemma
 Assume a sequential diagram $\A$ with its colimit $c : \coconeN(\A, X)$. Then for any natural number $k$, the morphism $\inclHomN[k] : \A \to \A[k]$ induces a map out of $X$. If we consider $c[k] : \coconeN(\A[k], X)$ as the colimit of $\A[k]$ by [[thm:up-shift]], this map's codomain is $X$. The induced map $\inclHomN[k]_{\infty} : X \to X$ is homotopic to the identity map $\id : X \to X$.
-#+end_thm
+#+end_lemma
 
 #+begin_proof
 Proceed by induction on $k$. For $k = 0$, note that the morphism \linebreak $\inclHomN[0] : \A \to \A[0]$ is the identity morphism, hence it is mapped to the identity by [[lemma:colim-preserves-id]].
@@ -2968,24 +2980,241 @@ Put $\A \judeq (A, a)$ and $c \judeq (i, H)$. It suffices to show that there is 
 where the bottom cocone is the total cocone of $B_{\infty}$ and its induced descent data, and the top cocone is the total cocone of $(B, b) \correspDD B_{\infty}$. The vertical maps are equivalences, and the prisms commute by a homotopy algebra argument similar to [[lemma:flattening-cube]]. The bottom cocone is a sequential colimit by [[lemma:flattening-seq-family]], so it follows that the top cocone is a sequential colimit.
 #+end_proof
 
-* Proof of correctness of the zigzag construction
+* Partial proof of correctness of the zigzag construction
+:PROPERTIES:
+:CUSTOM_ID: chap:zigzag-construction
+:END:
 
-\TODO[Mention that there are multiple versions].
-\TODO[Mention that ours is a slight variation by switching relations for spans].
+[cite/t:@War23] \TODO[describes an explicit construction of identity types of pushouts. He does so by fixing an element $a_0 : A$, and then defining type families $a_0 \rightsquigarrow_{\infty} a$ and $a_0 \rightsquigarrow_{\infty} b$, such that for any $a : A$ and $b : B$, there are equivalences]
+\begin{align*}
+  (\inl(a_0) = \inl(a)) &\simeq (a_0 \rightsquigarrow_{\infty} a) \\
+  (\inl(a_0) = \inr(b)) &\simeq (a_0 \rightsquigarrow_{\infty} b).
+\end{align*}
 
-** Zigzags of sequential diagrams
+\TODO[The type families are defined by gradual approximations of the identity types, $a_0 \rightsquigarrow_t a$ and $a_0 \rightsquigarrow_{t + 1} b$. If one thinks of the pushout $\PO{S}{A}{B}$ as a coproduct $A + B$ with added "bridges" from $f(s)$ to $g(s)$, then $a_0 \rightsquigarrow_t a$ describes the type of identifications between $\inl(a_0)$ and $\inl(a)$, provided that we can pass from the $A$ component to the $B$ component and back $t$ times, and similarly for $a_0 \rightsquigarrow_{t + 1} b$. The full identity types are then constructed by removing the upper bound on the number of steps, by taking the sequential colimit.]
+
+The two type families are related --- if one can get from $\inl(a_0)$ to $\inl(f s)$ in $t$ crossings, then one can get from $\inl(a_0)$ to $\inr(g s)$ in $t + 1$ crossings, and similarly in reverse. We can formally encode this relationship in a structure called a "zigzag" between sequential diagrams, from which the construction takes its name. We begin by defining general zigzags of sequential diagrams and their behavior in the colimit. Then we define the type families of approximations of identity types, and a zigzag between them. At last, we present a partial proof that the construction satisfies the induction principle of identity systems of pushouts from [[#sec:identity-systems]]. One coherence proof remains unsolved. The construction and proof of correctness are presented with emphasis on their encoding in the Agda proof assistant [cite//b:@Agda], which due to its mutually inductive nature presented challenges to termination checking and computation.
+
+** Zigzags between sequential diagrams
 :PROPERTIES:
 :CUSTOM_ID: sec:zigzags
 :END:
 
 #+begin_defn
-\TODO[Zigzags].
+Given sequential diagrams $\A \judeq (A, a)$ and $\B \judeq (B, b)$, a *zigzag* between them is a quadruple $(f, g, U, L)$, where $f$ and $g$ are families of maps
+\begin{align*}
+  f &: (n : \N) \to A_n \to B_n \\
+  g &: (n : \N) \to B_n \to A_{n + 1},
+\end{align*}
+and $U$ and $L$ are families of coherences between them
+\begin{align*}
+  U &: (n : \N) \to a_n \htpy (g_n \comp f_n) \\
+  L &: (n : \N) \to b_n \htpy (f_{n + 1} \comp g_n).
+\end{align*}
 #+end_defn
+
+A zigzag $(f, g, U, L)$ can be visualized as a sequence of juxtaposed triangles
+#+begin_center
+\begin{tikzcd}
+  A_0 \arrow[rr, "a_0"]
+  \arrow[dr, "f_0"', ""{name=F0, anchor=center}]
+  & \arrow[d, phantom, "U_0"]
+  & A_1 \arrow[rr, "a_1"]
+  \arrow[dr, "f_1"]
+  & \arrow[d, phantom, "U_1"]
+  & A_2 \arrow[rr, "a_2"]
+  \arrow[dr, "f_2"]
+  & \arrow[d, phantom, "\cdots"]
+  & \cdots \\
+  & B_0 \arrow[rr, "b_0"']
+  \arrow[ur, "g_0"']
+  & \arrow[u, phantom, "L_0"]
+  & B_1 \arrow[rr, "b_1"']
+  \arrow[ur, "g_1"']
+  & \arrow[u, phantom, "L_1"]
+  & B_2 \arrow[rr, "b_2"']
+  && \cdots.
+\end{tikzcd}
+#+end_center
+
+By forgetting the first triangle and turning the figure upside down, we get a new zigzag, this time between $\B$ and the shift $\A[1]$. This new zigzag is called a half-shift.
+
+#+begin_constr
+Given sequential diagrams $\A \judeq (A, a)$ and $\B \judeq (B, b)$, and a zigzag $z \judeq (f, g, U, L)$ between them, construct the *half-shift* of $z$ as the zigzag $(g, f', L, U')$ between $\B$ and $\A[1]$, where
+\begin{alignat*}{2}
+  &g &&: (n : \N) \to B_n \to A_{n + 1} \\
+  &f' \defeq (\lambda n \to f_{n + 1}) &&: (n : \N) \to A_{n + 1} \to B_{n + 1} \\
+  &L &&: (n : \N) \to b_n \htpy (f'_n \comp g_n) \\
+  &U' \defeq (\lambda n \to U_{n + 1}) &&: (n : \N) \to a_{n + 1} \htpy (g_{n + 1} \comp f'_n).
+\end{alignat*}
+#+end_constr
+
+#+begin_remark
+Half-shifts of zigzags provide a symmetry of the downward-going $f$ maps and upward-going $g$ maps. We exploit this symmetry in constructions and lemmas to follow, by formulating them for the downwards direction, and then applying them to the half-shift of a zigzag to get the constructions for the upward direction.
+#+end_remark
+
+Repeating a half-shift twice gives a full shift, which shifts all the components by one.
+
+#+begin_constr
+Given a zigzag $z \judeq (f, g, U, L)$ between the sequential diagrams $\A$ and $\B$, define the *full shift* of $z$, denoted $z[1]$, as the zigzag between $\A[1]$ and $\B[1]$ obtained by taking the half-shift of the half-shift of $z$. Explicitly, it consists of the components $(f', g', U', L')$, where
+\begin{alignat*}{2}
+  &f' \defeq (\lambda n \to f_{n + 1}) &&: (n : \N) \to A_{n + 1} \to B_{n + 1} \\
+  &g' \defeq (\lambda n \to g_{n + 1}) &&: (n : \N) \to B_{n + 1} \to A_{n + 2} \\
+  &U' \defeq (\lambda n \to U_{n + 1}) &&: (n : \N) \to a_{n + 1} \htpy (g_{n + 1} \comp f_{n + 1}) \\
+  &L' \defeq (\lambda n \to L_{n + 1}) &&: (n : \N) \to b_{n + 1} \htpy (f_{n + 2} \comp g_{n + 1}).
+\end{alignat*}
+#+end_constr
+
+We can "shear" a zigzag to look at it from yet another perspective, as a morphism $F : \A \to \B$, where the necessary squares are constructed by pasting triangles. Diagrammatically, we have
+#+begin_center
+\begin{tikzcd}
+  A_0 \arrow[r, "a_0"]
+  \arrow[d, "f_0"']
+  & A_1 \arrow[r, "a_1"]
+  \arrow[d, "f_1"]
+  & \cdots
+  \arrow[d, phantom, "\cdots"] \\
+  B_0 \arrow[r, "b_0"']
+  \arrow[ur, "g_0"]
+  & B_1 \arrow[r, "b_1"']
+  & \cdots.
+\end{tikzcd}
+#+end_center
+
+This is the morphism of sequential diagrams associated to the zigzag.
+
+#+begin_constr
+Given a zigzag $z \judeq (f, g, U, L)$ between $\A$ and $\B$, construct the *associated morphism* of sequential diagrams from $\A$ to $\B$ to be the morphism $(f, H)$, where
+\begin{alignat*}{2}
+  &f &&: (n : \N) \to A_n \to B_n \\
+  &H \defeq (L_n \rwhisk f_n) \hconcat (f_{n + 1} \lwhisk U_n^{-1}) &&: (n : \N) \to (b_n \comp f_n) \htpy (f_{n _ 1} \comp a_n).
+\end{alignat*}
+
+For sequential colimits $c : \coconeN(\A, X)$ and $c' : \coconeN(\B, Y)$, write $f_{\infty} : X \to Y$ for the induced map of colimits.
+#+end_constr
+
+By taking the associated morphism of a half-shift of a zigzag, we get the associated inverse morphism.
+
+#+begin_constr
+Given a zigzag $z$ between $\A$ and $\B$, define the *associated inverse morphism* to be the morphism $\B \to \A[1]$ associated to the half-shift of $z$.
+
+For sequential colimits $c : \coconeN(\B, Y)$ and $c' : \coconeN(\A[1], X)$, write $g_{\infty} : Y \to X$ for the induced map of colimits.
+#+end_constr
+
+It deserves the moniker "inverse", because we will show that the induced map $g_{\infty}$ is an inverse of $f_{\infty}$. The last prerequisite to showing that the induced maps are inverses is a lemma relating zigzags and the shift inclusion morphisms $\inclHomN[1]$.
+
+#+name: lemma:zigzag-htpy-incl-hom
+#+begin_lemma
+Given a zigzag between sequential diagrams $\A$ and $\B$, the inclusion morphism $\inclHomN[1] : \A \to \A[1]$ is homotopic to the composition of the associated morphism $\A \to \B$ and the inverse morphism $\B \to \A[1]$.
+#+end_lemma
+
+#+begin_proof
+Write $(f, g, U, L)$ for the zigzag, and $\A \judeq (A, a)$ and $\B \judeq (B, b)$.
+
+We need to show that the morphism
+#+begin_center
+\begin{tikzcd}
+  A_0 \arrow[r, "a_0"]
+  \arrow[d, "a_0"']
+  & A_1 \arrow[r, "a_1"]
+  \arrow[d, "a_1"]
+  & \cdots
+  \arrow[d, phantom, "\cdots"] \\
+  A_1 \arrow[r, "a_1"']
+  & A_2 \arrow[r, "a_2"']
+  & \cdots.
+\end{tikzcd}
+#+end_center
+and
+#+begin_center
+\begin{tikzcd}
+  A_0 \arrow[r, "a_0"]
+  \arrow[d, "f_0"']
+  & A_1 \arrow[r, "a_1"]
+  \arrow[d, "f_1"]
+  & \cdots
+  \arrow[d, phantom, "\cdots"] \\
+  B_0 \arrow[r, "b_0"']
+  \arrow[ur, "g_0"']
+  \arrow[d, "g_0"']
+  & B_1 \arrow[r, "b_1"']
+  \arrow[d, "g_1"]
+  & \cdots
+  \arrow[d, phantom, "\cdots"] \\
+  A_1 \arrow[r, "a_1"']
+  \arrow[ur, "f_1"']
+  & A_1 \arrow[r, "a_2"']
+  & \cdots
+\end{tikzcd}
+#+end_center
+are homotopic.
+
+The first component of the homotopy is a family of homotopies of maps $K_n : a_n \htpy g_n \comp f_n$. We take the triangles $U_n$ for the homotopies of maps. Then we need to show that the homotopies
+#+begin_center
+\begin{tikzcd}[column sep=small]
+  A_n
+  \arrow[rr, "a_n"]
+  \arrow[dd, "a_n"']
+  && A_{n + 1}
+  \arrow[dr, "f_{n + 1}"]
+  \arrow[dd, "a_{n + 1}"' near end, ""{name=A, anchor=center}] \\
+  &&& B_{n + 1}
+  \arrow[dl, "g_{n + 1}"]
+  \arrow[from=A, phantom, "U_{n + 1}"]\\
+  A_{n + 1}
+  \arrow[rr, "a_{n + 1}"']
+  \arrow[uurr, phantom, "\reflhtpy"]
+  && A_{n + 2}
+\end{tikzcd}
+and
+\begin{tikzcd}
+  A_n \arrow[r, "a_n"]
+  \arrow[d, "f_n"', ""{name=FN}]
+  \arrow[dd, bend right=60, "a_n"', ""{name=AN}]
+  & A_{n + 1}
+  \arrow[d, "f_{n + 1}", ""{name=FN1}]
+  \arrow[from=FN, phantom, "U_n^{-1}"] \\
+  B_n \arrow[r]
+  \arrow[ur]
+  \arrow[d, "g_n"', ""{name=GN}]
+  \arrow[from=AN, phantom, "U_n"]
+  \arrow[to=FN1, phantom, "L_n"]
+  & B_{n + 1}
+  \arrow[d, "g_{n + 1}", ""{name=GN1}]
+  \arrow[from=GN, phantom, "L_n^{-1}"] \\
+  A_{n + 1} \arrow[r, "a_{n + 1}"']
+  \arrow[ur]
+  \arrow[to=GN1, shift right, phantom, "U_{n + 1}"]
+  & A_{n + 2}
+\end{tikzcd}
+#+end_center
+are themselves homotopic. With some effort the pairs $U_n$ and $U_n^{-1}$, and $L_n$ and $L_n^{-1}$ cancel out, and we end up with $U_{n + 1}$ on both sides.
+#+end_proof
+
+#+begin_thm
+Consider sequential diagrams $\A$ and $\B$, their respective colimits $c : \coconeN(\A, X)$ and $c' : \coconeN(\B, Y)$, and a zigzag $z \judeq (f, g, U, L)$ between them. Then the associated morphism to $z$ induces a map $f_{\infty} : X \to Y$, and when we take $c[1] : \coconeN(\A[1], X)$ to be the colimit of $\A[1]$, the associated inverse morphism induces a map $g_{\infty} : Y \to X$. Then the two maps are mutually inverse equivalences.
+#+end_thm
+
+#+begin_proof
+We first show that with the above assumptions, $f_{\infty}$ is a section of $g_{\infty}$, \ie $g_{\infty} \comp f_{\infty} \htpy \id$. We can prove it by concatenating the following homotopies:
+\begin{alignat*}{2}
+  g_{\infty} \comp f_{\infty}
+  & \htpy (g \comp f)_{\infty} &\quad&\text{by \autoref{lemma:colim-preserves-comp}} \\
+  & \htpy (\inclHomN[1])_{\infty} &&\text{by \autoref{lemma:zigzag-htpy-incl-hom} and \autoref{lemma:colim-preserves-htpy}} \\
+  & \htpy \id &&\text{by \autoref{lemma:colim-incl-id}}
+\end{alignat*}
+
+Then consider the half-shift of $z$. The premises of the theorem are fulfilled by the sequential diagrams $\B$ and $\A[1]$, the colimits $c'$ and $c[1]$, and the half-shift. By the first half of the proof, we get that $g_{\infty}$ is a section of $f[1]_{\infty}$, in other words there is a triangle $f[1]_{\infty} \comp g_{\infty} \htpy \id$. Thus we found a section and a retraction of $g_{\infty}$, so by definition it is an equivalence. Then since $f_{\infty}$ is a section of an equivalence, it is itself an equivalence, and it is an inverse of $g_{\infty}$.
+#+end_proof
 
 ** The zigzag construction
 :PROPERTIES:
 :CUSTOM_ID: sec:zigzag-constr
 :END:
+
+\TODO[It is worth noting that Warn also described an alternative approach to the zigzag construction.]
+\TODO[Mention that there are multiple versions].
+\TODO[Mention that ours is a slight variation by switching relations for spans].
 
 #+begin_center
 \begin{tikzcd}[column sep=6em]
@@ -3014,7 +3243,7 @@ where the bottom cocone is the total cocone of $B_{\infty}$ and its induced desc
 \end{tikzcd}
 #+end_center
 
-** Proof of correctness
+** Partial proof of correctness
 :PROPERTIES:
 :CUSTOM_ID: sec:zigzag-correct
 :END:
@@ -3083,6 +3312,10 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 - [ ] Link formal statements to the formalization (fix a commit)
 - [ ] =column sep={between origins}= in wide diagrams
 - [ ] Check that there are no TODO's
+- [ ] Properly cite agda-unimath, not just with a repo link
+- [ ] Describe attachments
+- [ ] Open a PR for the zigzag construction
+- [ ] Check capitalization of autoref
 
 * Footnotes
 
@@ -3092,6 +3325,7 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 # org-latex-default-packages-alist: (("" "graphicx" t) ("" "wrapfig" nil) ("" "rotating" nil) ("normalem" "ulem" t) ("" "amsmath" t) ("" "amssymb" t) ("" "amsthm" t) ("" "capt-of" nil) ("rgb" "xcolor" nil) ("pdfa" "hyperref" nil) ("" "hyperxmp" nil) ("" "geometry" nil) ("nottoc" "tocbibind" nil) ("" "newpxtext" nil) ("" "unicode-math" nil) ("" "aliascnt") ("" "tikz-cd" t))
 # org-latex-classes: (("report" "\\documentclass{report}" ("\\chapter{%s}" . "\\chapter*{%1$s}\\addcontentsline{toc}{chapter}{%1$s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 # org-latex-reference-command: "\\autoref{%s}"
+# org-latex-prefer-user-labels: t
 # eval: (general-define-key :states 'normal :keymaps 'local "C-c C-f" #'hl-todo-next "C-c C-b" #'hl-todo-previous)
 # eval: (general-define-key :states 'insert :keymaps 'local "C-c C-." #'latex-insert-block)
 # End:
