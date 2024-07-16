@@ -206,22 +206,9 @@ DEDICATION
 :UNNUMBERED: t
 :END:
 
- Homotopy Type Theory [cite//b:@UF13] is a logical framework built on Martin-Löf's type theory and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory, in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite//b:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization". The validity of the constructions is verified by type-checking the programs.
+ Homotopy Type Theory [cite//b:@UF13] is a logical framework built on Martin-Löf's type theory [cite//b:@ML75] and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory [cite//b:@AGMV11], in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite//b:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization" [cite//b:@NPS90]. The validity of the constructions is verified by type-checking the programs.
 
- In this setting, one can define higher inductive types (HITs), by specifying both /point/ constructors, and higher /path/ constructors of the type. Homotopy pushouts are examples of HITs — given types $S, A, B$ and maps $f : S → A$, $g : S → B$, we define $\POData{f}{g}$ to be the higher inductive type with point constructors
-
- \begin{align*}
-   \constructor{inl} &: A \to \POData{f}{g} \\
-   \constructor{inr} &: B \to \POData{f}{g}
- \end{align*}
-
- and a path constructor
-
- \begin{align*}
-   \constructor{glue} : (s : S) \to \constructor{inl}(f s) =_{\POData{f}{g}} \constructor{inr}(g s)
- \end{align*}
-
- This work focuses on homotopy pushouts \mdash specifically we provide an exposition and formalization of the descent property and flattening lemma, and use the built infrastructure to formally prove correctness of Wärn's zigzag construction of identity types of pushouts.
+ This work focuses on homotopy pushouts --- specifically we provide an exposition and formalization of the descent property [cite//b:@Rij19] and flattening lemma [cite//b:@Bru16], and use the built infrastructure to formally prove correctness of Wärn's zigzag construction of identity types of pushouts [cite//b:@War23].
 
  \TODO[We build more infrastructure than strictly necessary for sequential colimits, since we anticipate it will be useful when formalizing applications of the zigzag construction. The formalized material comes from SvDR20, and as a byproduct we started an effort to collect pages for formalization of results from the literature. Even though it is not of mathematical nature, it is relevant to the formalization aspect, as it builds more documentation, makes the development accessible, and sets an example for beginning formalizers].
 
@@ -267,10 +254,15 @@ For every type $A$, type family $B : A \to \UU$, two elements $x, y : A$ and an 
 \TODO[transport is equiv-eq(ap)].
 #+end_lemma
 
+The following is a variation of the encode-decode method due to [cite/t:@LS13]
 #+NAME: lemma:fundamental-theorem-id
 #+ATTR_LATEX: :options [Fundamental theorem of identity types]
 #+begin_lemma
 \TODO[Fundamental theorem of identity types]
+#+end_lemma
+
+#+begin_lemma
+\TODO[SIP] [cite/t:@Acz12]
 #+end_lemma
 
 #+NAME: lemma:3for2-equiv
@@ -1457,7 +1449,7 @@ Unfolding the data of the equivalence, we get
   e_S &: (s : S) (p : i a_0 = i(f s)) \to e_B(g s, p \concat (H s)) = P_S(s, e_A(f s, p)).
 \end{align*}
 
-** van Kampen squares
+** COMMENT van Kampen squares
 
 \TODO[Should I finish this section? It gets wishy-washy kinda quickly].
 
@@ -3845,7 +3837,7 @@ The thesis also does not attempt to formalize applications of the zigzag constru
 Attachments consist of Git patch files, most of which were submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
 
 - {{{PR(535,refactor-descent-circle)}}}
-  updates formalization of the descent property of the circle to be consistent with its description in [cite:@Rij22].
+  updates formalization of the descent property of the circle to be consistent with its description in [cite//b:@Rij22].
 - {{{PR(709,descent-circle)}}}
   documents the above and extends the formalization with characterization of other kinds of type families over the circle.
 - {{{PR(724,foundation-precomp-concat-squares)}}}
@@ -3923,7 +3915,7 @@ Attachments consist of Git patch files, most of which were submitted as pull req
 - [ ] Make the first part of Pushouts a subsection, add section intro
 
 * Footnotes
-[fn:2] Since the types $A$, $B$ and $S$ can all live in different universes, we also formally have to raise the identity type and the empty type to their smallest universe containing all of them. This is done in the formalization, but it is omitted from the thesis text. 
+[fn:2] Since the types $A$, $B$ and $S$ can all live in different universes, we also formally have to raise the identity type and the empty type to the smallest universe containing all of them. This is done in the formalization, but it is omitted from the thesis text. 
 
 [fn:1] There is a slight inaccuracy caused by universe levels --- the type families $P_A$, $P_B$ and $P_S$ should be allowed to range over different universes $\UU$, $\UV$, $\UW$. This can be formally rectified by appropriately raising to the common universe $\UU \sqcup \UV \sqcup \UW$.
 
