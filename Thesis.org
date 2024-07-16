@@ -3842,32 +3842,56 @@ The thesis also does not attempt to formalize applications of the zigzag constru
 \appendix
 * List of attachments
 
-Attachments consist of Git patch files, submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
+Attachments consist of Git patch files, most of which were submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
 
 - {{{PR(535,refactor-descent-circle)}}}
+  updates formalization of the descent property of the circle to be consistent with its description in [cite:@Rij22].
 - {{{PR(709,descent-circle)}}}
+  documents the above and extends the formalization with characterization of other kinds of type families over the circle.
 - {{{PR(724,foundation-precomp-concat-squares)}}}
+  shows commutativity of pasting and exponentiation of commuting squares.
 - {{{PR(725,foundation-horizontal-paste-pushouts)}}}
+  formalizes horizontal pasting of pushouts squares.
 - {{{PR(755,foundation-vertical-paste-pushouts)}}}
+  formalizes vertical pasting of pushouts squares.
 - {{{PR(758,foundation-unpaste-pushouts)}}}
+  formalizes the inverse direction of pasting properties of pushout squares.
 - {{{PR(764,flattening-pushouts-family)}}}
+  formalizes the flattening lemma for pushouts, without descent data.
 - {{{PR(792,coequalizers)}}}
+  introduces coequalizers to the extent described in the thesis.
 - {{{PR(816,flattening-pushouts-descent-data)}}}
+  formalizes the flattening lemma for pushouts, using descent data.
 - {{{PR(831,flattening-coequalizers)}}}
+  refactors the flattening lemma for coequalizers to be derived from the flattening lemma for pushouts.
 - {{{PR(841,sequential-colimits)}}}
+  defines and documents basic infrastructure of sequential diagrams and their colimits in terms of universal properties.
 - {{{PR(919,functoriality-sequential-colimits)}}}
+  introduces commuting prisms and formalizes functoriality of taking the standard sequential colimit, to the extent described in the thesis.
 - {{{PR(972,flattening-sequential-colimits-family)}}}
+  formalizes the flattening lemma for sequential colimits, without descent data.
 - {{{PR(978,refactor-functoriality-sequential-colimits)}}}
+  generalizes functoriality of sequential colimits from only the standard ones to arbitrary cocones satisfying the universal property.
 - {{{PR(988,refactor-lifts-families)}}}
+  refactors and documents formalization of lifts of families of elements, which underpin the equivalence of the dependent and non-dependent pullback properties of pushouts.
 - {{{PR(1070,shifts-sequential-colimits)}}}
+  formalizes shifts of sequential diagrams and related concepts, and its preservation of sequential colimits.
 - {{{PR(1098,refactor-coequalizers)}}}
+  introduces infrastructure for double arrows, and adopts coequalizers to use it.
 - {{{PR(1109,flattening-sequential-colimits-descent-data)}}}
+  formalizes descent data over sequential diagrams and the flattening lemma for sequential colimits, using descent data.
 - {{{PR(1117,equivalences-sequential-comp)}}}
+  formalizes the fact that equivalences are closed under sequential composition.
 - {{{PR(1129,zigzags-sequential-diagrams)}}}
-- {{{PR(1140,descent-coequalizers)}}}
+  formalizes zigzags of sequential diagrams, to the extent described in the thesis.
 - {{{PR(1145,descent-pushouts)}}}
+  refactors, extends and documents the descent property of pushouts.
 - {{{PR(1148,characterization-families-pushouts)}}}
+  characterizes families of functions and families of equivalences over pushouts, and the family of based identity types.
 - {{{PR(1150,identity-systems-descent-pushouts)}}}
+  formalizes the induction principle of identity types of pushouts, using descent data.
+- =zigzag-construction-identity-types.patch=
+  formalizes the zigzag construction and its partial proof of correctness, to the extent of the thesis.
 
 
 * COMMENT Battle plan
@@ -3890,8 +3914,8 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 - [ ] =column sep={between origins}= in wide diagrams
 - [ ] Check that there are no TODO's
 - [ ] Properly cite agda-unimath, not just with a repo link
-- [ ] Describe attachments
-- [ ] Open a PR for the zigzag construction
+- [X] Describe attachments
+- [X] +Open a PR for the zigzag construction+ included as an independent patch
 - [ ] Check capitalization of autoref
 - [ ] Cite Brunerie's thesis for the flattening lemma
 - [ ] Cite Egbert's thesis for descent
