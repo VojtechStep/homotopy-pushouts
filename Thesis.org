@@ -69,6 +69,8 @@
 #+LATEX_HEADER: \DeclareMathOperator{\runithtpy}{runit-htpy}
 
 #+LATEX_HEADER: \newcommand{\N}{\mathbb{N}}
+#+LATEX_HEADER: \newcommand{\0}{\mathbb{0}}
+#+LATEX_HEADER: \newcommand{\1}{\mathbb{1}}
 
 # Products
 #+LATEX_HEADER: \DeclareMathOperator{\pr}{pr}
@@ -76,6 +78,7 @@
 # Pushouts/coproducts
 #+LATEX_HEADER: \DeclareMathOperator{\inl}{inl}
 #+LATEX_HEADER: \DeclareMathOperator{\inr}{inr}
+#+LATEX_HEADER: \DeclareMathOperator{\glue}{glue}
 #+LATEX_HEADER: \newcommand{\codiag}{\nabla}
 #+LATEX_HEADER: \newcommand{\coprodM}[2]{\left[#1, #2\right]}
 #+LATEX_HEADER: \DeclareMathOperator{\cocone}{cocone}
@@ -95,6 +98,7 @@
 #+LATEX_HEADER: \newcommand{\POData}[2]{\typeformer{Pushout}\;#1\;#2}
 #+LATEX_HEADER: \newcommand{\PO}[3]{#2 \sqcup_{#1} #3}
 #+LATEX_HEADER: \renewcommand{\S}{\mathcal{S}}
+#+LATEX_HEADER: \newcommand{\T}{\mathcal{T}}
 
 # Coequalizers
 #+LATEX_HEADER: \newcommand{\D}{\mathcal{D}}
@@ -137,6 +141,12 @@
 #+LATEX_HEADER: \newcommand{\evreflidsystemDD}{\term{ev-refl-id-system-DD}}
 #+LATEX_HEADER: \newcommand{\indidsystemDD}{\term{ind-Q}}
 
+# Zigzag construction
+#+LATEX_HEADER: \DeclareMathOperator{\PInf}{P^{\infty}}
+#+LATEX_HEADER: \DeclareMathOperator{\reflinf}{\refl_{\infty}}
+#+LATEX_HEADER: \newcommand{\concatInf}[1]{#1 \concat_{\infty}}
+
+
 # Title page
 #+begin_export latex
 \def\Department{Department of Algebra}
@@ -161,19 +171,28 @@ DEDICATION
 \newaliascnt{corol}{thm}
 \newtheorem{corol}[corol]{Corollary}
 \aliascntresetthe{corol}
+% I was really hoping to get away without this one...
+\newaliascnt{conj}{thm}
+\newtheorem{conj}[conj]{Conjecture}
+\aliascntresetthe{conj}
 
 \theoremstyle{definition}
-\newtheorem{defn}{Definition}[section]
+\newaliascnt{defn}{thm}
+\newtheorem{defn}[defn]{Definition}
+\aliascntresetthe{defn}
 \newaliascnt{constr}{defn}
 \newtheorem{constr}[constr]{Construction}
 \aliascntresetthe{constr}
 
 \theoremstyle{remark}
-\newtheorem{remark}{Remark}
+\newaliascnt{remark}{thm}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
 
 \def\thmautorefname{Theorem}
 \def\lemmaautorefname{Lemma}
 \def\corolautorefname{Corollary}
+\def\conjautorefname{Conjecture}
 \def\defnautorefname{Definition}
 \def\constructorautorefname{Construction}
 \def\chapterautorefname{Chapter}
@@ -672,10 +691,10 @@ We write $(e_A, e_B, e_S) : (P_A, P_B, P_S) \simeq (Q_A, Q_B, Q_S)$.
 
 #+attr_latex: [Uniqueness of descent data]
 #+begin_thm
-Consider a span diagram $\S \judeq (f, g)$ and a pushout cocone $c \judeq (i, j, H)$ on $X$. Then for any descent data $(P_A, P_B, P_S)$ over $\S$, the type of type families $P : X \to \UU$ equipped with equivalences
+Consider a span diagram $\S \judeq (f, g)$ and a pushout cocone $c \judeq (i, j, H)$ on $X$. Then for any descent data $(P_A, P_B, P_S)$ over $\S$, the type of type families $P : X \to \UU$ equipped with an equivalence of descent data $\ddFam_c(P) \simeq (P_A, P_B, P_S)$ is contractible. In other words, there is a unique quadruple $(P, e_A, e_B, e_S)$ consisting of a type family $P : X \to \UU$, equivalences
 \begin{align*}
   e_A : (a : A) \to P(i a) \simeq P_A(a) \\
-  e_B : (b : B) \to P(j b) \simeq P_B(b)
+  e_B : (b : B) \to P(j b) \simeq P_B(b),
 \end{align*}
 and a family of coherences $e_s$
 #+begin_center
@@ -684,11 +703,11 @@ and a family of coherences $e_s$
   P(j (g s)) \arrow[r, "e_B(g s)"'] & P_B(g s)
 \end{tikzcd}
 #+end_center
-indexed by $s : S$, is contractible.
+indexed by $s : S$.
 #+end_thm
 
 #+begin_proof
-The type of quadruples $(P, e_A, e_B, e_S)$ is exactly the type of type families $P : X \to \UU$ equipped with an equivalence $(e_A, e_B, e_S) : \ddFam_c(P) \simeq (P_A, P_B, P_S)$. Equivalences of descent data characterize identifications of descent data, so the second part corresponds to an identification $\ddFam_c(P) = (P_A, P_B, P_S)$. Since contractibility is preserved by equivalences, it suffices to show that the type $\Sigma (P : X \to \UU). (\ddFam_c(P) = (P_A, P_B, P_S))$ is contractible. But that is exactly the type of fibers of $\ddFam_c$ over $(P_A, P_B, P_S)$, which are contractible on account of $\ddFam_c$ being an equivalence.
+Equivalences of descent data characterize identifications of descent data, so the type of type families $P : X \to \UU$ equipped with an equivalence \linebreak ${\ddFam_c(P) \simeq (P_A, P_B, P_S)}$ is equivalent to the type of type families $P : X \to \UU$ with an identification $\ddFam_c(P) = (P_A, P_B, P_S)$. Since contractibility is preserved by equivalences, it suffices to show that the latter type is contractible. But that is exactly the type of fibers of $\ddFam_c$ over $(P_A, P_B, P_S)$, which are contractible on account of $\ddFam_c$ being an equivalence.
 #+end_proof
 
 When relating concepts from the world of type families with concepts from the world of descent data, it can be beneficial to be parametric over the data of a type family $P$ and its "corresponding descent data", meaning some descent data $(P_A, P_B, P_S)$ which is equivalent to the descent data induced by $P$. Of course, by the descent theorem this data is completely determined by either $P$ or $(P_A, P_B, P_S)$ up to identification, but this level of generality allows users to provide their own equivalences for potentially better computational properties. We introduce a shorthand notation.
@@ -1388,6 +1407,7 @@ By [[lemma:fam-with-dd-id]] and [[lemma:is-id-system-DD-is-id-system]], the desc
 
 The induction principle of identity systems is stated in terms of an evaluation map having a section, which makes it consistent with statements of other induction principles in Homotopy Type Theory. However, the following lemma shows that the condition on the converse map of being a section is redundant.
 
+#+name: lemma:identity-system-ind-singleton
 #+begin_lemma
 Consider a span diagram $\S$ and its pushout cocone $c$ on $X$. To show that $(P_A, P_B, P_S)$ is an identity system at $p₀ : P_A(a_0)$, it suffices to provide a map
 \begin{displaymath}
@@ -1410,6 +1430,7 @@ $e^Q_A ((a_0, p_0), q_0): Q_{\Sigma A} (a_0, p_0)$.
 Note that the pushout $c$ is not used in the statement of the lemma. We include it as a parameter to avoid assuming existence of all pushouts.
 #+end_remark
 
+#+name: thm:unique-uniqueness-id-system
 #+begin_thm
 Consider a span diagram $\S$, a point $a_0 : A$, and a pushout cocone $c$. For any identity system $(P_A, P_B, P_S)$ at $p_0 : P_A(a_0)$, there is a unique equivalence of descent data
 \begin{displaymath}
@@ -2180,6 +2201,7 @@ using the universal property of $c$, as the map taking a morphism $f : \A \to \B
 We often write $f_{\infty} : X \to Y$ for the map induced by a morphism $f : \A \to \B$.
 #+end_constr
 
+#+name: lemma:prism-hom-seq-diag
 #+begin_lemma
 The map $f_{\infty}$ fits into commuting squares
 #+begin_center
@@ -2993,7 +3015,7 @@ where the bottom cocone is the total cocone of $B_{\infty}$ and its induced desc
 
 \TODO[The type families are defined by gradual approximations of the identity types, $a_0 \rightsquigarrow_t a$ and $a_0 \rightsquigarrow_{t + 1} b$. If one thinks of the pushout $\PO{S}{A}{B}$ as a coproduct $A + B$ with added "bridges" from $f(s)$ to $g(s)$, then $a_0 \rightsquigarrow_t a$ describes the type of identifications between $\inl(a_0)$ and $\inl(a)$, provided that we can pass from the $A$ component to the $B$ component and back $t$ times, and similarly for $a_0 \rightsquigarrow_{t + 1} b$. The full identity types are then constructed by removing the upper bound on the number of steps, by taking the sequential colimit.]
 
-The two type families are related --- if one can get from $\inl(a_0)$ to $\inl(f s)$ in $t$ crossings, then one can get from $\inl(a_0)$ to $\inr(g s)$ in $t + 1$ crossings, and similarly in reverse. We can formally encode this relationship in a structure called a "zigzag" between sequential diagrams, from which the construction takes its name. We begin by defining general zigzags of sequential diagrams and their behavior in the colimit. Then we define the type families of approximations of identity types, and a zigzag between them. At last, we present a partial proof that the construction satisfies the induction principle of identity systems of pushouts from [[#sec:identity-systems]]. One coherence proof remains unsolved. The construction and proof of correctness are presented with emphasis on their encoding in the Agda proof assistant [cite//b:@Agda], which due to its mutually inductive nature presented challenges to termination checking and computation.
+The two type families are related --- if one can get from $\inl(a_0)$ to $\inl(f s)$ in $t$ crossings, then one can get from $\inl(a_0)$ to $\inr(g s)$ in $t + 1$ crossings, and similarly in reverse. We can formally encode this relationship in a structure called a "zigzag" between sequential diagrams. We begin by defining general zigzags of sequential diagrams and their behavior in the colimit. Then we define the type families of approximations of identity types, and a zigzag between them. At last, we present a partial proof that the construction satisfies the induction principle of identity systems of pushouts from [[#sec:identity-systems]]. One coherence proof remains unsolved. The construction and proof of correctness are presented with emphasis on their encoding in the Agda proof assistant [cite//b:@Agda], which due to its mutually inductive nature presented challenges to termination checking and computation.
 
 ** Zigzags between sequential diagrams
 :PROPERTIES:
@@ -3191,6 +3213,7 @@ and
 are themselves homotopic. With some effort the pairs $U_n$ and $U_n^{-1}$, and $L_n$ and $L_n^{-1}$ cancel out, and we end up with $U_{n + 1}$ on both sides.
 #+end_proof
 
+#+name: thm:equiv-zigzag
 #+begin_thm
 Consider sequential diagrams $\A$ and $\B$, their respective colimits $c : \coconeN(\A, X)$ and $c' : \coconeN(\B, Y)$, and a zigzag $z \judeq (f, g, U, L)$ between them. Then the associated morphism to $z$ induces a map $f_{\infty} : X \to Y$, and when we take $c[1] : \coconeN(\A[1], X)$ to be the colimit of $\A[1]$, the associated inverse morphism induces a map $g_{\infty} : Y \to X$. Then the two maps are mutually inverse equivalences.
 #+end_thm
@@ -3207,28 +3230,32 @@ We first show that with the above assumptions, $f_{\infty}$ is a section of $g_{
 Then consider the half-shift of $z$. The premises of the theorem are fulfilled by the sequential diagrams $\B$ and $\A[1]$, the colimits $c'$ and $c[1]$, and the half-shift. By the first half of the proof, we get that $g_{\infty}$ is a section of $f[1]_{\infty}$, in other words there is a triangle $f[1]_{\infty} \comp g_{\infty} \htpy \id$. Thus we found a section and a retraction of $g_{\infty}$, so by definition it is an equivalence. Then since $f_{\infty}$ is a section of an equivalence, it is itself an equivalence, and it is an inverse of $g_{\infty}$.
 #+end_proof
 
-** The zigzag construction
+** The zigzag construction of identity types
 :PROPERTIES:
 :CUSTOM_ID: sec:zigzag-constr
 :END:
 
-\TODO[It is worth noting that Warn also described an alternative approach to the zigzag construction.]
-\TODO[Mention that there are multiple versions].
-\TODO[Mention that ours is a slight variation by switching relations for spans].
+The following construction is a variation of the original zigzag construction of [cite/t:@War23]. It differs from Wärn's version in representation of span diagrams --- Wärn represents span diagrams as a pair of types $A$, $B$ with a type-valued relation $R : A \to B \to \UU$. We use the same representation as in the rest of the thesis, \ie a triple of types $S$, $A$, $B$, and a pair of maps $f : S \to A$, $g : S \to B$. These two representations are equivalent: a relation $R$ can be seen as the spanning type $\Sigma (a : A) (b : B).\, R(a, b)$ with the first and second projections, and conversely a spanning type $S$ with maps $f$, $g$ can be seen as the relation $\lambda a, b \to \Sigma (s : S).\, (f s = a) \times (g s = b)$. Adapting Wärn's construction involves reconstructing a relation from a span diagram and removing contractible pairs.
 
-#+begin_center
-\begin{tikzcd}[column sep=6em]
-  \Sigma (s : S) (r : b = (g s)). \; P_B^n(b)
-  \arrow[r, "\tot(\tot(\blank \concat_n \overline{s}))"]
-  \arrow[d, "\pr_3"']
-  \arrow[rd, phantom, "\ulcorner", at end]
-  & \Sigma (s : S) (r : b = (g s)). \; P_A^n(f s)
-  \arrow[d, "\blank \concat_n' s \defeq \inr"] \\ P_B^n(b)
-  \arrow[r, "\incl_B^n \defeq \inl"']
-  & P_B^{n + 1}(b)
-\end{tikzcd}
-#+end_center
+This version of the construction is the original type-theoretic one. Wärn later published a categorical version [cite//b:@War24]. The categorical version was published \TODO[when I was already working on the infrastructure for the type-theoretic version, and it requires differnet tooling to be built]. It is also not as straightforward to recover the concrete equivalences between identity types and the resulting type families.
 
+\TODO[We assume existence of all pushouts and sequential colimits, because I don't know how to ask the user for the pushouts of inductively defined spans. The maps into pushouts are called $\inl$ and $\inr$ and the square is called $\glue$. The inclusion maps into the sequential colimit are called $\iota_n$, and the triangles are called $\kappa_n$. Name the computation rules].
+
+We begin by describing the construction informally, and then discuss necessary modifications to encode it in a proof assistant.
+
+For the remainder of this section, assume a span diagram $\S \judeq (f, g)$ and a basepoint $a_0 : A$. The data we need to construct is a pair of type families
+\begin{align*}
+  P_A^n &: A \to \UU \\
+  P_B^n &: B \to \UU
+\end{align*}
+and a pair of connecting maps
+\begin{align*}
+  \blank \concat_n s &: P_A^n(f s) \to P_B^{n + 1}(g s) \\
+  \blank \concat_n \overline{s} &: P_B^n(g s) \to P_A^n(f s),
+\end{align*}
+all of which are indexed by $n : \N$. The construction proceeds by induction on $n$, with various interdependencies between definitions of the above data.
+
+Take $P_A^0(a)$ to be the identity type $(a_0 = a)$, $P_B^0(b)$ to be the empty type $\0$, and $\blank \concat_0 \overline{s}$ to be the unique map out of the empty type[fn:2]. Note that we cannot yet define $\blank \concat_0 s$, because its intended codomain $P_B^1(g s)$ is not defined. Then construct the types $P_A^{n + 1}(a)$, $P_B^{n + 1}(b)$ and the connecting maps $\blank \concat_{n + 1} \overline{s}$ and $\blank \concat_n s$ together as the pushouts and their inclusion maps
 #+begin_center
 \begin{tikzcd}[column sep=6em]
   \Sigma (s : S) (r : a = (f s)). \; P_A^n(a)
@@ -3236,24 +3263,364 @@ Then consider the half-shift of $z$. The premises of the theorem are fulfilled b
   \arrow[d, "\pr_3"']
   \arrow[rd, phantom, "\ulcorner", at end]
   & \Sigma (s : S) (r : a = (f s)). \; P_B^{n + 1}(g s)
-  \arrow[d, "\blank \concat_n \overline{s} \defeq \inr"] \\
+  \arrow[d, "\blank \concat_{n + 1} \overline{s} \defeq \inr"] \\
   P_A^n(a)
-  \arrow[r, "\incl_A^n \defeq \inl"']
+  \arrow[r]
   & P_A^{n + 1}(a)
 \end{tikzcd}
 #+end_center
+for $a : A$, and
+#+begin_center
+\begin{tikzcd}[column sep=6em]
+  \Sigma (s : S) (r : b = (g s)). \; P_B^n(b)
+  \arrow[r, "\tot(\tot(\blank \concat_n \overline{s}))"]
+  \arrow[d, "\pr_3"']
+  \arrow[rd, phantom, "\ulcorner", very near end]
+  & \Sigma (s : S) (r : b = (g s)). \; P_A^n(f s)
+  \arrow[d, "\blank \concat_n s \defeq \inr"] \\ P_B^n(b)
+  \arrow[r]
+  & P_B^{n + 1}(b)
+\end{tikzcd}
+#+end_center
+for $b : B$. The top maps $\tot(\tot(\blank \concat_n s))$ and $\tot(\tot(\blank \concat_n \overline{s}))$ additionally transport in the type families $P_A^n$ and $P_B^n$ using the identifications $r : (a = f s)$ and $r : (b = g s)$ respectively, to make the types line up.
+
+The data dependencies resulting from these definitions are summarized in [[fig:zigzag-deps]].
+
+#+name: fig:zigzag-deps
+#+caption: Dependencies between definitions in the zigzag construction.
+#+begin_figure
+\begin{align*}
+  \cdot &\vdash P_B^0 & P_B^n, P_A^n, \blank \concat_n \overline{s} &\vdash P_B^{n + 1} \\
+  \cdot &\vdash P_A^0 & P_A^n, P_B^{n + 1}, \blank \concat_n s &\vdash P_A^{n + 1} \\
+  \cdot &\vdash \blank \concat_0 \overline{s} & P_A^{n + 1} &\vdash \blank \concat_{n + 1} \overline{s} \\
+  P_B^1(b) &\vdash \blank \concat_0 s & P_B^{n + 1} &\vdash \blank \concat_n s \\
+\end{align*}
+#+end_figure
+
+Formally, we induct on the stage $n : \N$, so we need a type family over $\N$ to induct into. Writing down the type of $\blank \concat_n s$ poses a challenge already, because to define it at stage $n$, it needs to know what the type family $P_B$ is at the next stage $n + 1$. One possibility is to not refer to its codomain as $P_B^{n + 1}(g s)$, but instead inline its definition as the appropriate pushout, because all the necessary data to construct $P_B^{n + 1}(g s)$ is available at stage $n$. Then after performing the construction, its codomain will be judgmentally equal to $P_B^{n + 1}(g s)$. This approach has two disadvantages. The first one is duplication of code --- one would need to construct the exact span diagram and its pushout to both state the type, and provide an inhabitant of one of its components. Additionally, the code for the definition of the cases $\blank \concat_0 s$ and $\blank \concat_{n + 1} s$ would be identical. The other issue is computational: in contrast to $\blank \concat_n \overline{s}$, the map $\blank \concat_n s$ is defined as the right inclusion map of a pushout at every stage $n$. But this is invisible to computation, because it is defined together with the other data by induction on $n$, so the definition only computes when it is applied to either of the constructors $0$ or $n' + 1$.
+
+An alternative definition of the type family removes the $\blank \concat_n s$ component altogether. In the construction itself it is only used to define $P_A^{n + 1}$, where it can be replaced by a direct reference to the right inclusion map of the pushout $P_B^{n + 1}(g s)$, which is already defined by the time we need to define $P_A^{n + 1}$. Then $\blank \concat_n s$ can be defined after the construction as the right inclusion map at every stage, without induction, removing code duplication and giving it the right computational behavior. We also want to refer to the span diagrams defining $P_B^{n + 1}$ and $P_A^{n + 1}$ later in the code, hence we also remember those in the construction.
+
+#+begin_defn
+Given a natural number $n$, define the type of *zigzag construction data* at stage $n$ to be the type of quadruples $(P_B^n, P_A^n, \blank \concat_n \overline{s}, D)$, where
+\begin{align*}
+  P_B^n &: B \to \UU \\
+  P_A^n &: A \to \UU
+\end{align*}
+are type families,
+\begin{displaymath}
+  \blank \concat_n \overline{s} : P_B^n(g s) \to P_A^n(f s)
+\end{displaymath}
+is a family of map indexed by $s : S$, and $D$ is an element of the unit type if $n = 0$, or of the type of pairs $(\T_B^n, \T_A^n)$ where $\T_B^n$ is a family of span diagrams indexed by $B$, and $\T_A^n$ is a family of span diagrams indexed by $A$ if $n$ is a successor.
+#+end_defn
+
+This type can be inhabited for all $n : \N$, using the construction described above.
+
+#+begin_constr
+Construct an inhabitant of the type of zigzag construction data for every stage $n$ by induction.
+
+For the zero case, use
+\begin{alignat*}{3}
+  &P_B^0 \defeq (\lambda b \to \0) &&: B \to \UU \\
+  &P_A^0 \defeq (\lambda a \to (a_0 = a)) &&: A \to \UU \\
+  &\blank \concat_n \overline{s} \defeq \term{ex-falso} &&: P_B^0(g s) \to P_A^0(f s) \\
+  &D^0 \defeq \star &&: \1.
+\end{alignat*}
+
+For the successor case $n + 1$, first construct the families of span diagrams $\T_B^{n + 1}$. For an element $b : B$, define $\T_B^{n + 1}(b)$ to be the span diagram
+#+begin_center
+\begin{tikzcd}
+  P_B^n(b)
+  & \Sigma (s : S) (r : b = g s).\, P_B^n(b)
+  \arrow[l, "\pr_3"']
+  \arrow[r, "\varphi"]
+  & \Sigma (s : S) (r : b = g s). \, P_A^n(f s),
+\end{tikzcd}
+#+end_center
+where $\varphi$ sends $(s, r, p)$ to $(s, r, (\tr_{P_B^n}(r, p)) \concat_n \overline{s})$. Take $P_B^{n + 1}(b)$ to be the standard pushout of this diagram. Analogously, for an element $a : A$, define $\T_A^{n + 1}(a)$ to be the span diagram
+#+begin_center
+\begin{tikzcd}
+  P_A^n(a)
+  & \Sigma (s : S) (r : a = f s).\, P_A^n(a)
+  \arrow[l, "\pr_3"']
+  \arrow[r, "\psi"]
+  & \Sigma (s : S) (r : a = f s). \, P_B^{n + 1}(g s)
+\end{tikzcd}
+#+end_center
+where the map $\psi$ takes $(s, r, p)$ to $(s, r, \inr(s, \refl, \tr_{P_A^n}(r, p)))$, using the right inclusion $\inr$ into the pushout $P_B^{n + 1}(g s)$. Then define $P_A^{n + 1}(a)$ to be the standard pushout of $\T_A^{n + 1}(a)$. Finally, define $p \concat_{n + 1} \overline{s}$ to be $\inr(s, \refl, p)$ using the right inclusion map into $P_A^{n + 1}(f s)$.
+#+end_constr
+
+We keep using the names $P_B^n$, $P_A^n$, $\blank \concat_n s$, $\T_B^n$ and $\T_A^n$ for the corresponding elements of this canonical construction. Note that the span diagrams $\T_B^n(b)$ and $\T_A^n(a)$ are not defined when $n$ is zero; they are the defining span diagrams of $P_B^n(b)$ and $P_A^n(a)$, respectively, which are only pushouts in the successor case.
+
+#+begin_constr
+For every stage $n : \N$ and element $s : S$, define the map
+\begin{displaymath}
+  \blank \concat_n s : P_A^n(f s) \to P_B^{n + 1}(g s)
+\end{displaymath}
+to send $p$ to $\inr(s, \refl, p)$, where $\inr$ is the right inclusion of the defining pushout of $P_B^{n + 1}(g s)$.
+#+end_constr
+
+We may also construct the sequential diagrams of approximations of the type families $(\inl(a_0) = \inr(b))$ and $(\inl(a_0) = \inl(a))$.
+
+#+begin_constr
+Given an element $b : B$, define the sequential diagram $P_B^{\bullet}(b)$ to be the diagram
+#+begin_center
+\begin{tikzcd}
+  \0
+  \arrow[r, "\incl_B^0"]
+  & P_B^1(b)
+  \arrow[r, "\incl_B^1"]
+  & P_B^2(b)
+  \arrow[r, "\incl_B^2"]
+  & \cdots,
+\end{tikzcd}
+#+end_center
+where the maps $\incl_B^n$ are the left inclusions $\inl$ of the pushouts defining $P_B^{n + 1}(b)$.
+#+end_constr
+
+#+begin_constr
+Given an element $a : A$, define the sequential diagram $P_A^{\bullet}(a)$ to be the diagram
+#+begin_center
+\begin{tikzcd}
+  (a_0 = a)
+  \arrow[r, "\incl_A^0"]
+  & P_A^1(a)
+  \arrow[r, "\incl_A^1"]
+  & P_A^2(a)
+  \arrow[r, "\incl_A^2"]
+  & \cdots,
+\end{tikzcd}
+#+end_center
+where the maps $\incl_A^n$ are the left inclusions $\inl$ of the pushouts defining $P_A^{n + 1}(a)$.
+#+end_constr
+
+\TODO[While we define the full sequential diagram starting with $P_B^0(b)$, we only do so for uniformity of the zigzag construction. This way exactly the type families with a non-zero index are pushouts. When working with the construction we drop the first vertex, and compute only with $P_B^{n + 1}(b)$, which are all pushouts].
+
+When constrained to the sequential diagrams $P_B^{\bullet}(g s)$ and $P_A^{\bullet}(f s)$, those sequential diagrams admit a zigzag between them.
+
+#+name: constr:zigzag-zigzag
+#+begin_constr
+Given an element $s : S$, construct the zigzag $Z$ between $P_A^{\bullet}(f s)$ and the shift $P_B^{\bullet}(g s)[1]$ as
+#+begin_center
+\begin{tikzcd}[column sep=tiny]
+  (a_0 = f s) \arrow[rr, "\incl_A^0"]
+  \arrow[dr, "\blank \concat_0 s"']
+  && P_A^1(f s) \arrow[rr, "\incl_A^1"]
+  \arrow[dr, "\blank \concat_1 s"]
+  && P_A^2(f s) \arrow[rr, "\incl_A^2"]
+  \arrow[dr, "\blank \concat_2 s"]
+  && \cdots \\
+  & P_B^1(g s) \arrow[rr, "\incl_B^1"']
+  \arrow[ur, "\blank \concat_1 \overline{s}"']
+  && P_B^2(g s) \arrow[rr, "\incl_B^2"']
+  \arrow[ur, "\blank \concat_2 \overline{s}"']
+  && P_B^3(g s) \arrow[rr, "\incl_B^3"']
+  && \cdots,
+\end{tikzcd}
+#+end_center
+where the triangles are the gluing homotopies
+\begin{align*}
+  \glue_A^n(s, \refl) &: \incl_A^n \htpy (\blank \concat_n s) \concat_{n + 1} \overline{s} \\
+  \glue_B^n(s, \refl) &: \incl_B^n \htpy (\blank \concat_n \overline{s}) \concat_{n} s.
+\end{align*}
+of the defining pushouts of $P_A^{n + 1}(f s)$ and $P_B^{n + 1}$, respectively.
+#+end_constr
+
+#+begin_constr
+Define the *zigzag descent data* $(P_A^{\infty}, P_B^{\infty}, \blank \concat_{\infty} s)$, where the type families are constructed by taking sequential colimits of $P_A^{\bullet}(a)$ and $P_B^{\bullet}(b)[1]$, respectively, and the family of equivalences
+\begin{displaymath}
+  \blank \concat_{\infty} s : P_A^{\infty}(f s) \simeq P_B^{\infty}(g s)
+\end{displaymath}
+is induced by the zigzag between $P_A^{\infty}(f s)$ and $P_B^{\infty}(g s)$ for an element $s : S$, using [[thm:equiv-zigzag]].
+
+Additionally, this descent data is pointed with $\iota_0(\refl_{a_0}) : P_A^\infty(a_0)$, which we call $\refl_{\infty}$.
+#+end_constr
+
+#+begin_lemma
+For every element $s : S$, there is a family of commuting square of maps indexed by $n : \N$
+#+begin_center
+\begin{tikzcd}
+  P_A^n(f s)
+  \arrow[r, "\blank \concat_n s"]
+  \arrow[d, "\iota_A^n"']
+  & P_B^{n + 1}(g s)
+  \arrow[d, "\iota_B^{n + 1}"] \\
+  P_A^{\infty}(f s)
+  \arrow[r, "\blank \concat_{\infty} s"']
+  & P_B^{\infty}(g s),
+\end{tikzcd}
+#+end_center
+call them $C^n(s)$, which fit in a commuting prism
+#+begin_center
+\begin{tikzcd}[row sep=small]
+  P_A^n(f s)
+  \arrow[dd, "\blank \concat_n s"']
+  \arrow[rr, "\incl_A^n"]
+  \arrow[dr, "\iota_A^n"', near end]
+  && P_A^{n + 1}(f s)
+  \arrow[dd, "\blank \concat_{n + 1} s"]
+  \arrow[dl, "\iota_A^{n + 1}", near end] \\
+  & P_A^{\infty}(f s) \\
+  P_B^{n + 1}(g s)
+  \arrow[rr, "\incl_B^{n + 1}", near start]
+  \arrow[dr, "\iota_B^{n + 1}"']
+  && P_B^{n + 2}(g s)
+  \arrow[dl, "\iota_B^{n + 2}"] \\
+  & P_B^{\infty}(g s)
+  \arrow[from=uu, "\blank \concat_{\infty} s", near start, crossing over]
+\end{tikzcd}
+#+end_center
+as the front squares, with the triangles being $\kappa_A^n$ and $\kappa_B^{n + 1}$, and the back square a composition of $(\glue_A^n)^{-1}$ and $\glue_B^{n + 1}$.
+#+end_lemma
+
+#+begin_proof
+The data is obtained from the morphism associated to the zigzag $Z$ using [[lemma:prism-hom-seq-diag]].
+#+end_proof
 
 ** Partial proof of correctness
 :PROPERTIES:
 :CUSTOM_ID: sec:zigzag-correct
 :END:
 
-\TODO[The objective is to show that the zigzag descent data is an identity system. To do that, assume "dependent" descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, and a point $q_0 : Q_{\Sigma A}(a_0, \iota_A^0(\refl))$ and conjure a section of $Q$. Explicitly (write out the type of a section), which in every case proceeds by induction on $P_\bullet^{\infty}$.]
+We write down a partial proof that the zigzag descent data $(P_A^{\infty}, P_B^{\infty}, \blank \concat_{\infty} s)$ is an identity system at $\reflinf$. Incompleteness of the proof is due to [[conj:zigzag-coherence]], which remains an unproven coherence condition at the time of writing.
+
+To show that the zigzag descent data is an identity system, we assume pointed descent data $Q$ over its total span diagram, and the rest of the thesis is dedicated to providing a section of $Q$.
+
+Explicitly, in the remainder of this section assume type families
+\begin{align*}
+  Q_{\Sigma A} &: (a : A) \to P_A^{\infty}(a) \to \UU \\
+  Q_{\Sigma B} &: (b : B) \to P_B^{\infty}(b) \to \UU,
+\end{align*}
+a family of equivalences
+\begin{displaymath}
+  Q_{\Sigma S} : (s : S) (p : P_A^{\infty}(a)) \to Q_{\Sigma A}(f s, p) \simeq Q_{\Sigma B}(g s, p \concat_{\infty} s),
+\end{displaymath}
+and a point $q_0 : Q_{\Sigma A}(a_0, \reflinf)$. The goal is to conjure a section, \ie define a pair of dependent functions
+\begin{align*}
+  t_A &: (a : A) (p : P_A^{\infty}(a)) \to Q_{\Sigma A}(a, p) \\
+  t_B &: (b : B) (p : P_B^{\infty}(b)) \to Q_{\Sigma B}(b, p)
+\end{align*}
+and a family of identifications
+\begin{displaymath}
+  t_S : (s : S) (p : P_A^{\infty}(f s)) \to Q_{\Sigma S}(s, p, t_A(f s, p)) = t_B(g s, p \concat_{\infty} s).
+\end{displaymath}
+We may occasionally omit some arguments when writing down expressions, and we pass freely between the curried and uncurried forms, to aid readability and clarity of intent.
+
+In each case the construction proceeds by induction on the argument $p$. By the dependent universal property of sequential colimits, it suffices to define the data
+\begin{align*}
+  t_A^n &: (a : A) (p : P_A^n(a)) \to Q_{\Sigma A}(a, \iota_A^n(p)) \\
+  K_A^n &: (a : A) (p : P_A^n(a)) \to \tr_{Q_{\Sigma A}(a)}(\kappa_A^n(p), t_A^n(a, p)) = t_A^{n + 1}(a, \incl_A^n p) \\
+  t_B^n &: (b : B) (p : P_B^n(b)) \to Q_{\Sigma B}(b, \iota_B^n(p)) \\
+  K_B^n &: (b : B) (p : P_B^n(b)) \to \tr_{Q_{\Sigma B}(b)}(\kappa_B^n(p), t_B^n(b, p)) = t_B^{n + 1}(b, \incl_B^n p)
+\end{align*}
+for the maps, and
+\begin{alignat*}{2}
+  t_S^n &: &\:&(s : S) (p : P_A^n(f s)) \to Q_{\Sigma S}(s, \iota_A^n(p), t_A(f s, \iota_A^n(p))) = t_B(g s, (\iota_A^n(p)) \concat_{\infty} s) \\
+  K_S^n &: &&(s : S) (p : P_A^n(f s)) \to \\
+  &&&\tr_{\lambda q \to (Q_{\Sigma S}(s, q, t_A(f s, q)) = t_B(g s, q \concat_{\infty} s))}(\kappa_A^n(p), t_S^n(s, p)) = t_S^{n + 1}(s, \incl_A^n p)
+\end{alignat*}
+for the coherence.
+
+We begin with the maps $t_B^n$ and $t_A^n$, which are defined together. We first present their construction informally, and then explain the modifications necessary for Agda to accept them in code.
+
+The maps $t_B^n$ and $t_A^n$ are defined by induction on $n$. In the zero case, the domain of $t_B^0(b)$ is the empty type, so it is defined by $\term{ex-falso}$. The domain of $t_A^0(a)$ is the identity type $(a_0 = a)$, and inducting on it gives us the goal of inhabiting $Q_{\Sigma A}(a_0, \iota_A^0(\refl))$, which we can do by the basepoint $q_0$. In the successor case $n + 1$, we eliminate from the pushouts $P_B^{n + 1}(b)$ and $P_A^{n + 1}(a)$, so we use the dependent universal property of pushouts. This means that we need to give definitions of the maps on point constructors and a coherence over the path constructor. Let us begin with the point constructor cases.
+
+To define $t_B^{n + 1}$, the behavior on point constructors consists of maps
+\begin{alignat*}{2}
+  &t_B^{n + 1}(b, \incl_B^n(\blank)) &&: (p : P_B^n(b)) \to Q_{\Sigma B}(b, \iota_B^{n + 1}(\incl_B^n p)) \\
+  &t_B^{n + 1}(g s, \blank \concat_n s) &&: (p : P_A^n(f s)) \to Q_{\Sigma B}(g s, \iota_B^{n + 1}(p \concat_n s)).
+\end{alignat*}
+The statement of the second function is in a form after inducting on the term \linebreak $r : b = g s$ in the context. The maps are defined by
+\begin{align*}
+  &t_B^{n + 1}(b, \incl_B^n(p)) \defeq \tr_{Q_{\Sigma B}(b)}(\kappa_B^n(p), t_B^n(b, p)) \\
+  &t_B^{n + 1}(g s, p \concat_n s) \defeq \tr_{Q_{\Sigma B}(g s)}(C^n(s, p), Q_{\Sigma S}(s, \iota_A^0(p), a, t_A^n(a, p))).
+\end{align*}
+
+Similarly for the definition of $t_A^{n + 1}$ on point constructors, we need to give
+\begin{alignat*}{2}
+  &t_A^{n + 1}(a, \incl_A^n(\blank)) &&: (p : P_A^n(a)) \to Q_{\Sigma A}(a, \iota_A^{n + 1}(\incl_A^n p)) \\
+  &t_A^{n + 1}(f s, \blank \concat_{n + 1} \overline{s}) &&: (p : P_B^{n + 1}(g s)) \to Q_{\Sigma A}(f s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})).
+\end{alignat*}
+The behavior on $\incl_A^n$ is analogous to the one of $t_B^{n + 1}$, specifically
+\begin{displaymath}
+  t_A^{n + 1}(a, \incl_A^n(p)) \defeq \tr_{Q_{\Sigma A}(a)}(\kappa_A^n(p), t_A^n(a, p)).
+\end{displaymath}
+For the second map, we would expect to use the inverse $Q_{\Sigma S}(s, \blank)^{-1}$. It isn't that straightforward, because $t_B^{n + 1}(g s, p)$ gives an element of $Q_{\Sigma B}(g s, \iota_B^{n + 1}(p))$, and $Q_{\Sigma S}(s, \blank)^{-1}$ can only undo an application of $\blank \concat_{\infty} s$ under $Q_{\Sigma B}(g s)$, not add an application of $\blank \concat_{\infty} \overline{s}$ under $Q_{\Sigma A}(f s)$. One might try to fix this by recalling that $\blank \concat_{\infty} s$ and $\blank \concat_{\infty} \overline{s}$ are inverse equivalences, and using the homotopy
+\begin{displaymath}
+  \id \htpy (\blank \concat_{\infty} \overline{s}) \concat_{\infty} s.
+\end{displaymath}
+This approach leads to complications in proving further coherences, so instead we define a helper function which we can later compute with.
+
+#+begin_constr
+For any element $s : S$ and natural number $n$, define the map
+\begin{displaymath}
+  \Phi^n(s) : (p : P_B^{n + 1}(g s)) \to Q_{\Sigma B}(g s, \iota_B^{n + 1} p) \to Q_{\Sigma B}(g s, (\iota_A^{n + 1}(p \concat_{n + 1} \overline{s})) \concat_{\infty} s)
+\end{displaymath}
+as the composition of transports
+#+begin_center
+\begin{tikzcd}
+  Q_{\Sigma B}(g s, \iota_B^{n + 1} p)
+  \arrow[d, "\tr_{Q_{\Sigma B}(g s)}(\kappa_B^{n + 1} p)"] \\
+  Q_{\Sigma B}(g s, \iota_B^{n + 2}(\incl_B^{n + 1} p))
+  \arrow[d, "{\tr_{Q_{\Sigma B}(g s, \iota_B^{n + 2}(\blank))}(\glue_B^{n + 1}(s, \refl, p))}"] \\
+  Q_{\Sigma B}(g s, \iota_B^{n + 2}((p \concat_{n + 1} \overline{s}) \concat_{n + 1} s))
+  \arrow[d, "{\tr_{Q_{\Sigma B}(g s)}(C^{n + 1}(s, p \concat_{n + 1} \overline{s}))^{-1}}"] \\
+  Q_{\Sigma B}(g s, (\iota_A^{n + 1}(p \concat_{n + 1} \overline{s})) \concat_{\infty} s).
+\end{tikzcd}
+#+end_center
+#+end_constr
+
+With this function in hand, we can define
+\begin{displaymath}
+  t_A^{n + 1}(f s, p \concat_{n + 1} \overline{s}) \defeq (Q_{\Sigma S}(s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})))^{-1}(\Phi^n(s, p, t_B^{n + 1}(g s, p))).
+\end{displaymath}
+
+\TODO
+
+#+name: conj:zigzag-coherence
+#+begin_conj
+A family of coherences $K_S$ exists.
+#+end_conj
+
+#+name: thm:is-identity-system-zigzag
+#+begin_thm
+Assuming [[conj:zigzag-coherence]] holds, the descent data ${(P_A^{\infty}, P_B^{\infty}, \blank \concat_{\infty} s)}$ is an identity system at $\refl_\infty(a_0)$.
+#+end_thm
+
+#+begin_proof
+The data $(t_A, t_B, t_S)$ form an element of $\sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, which makes $(P_A^{\infty}, P_B^{\infty}, \blank \concat_{\infty} s)$ an identity system by [[lemma:identity-system-ind-singleton]].
+#+end_proof
+
+#+begin_corol
+Assuming [[conj:zigzag-coherence]] holds, there are families of equivalences
+\begin{align*}
+  e_A : (a : A) \to (\inl(a_0) = \inl(a)) &\simeq P_A^{\infty}(a) \\
+  e_B : (b : B) \to (\inl(a_0) = \inr(b)) &\simeq P_B^{\infty}(b)
+\end{align*}
+satisfying $e_A(a_0, \refl) = \refl_{\infty}$, and for every $s : S$ a commuting square
+#+begin_center
+\begin{tikzcd}[column sep=large]
+  (\inl(a_0) = \inl(f s))
+  \arrow[r, "e_A(f s)"]
+  \arrow[d, "\blank \concat (H s)"']
+  & P_A^{\infty}(f s)
+  \arrow[d, "\blank \concat_{\infty} s"] \\
+  (\inl(a_0) = \inr(g s))
+  \arrow[r, "e_B(g s)"']
+  & P_B^{\infty}(g s).
+\end{tikzcd}
+#+end_center
+#+end_corol
+
+#+begin_proof
+By [[thm:unique-uniqueness-id-system]] and [[thm:is-identity-system-zigzag]], there is a unique equivalence of descent data $e : (I_A, I_B, I_S) \simeq (P_A^{\infty}, P_B^{\infty}, \blank \concat_{\infty} \blank)$ sending $\refl$ to $\refl_{\infty}$.
+#+end_proof
 
 * Conclusion
 
 Future work:
 - more abstract proof of the last coherence: using the calculus of dependent identifications, and/or a more general lemma about coherent sections over zigzags; although that might have limited applications
+- improve the definition of $t_A$ and $t_B$ by removing reconstructible data, similarly to how we removed $\blank \concat_n s$ from the zigzag construction data
 - formalize applications
   - some of them require connectivity results about sequential colimits
   - those in turn require the generalized flattening lemma
@@ -3316,8 +3683,13 @@ Attachments consist of Git patch files, submitted as pull requests to the {{{AU}
 - [ ] Describe attachments
 - [ ] Open a PR for the zigzag construction
 - [ ] Check capitalization of autoref
+- [ ] Cite Brunerie's thesis for the flattening lemma
+- [ ] Cite Egbert's thesis for descent
+- [ ] Try to move important ideas from remarks to section introductions
+- [ ] Make the first part of Pushouts a subsection, add section intro
 
 * Footnotes
+[fn:2] Since the types $A$, $B$ and $S$ can all live in different universes, we also formally have to raise the identity type and the empty type to their smallest universe containing all of them. This is done in the formalization, but it is omitted from the thesis text. 
 
 [fn:1] There is a slight inaccuracy caused by universe levels --- the type families $P_A$, $P_B$ and $P_S$ should be allowed to range over different universes $\UU$, $\UV$, $\UW$. This can be formally rectified by appropriately raising to the common universe $\UU \sqcup \UV \sqcup \UW$.
 
