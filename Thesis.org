@@ -3827,14 +3827,15 @@ By [[thm:unique-uniqueness-id-system]] and [[thm:is-identity-system-zigzag]], th
 
 * Conclusion
 
-Future work:
-- more abstract proof of the last coherence: using the calculus of dependent identifications, and/or a more general lemma about coherent sections over zigzags; although that might have limited applications
-- improve the definition of $t_A$ and $t_B$ by removing reconstructible data, similarly to how we removed $\blank \concat_n s$ from the zigzag construction data
-- formalize applications
-  - some of them require connectivity results about sequential colimits
-  - those in turn require the generalized flattening lemma
-  - and that needs arbitrary shifts
-- formalize categorical statement
+The goal of the thesis was to improve existing infrastructure for working with homotopy pushouts in the {{{AU}}} library, and formalize existing results from the literature. Specifically the descent property, the flattening lemma, and the induction principle of identity types of pushouts were successfully formalized, properly documented, and integrated into the library. In an attempt to formalize the zigzag construction of identity types of pushouts, infrastructure for coequalizers and sequential colimits was developed. The zigzag construction was formalized, but it has not been shown to satisfy the induction principle of identity types of pushouts. Progress was made, but one coherence condition remains unproven.
+
+**** Future work
+
+There is an obvious step to continue the presented work, which is to complete the proof of correctness of the zigzag construction. Additional insight into strategies of its proof might be necessary, for example using the calculus of dependent identifications to abstract the transports, or formulating general lemmas about type families over sequential diagrams connected by a zigzag. This abstraction has not been explored in the thesis for its perceived low applicability.
+
+The inductive definition of $d_B^n$ and $d_A^n$ could be improved by removing contractible data, \ie the right map of $d_A^n$ and the witness $R^n$.
+
+The thesis also does not attempt to formalize applications of the zigzag construction. Wärn presents truncatedness and connectivity results as applications of the construction. For reasoning about the zigzag construction, more results about sequential colimits might be necessary, particularly the full "generalized flattening lemma" [cite//b:@SvDR20]. While the paper presents a proof in homotopy type theory, it does so in a context with judgmental computation rules for sequential colimits, which are not present in our setting.
 
 #+PRINT_BIBLIOGRAPHY: :heading bibintoc
 
