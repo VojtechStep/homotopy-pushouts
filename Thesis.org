@@ -79,6 +79,7 @@
 #+LATEX_HEADER: \DeclareMathOperator{\inl}{inl}
 #+LATEX_HEADER: \DeclareMathOperator{\inr}{inr}
 #+LATEX_HEADER: \DeclareMathOperator{\glue}{glue}
+#+LATEX_HEADER: \DeclareMathOperator{\depCogap}{dep-cogap}
 #+LATEX_HEADER: \newcommand{\codiag}{\nabla}
 #+LATEX_HEADER: \newcommand{\coprodM}[2]{\left[#1, #2\right]}
 #+LATEX_HEADER: \DeclareMathOperator{\cocone}{cocone}
@@ -86,6 +87,8 @@
 #+LATEX_HEADER: \DeclareMathOperator{\depCocone}{dep-cocone}
 #+LATEX_HEADER: \DeclareMathOperator{\depCoconeMap}{dep-cocone-map}
 #+LATEX_HEADER: \DeclareMathOperator{\incl}{incl}
+#+LATEX_HEADER: \DeclareMathOperator{\exf}{ex-falso}
+#+LATEX_HEADER: \DeclareMathOperator{\psh}{pushout}
 
 # Apparently unicode-math doesn't fix \Sigma in operator font,
 # so use the "fixed" mupSigma command
@@ -301,6 +304,10 @@ If any two of the maps are equivalences, then so is the third.
 :PROPERTIES:
 :CUSTOM_ID: chap:pushouts
 :END:
+
+\TODO[Section introduction]
+
+** Universal property
 
 \TODO[Decide how to treat and write "span" vs "span diagram"].
 
@@ -3239,7 +3246,7 @@ The following construction is a variation of the original zigzag construction of
 
 This version of the construction is the original type-theoretic one. Wärn later published a categorical version [cite//b:@War24]. The categorical version was published \TODO[when I was already working on the infrastructure for the type-theoretic version, and it requires differnet tooling to be built]. It is also not as straightforward to recover the concrete equivalences between identity types and the resulting type families.
 
-\TODO[We assume existence of all pushouts and sequential colimits, because I don't know how to ask the user for the pushouts of inductively defined spans. The maps into pushouts are called $\inl$ and $\inr$ and the square is called $\glue$. The inclusion maps into the sequential colimit are called $\iota_n$, and the triangles are called $\kappa_n$. Name the computation rules].
+\TODO[We assume existence of all pushouts and sequential colimits, because I don't know how to ask the user for the pushouts of inductively defined spans. The maps into pushouts are called $\inl$ and $\inr$ and the square is called $\glue$. The pushout cocone of a span diagram $\S$ is written $\psh(\S)$. The unique map corresponding to a dependent cocone $d$ is called $\depCogap(d)$. The inclusion maps into the sequential colimit are called $\iota_n$, and the triangles are called $\kappa_n$. Name the computation rules].
 
 We begin by describing the construction informally, and then discuss necessary modifications to encode it in a proof assistant.
 
@@ -3323,7 +3330,7 @@ For the zero case, use
 \begin{alignat*}{3}
   &P_B^0 \defeq (\lambda b \to \0) &&: B \to \UU \\
   &P_A^0 \defeq (\lambda a \to (a_0 = a)) &&: A \to \UU \\
-  &\blank \concat_n \overline{s} \defeq \term{ex-falso} &&: P_B^0(g s) \to P_A^0(f s) \\
+  &\blank \concat_n \overline{s} \defeq \exf &&: P_B^0(g s) \to P_A^0(f s) \\
   &D^0 \defeq \star &&: \1.
 \end{alignat*}
 
@@ -3436,6 +3443,7 @@ is induced by the zigzag between $P_A^{\infty}(f s)$ and $P_B^{\infty}(g s)$ for
 Additionally, this descent data is pointed with $\iota_0(\refl_{a_0}) : P_A^\infty(a_0)$, which we call $\refl_{\infty}$.
 #+end_constr
 
+#+name: lemma:coherence-prism-zigzag
 #+begin_lemma
 For every element $s : S$, there is a family of commuting square of maps indexed by $n : \N$
 #+begin_center
@@ -3523,27 +3531,27 @@ for the coherence.
 
 We begin with the maps $t_B^n$ and $t_A^n$, which are defined together. We first present their construction informally, and then explain the modifications necessary for Agda to accept them in code.
 
-The maps $t_B^n$ and $t_A^n$ are defined by induction on $n$. In the zero case, the domain of $t_B^0(b)$ is the empty type, so it is defined by $\term{ex-falso}$. The domain of $t_A^0(a)$ is the identity type $(a_0 = a)$, and inducting on it gives us the goal of inhabiting $Q_{\Sigma A}(a_0, \iota_A^0(\refl))$, which we can do by the basepoint $q_0$. In the successor case $n + 1$, we eliminate from the pushouts $P_B^{n + 1}(b)$ and $P_A^{n + 1}(a)$, so we use the dependent universal property of pushouts. This means that we need to give definitions of the maps on point constructors and a coherence over the path constructor. Let us begin with the point constructor cases.
+The maps $t_B^n$ and $t_A^n$ are defined by induction on $n$. In the zero case, the domain of $t_B^0(b)$ is the empty type, so it is defined by $\exf$. The domain of $t_A^0(a)$ is the identity type $(a_0 = a)$, and inducting on it gives us the goal of inhabiting $Q_{\Sigma A}(a_0, \iota_A^0(\refl))$, which we can do by the basepoint $q_0$. In the successor case $n + 1$, we eliminate from the pushouts $P_B^{n + 1}(b)$ and $P_A^{n + 1}(a)$, so we use the dependent universal property of pushouts. This means that we need to give definitions of the maps on point constructors and a coherence over the path constructor, which defines a dependent cocone. Let us begin with the point constructor cases.
 
 To define $t_B^{n + 1}$, the behavior on point constructors consists of maps
 \begin{alignat*}{2}
-  &t_B^{n + 1}(b, \incl_B^n(\blank)) &&: (p : P_B^n(b)) \to Q_{\Sigma B}(b, \iota_B^{n + 1}(\incl_B^n p)) \\
-  &t_B^{n + 1}(g s, \blank \concat_n s) &&: (p : P_A^n(f s)) \to Q_{\Sigma B}(g s, \iota_B^{n + 1}(p \concat_n s)).
+  &\overline{t_B^{n + 1}}(b, \incl_B^n(\blank)) &&: (p : P_B^n(b)) \to Q_{\Sigma B}(b, \iota_B^{n + 1}(\incl_B^n p)) \\
+  &\overline{t_B^{n + 1}}(g s, \blank \concat_n s) &&: (p : P_A^n(f s)) \to Q_{\Sigma B}(g s, \iota_B^{n + 1}(p \concat_n s)).
 \end{alignat*}
-The statement of the second function is in a form after inducting on the term \linebreak $r : b = g s$ in the context. The maps are defined by
+We need to distinguish between $t_B^{n + 1}$ and $\overline{t_B^{n + 1}}$, because they have different computational properties. Since we work in a type theory without judgmental computation rules for pushouts, once we combine the data into the map $t_B^{n + 1}$, its behavior on path constructors will only hold up to an identification. In contrast, $\overline{t_B^{n + 1}}$ is a pair of functions which compute judgmentally, but their applications are only well-formed when they are syntactically applied to a point constructor. The statement of the second function is in a form after inducting on the term $r : b = g s$ in the context. The maps are defined by
 \begin{align*}
-  &t_B^{n + 1}(b, \incl_B^n(p)) \defeq \tr_{Q_{\Sigma B}(b)}(\kappa_B^n(p), t_B^n(b, p)) \\
-  &t_B^{n + 1}(g s, p \concat_n s) \defeq \tr_{Q_{\Sigma B}(g s)}(C^n(s, p), Q_{\Sigma S}(s, \iota_A^0(p), a, t_A^n(a, p))).
+  &\overline{t_B^{n + 1}}(b, \incl_B^n(p)) \defeq \tr_{Q_{\Sigma B}(b)}(\kappa_B^n(p), t_B^n(b, p)) \\
+  &\overline{t_B^{n + 1}}(g s, p \concat_n s) \defeq \tr_{Q_{\Sigma B}(g s)}(C^n(s, p), Q_{\Sigma S}(s, \iota_A^n(p), f s, t_A^n(f s, p))).
 \end{align*}
 
 Similarly for the definition of $t_A^{n + 1}$ on point constructors, we need to give
 \begin{alignat*}{2}
-  &t_A^{n + 1}(a, \incl_A^n(\blank)) &&: (p : P_A^n(a)) \to Q_{\Sigma A}(a, \iota_A^{n + 1}(\incl_A^n p)) \\
-  &t_A^{n + 1}(f s, \blank \concat_{n + 1} \overline{s}) &&: (p : P_B^{n + 1}(g s)) \to Q_{\Sigma A}(f s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})).
+  &\overline{t_A^{n + 1}}(a, \incl_A^n(\blank)) &&: (p : P_A^n(a)) \to Q_{\Sigma A}(a, \iota_A^{n + 1}(\incl_A^n p)) \\
+  &\overline{t_A^{n + 1}}(f s, \blank \concat_{n + 1} \overline{s}) &&: (p : P_B^{n + 1}(g s)) \to Q_{\Sigma A}(f s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})).
 \end{alignat*}
 The behavior on $\incl_A^n$ is analogous to the one of $t_B^{n + 1}$, specifically
 \begin{displaymath}
-  t_A^{n + 1}(a, \incl_A^n(p)) \defeq \tr_{Q_{\Sigma A}(a)}(\kappa_A^n(p), t_A^n(a, p)).
+  \overline{t_A^{n + 1}}(a, \incl_A^n(p)) \defeq \tr_{Q_{\Sigma A}(a)}(\kappa_A^n(p), t_A^n(a, p)).
 \end{displaymath}
 For the second map, we would expect to use the inverse $Q_{\Sigma S}(s, \blank)^{-1}$. It isn't that straightforward, because $t_B^{n + 1}(g s, p)$ gives an element of $Q_{\Sigma B}(g s, \iota_B^{n + 1}(p))$, and $Q_{\Sigma S}(s, \blank)^{-1}$ can only undo an application of $\blank \concat_{\infty} s$ under $Q_{\Sigma B}(g s)$, not add an application of $\blank \concat_{\infty} \overline{s}$ under $Q_{\Sigma A}(f s)$. One might try to fix this by recalling that $\blank \concat_{\infty} s$ and $\blank \concat_{\infty} \overline{s}$ are inverse equivalences, and using the homotopy
 \begin{displaymath}
@@ -3572,15 +3580,216 @@ as the composition of transports
 
 With this function in hand, we can define
 \begin{displaymath}
-  t_A^{n + 1}(f s, p \concat_{n + 1} \overline{s}) \defeq (Q_{\Sigma S}(s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})))^{-1}(\Phi^n(s, p, t_B^{n + 1}(g s, p))).
+  \overline{t_A^{n + 1}}(f s, p \concat_{n + 1} \overline{s}) \defeq (Q_{\Sigma S}(s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})))^{-1}(\Phi^n(s, p, t_B^{n + 1}(g s, p))).
 \end{displaymath}
 
-\TODO
+The path constructor cases will be less similar between $t_B^{n + 1}$ and $t_A^{n + 1}$. The coherence of $t_B^{n + 1}$ asks us to inhabit the type
+\begin{displaymath}
+  (p : P_B^n(g s)) \to \tr_{Q_{\Sigma B}(g s, \iota_B^{n + 1}(\blank))}(\glue_B^n(p), \overline{t_B^{n + 1}}(\incl_B^n(p))) = \overline{t_B^{n + 1}}((p \concat_n \overline{s}) \concat_n s).
+\end{displaymath}
+Here we once again need to case split on $n$. In the zero case we eliminate from $P_B^0(g s) \judeq \0$, so we inhabit the coherence by $\exf$. In the successor case, the right-hand side computes to
+\begin{displaymath}
+  \tr_{Q_{\Sigma B}(g s)}(C^{n + 1}(s, p \concat_{n + 1} \overline{s}), Q_{\Sigma S}(s, \iota_A^{n + 1}(p \concat_{n + 1} \overline {s}), t_A^{n + 1}(p \concat_{n + 1} \overline{s}))),
+\end{displaymath}
+where we can use a computation rule of $t_A^{n + 1}$ and further expand $\Phi^n$ in the resulting expression. Then the two sides are identified, because the equivalence $Q_{\Sigma S}(s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s}))$ cancels out with its inverse, and so does \linebreak $\tr_{Q_{\Sigma B}(g s)}(C^{n + 1}(s, p \concat_{n + 1} \overline{s}))$.
+
+The coherence for $t_A^{n + 1}$ has the type
+\begin{displaymath}
+  (p : P_A^n(f s)) \to \tr_{Q_{\Sigma A}(f s, \iota_A^{n + 1}(\blank))}(\glue_A^n(p), \overline{t_A^{n + 1}}(\incl_A^n(p))) = \overline{t_A^{n + 1}}((p \concat_n s) \concat_{n + 1} \overline{s}).
+\end{displaymath}
+We can expand the $\overline{t_A^{n + 1}}$, the $\Phi^n$, and also use the computation rule of $t_B^{n + 1}$ to compute $t_B^{n + 1}(p \concat_n s)$. By transposing $Q_{\Sigma S}(s, \iota_A^{n + 1}((p \concat_n s) \concat_{n + 1} \overline{s}))^{-1}$ to the other side of the identification, we see that the goal is to make the diagram
+#+begin_center
+\begin{tikzcd}[column sep=8em]
+  Q_{\Sigma A}(f s, \iota_A^n(p))
+  \arrow[r, "{Q_{\Sigma S}(s, \iota_A^n(p))}"]
+  \arrow[dd, "\tr_{Q_{\Sigma A}(f s)}(\kappa_A^n(p))"]
+  & Q_{\Sigma B}(g s, (\iota_A^n(p)) \concat_{\infty} s)
+  \arrow[d, "{\tr_{Q_{\Sigma B}(g s)}(C^n(s, p))}"']
+  \arrow[ddddl, Rightarrow, shorten=11.5em] \\
+  & Q_{\Sigma B}(g s, \iota_B^{n + 1}(p \concat_n s))
+  \arrow[d, "{\tr_{Q_{\Sigma B}(g s)}(\kappa_B^{n + 1}(p \concat_n s))}"'] \\
+  Q_{\Sigma A}(f s, \iota_A^{n + 1}(\incl_A^n(p)))
+  \arrow[dd, "{\tr_{Q_{\Sigma A}(f s, \iota_A^{n + 1}(\blank))}(\glue_A^n(p))}"]
+  & Q_{\Sigma B}(g s, \iota_B^{n + 2}(\incl_B^{n + 1}(p \concat_n s)))
+  \arrow[d, "{\tr_{Q_{\Sigma A}(g s), \iota_B^{n + 2}(\blank)}(\glue_B^{n + 1}(p \concat_n s))}"'] \\
+  & Q_{\Sigma B}(g s, \iota_B^{n + 2}(((p \concat_n s) \concat_{n + 1} \overline{s}) \concat_{n + 1} s))
+  \arrow[d, "{\tr_{Q_{\Sigma B}(g s)}(C^{n + 1}(s, (p \concat_n s) \concat_{n + 1} \overline{s}))^{-1}}"'] \\
+  Q_{\Sigma A}(f s, \iota_A^{n + 1}((p \concat_n s) \concat_{n + 1} \overline{s}))
+  \arrow[r, "{Q_{\Sigma S}(s, \iota_A^{n + 1}((p \concat_n s) \concat_{n + 1} \overline{s}))}"']
+  & Q_{\Sigma B}(g s, (\iota_B^{n + 1}((p \concat_n s) \concat_{n + 1} \overline{s})) \concat_{\infty} s)
+\end{tikzcd}
+#+end_center
+commute from right to left --- it is rotated only to fit on the page. Commutativity can be established using the following lemma.
+
+#+begin_lemma
+Given types $A$, $B$ and a function $f : A \to B$, type families $P : A \to \UU$ and $Q : B \to \UV$, a fiberwise function $h : (a : A) \to P(a) \to Q(f a)$, identifications $p : x = y$ of elements in $A$ and $q : f x = f y$, and a coherence $\alpha : \ap_f(p) = q$, there is a commuting square
+#+begin_center
+\begin{tikzcd}
+  P(x)
+  \arrow[r, "\tr_P(p)"]
+  \arrow[d, "h(x)"']
+  & P(y)
+  \arrow[d, "h(y)"] \\
+  Q(f x)
+  \arrow[r, "\tr_Q(q)"']
+  & Q(f y).
+\end{tikzcd}
+#+end_center
+#+end_lemma
+
+#+begin_proof
+By induction on $\alpha$ and $p$, it suffices to provide a homotopy $h(x) \htpy h(x)$, which we can fulfill with $\reflhtpy$.
+#+end_proof
+
+Computing transports of the form $\tr_{(P \comp f)}(p)$ to $\tr_P(\ap_f p)$ \TODO[ref?] and distributivity of concatenation and transport \TODO[ref?] allows us to collect both sides of the diagram into one transport each, at which point we may apply the lemma. The coherence $\alpha$ is obtained from the prism [[lemma:coherence-prism-zigzag]] by straightforward homotopy algebra. This completes the paper construction of the maps $t_B^n$ and $t_A^n$.
+
+In the formalization, we are again met with computation issues. Since $t_B^n$ and $t_A^n$ are defined together by induction on $n$, and the definition of $t_B^{n + 1}$ does one more case split on $n$, we end up with three cases for the induction, namely $0$, $1$ and $n + 2$. As a consequence, $\overline{t_A^{n + 1}}(p \concat_{n + 1} \overline{s})$ does not have a uniform definition, because it is also defined by cases $0$, $1$ and $n + 2$. But we rely on its definition when computing the coherence of $t_B^{n + 1}$. If we naïvely try to case split on $n$ again to analyze the cases $t_A^1$ and $t_A^{n + 2}$ separately, we would end up defining everything in terms of the cases $0$, $1$, $2$ and $n + 3$. Instead, during the definition of $t_B^{n + 1}$ and $t_A^{n + 1}$ we carry a proof that $\overline{t_A^{n + 1}}(p \concat_{n + 1} \overline{s})$ is identical to the desired composition of $Q_{\Sigma S}^{-1}$ and $\Phi$. This component will be satisfied by $\refl$ at all stages.
+
+Furthermore, during induction we need to compute with $t_B^{n + 1}$ and $t_A^{n + 1}$ as maps defined by the dependent universal property, meaning that we need to carry around their defining dependent cocones. Rather than defining together the maps, the dependent cocones, and proofs that the maps are defined by the respective dependent cocones, we prefer to construct only the dependent cocones during induction, materializing their induced maps $t_B^{n + 1}$ and $t_A^{n + 1}$ only when necessary.
+
+#+begin_defn
+Given a natural number $n$, the type of *section cocones* at stage $n$ is the type of triples $(d_B^n, d_A^n, R^n)$, where
+\begin{align*}
+  d_B^n &: (b : B) \to \depCocone(\psh(\T_B^{n + 1}(b)), Q_{\Sigma B}(b, \iota_B^{n + 1}(\blank))) \\
+  d_A^n &: (a : A) \to \depCocone(\psh(\T_A^{n + 1}(a)), Q_{\Sigma A}(a, \iota_A^{n + 1}(\blank)))
+\end{align*}
+are families of dependent cocones over the standard pushout cocones of the span diagrams defining $P_B^{n + 1}(b)$ and $P_A^{n + 1}(a)$, respectively, and $R^n$ is an identification between the vertical map of $d_A^n(f s)$ applied to $p : P_B^{n + 1}(g s)$ and the element
+\begin{displaymath}
+  (Q_{\Sigma S}(s, \iota_A^{n + 1}(p \concat_{n + 1} \overline{s})))^{-1}(\Phi^n(s, p, \depCogap(d_B^{n}(g s), p))).
+\end{displaymath}
+#+end_defn
+
+#+begin_constr
+For any natural number $n$, construct a section cocone at stage $n$. Begin by case splitting on $n$. Define the left map and coherence of $d_B^0$ by $\exf$, and the right map by pattern matching on $p : P_A^0(f s)$, and filling the goal with $\tr_{Q_{\Sigma B}(g s)}(C^0(s, \refl), Q_{\Sigma S}(s, \refl_{\infty})(q_0))$. For the successor case, define the left and right maps of $d_B^{n + 1}$ like in the informal description, replacing $t_B^{n + 1}(b)$ by $\depCogap(d_B^n(b))$ and $t_A^{n + 1}(a)$ by $\depCogap(d_A^n(a))$. Similarly, define the left and right maps and coherences of $d_A^0$ and $d_A^{n + 1}$ following the informal description, replacing calls to $t_B^{n + 1}$ and $t_A^n$ with the cogap maps of the appropriate dependent cocones. Use the reflexive homotopy for the witnesses $R^0$ and $R^{n + 1}$.
+
+Finally, construct the coherence of $d_B^{n + 1}$ using the informal description, following the computation rule of $\depCogap(d_A^{n + 1})$ by the identification $R^n$ to get to the desired shape of the right-hand side of the coherence.
+#+end_constr
+
+The dependent cocones induce maps $t_B^{n + 1}$ and $t_A^{n + 1}$, for which we can add the base cases to get the maps $t_B^n$ and $t_A^n$.
+
+#+begin_constr
+Construct the maps
+\begin{align*}
+  t_B^n &: (b : B) (p : P_B^n(b)) \to Q_{\Sigma B}(b, \iota_B^n(p)) \\
+  t_A^n &: (a : A) (p : P_A^n(a)) \to Q_{\Sigma A}(a, \iota_A^n(p))
+\end{align*}
+by induction on $n$.
+
+In the zero case, define
+\begin{align*}
+  &t_B^0(b) \defeq \exf \\
+  &t_A^0(a_0, \refl) \defeq q_0,
+\end{align*}
+and in the successor case, define
+\begin{align*}
+  &t_B^{n + 1}(b) \defeq \depCogap(d_B^n(b)) \\
+  &t_A^{n + 1}(a) \defeq \depCogap(d_A^n(a)).
+\end{align*}
+#+end_constr
+
+The coherences $K_B^n$ and $K_A^n$ can be recovered from the computation rules of $t_B^{n + 1}$ and $t_A^{n + 1}$, respectively.
+
+#+begin_constr
+Define the family of coherences
+\begin{displaymath}
+  K_B : (n : \N) (b : B) (p : P_B^n(b)) \to \tr_{Q_{\Sigma B}(b)}(\kappa_B^n(p), t_B^n(b, p)) = t_B^{n + 1}(b, \incl_B^n p)
+\end{displaymath}
+by case analysis on $n$. In the zero case, define
+\begin{displaymath}
+  K_B^0(b) \defeq \exf,
+\end{displaymath}
+and in the successor case, unfold the definition of $t_B^{n + 2}(b)$ as the dependent cogap of the cocone $d_B^{n + 1}(b)$, which comes equipped with the computation rule
+\begin{displaymath}
+  t_B^{n + 2}(\incl_B^{n + 1}(p)) = \tr_{Q_{\Sigma B}(b)}(\kappa_B^{n + 1}(p), t_B^{n + 1}(b, p)),
+\end{displaymath}
+which may be inverted to get the desired identification.
+#+end_constr
+
+#+begin_constr
+Define the family of coherences
+\begin{displaymath}
+  K_A : (n : \N) (a : A) (p : P_A^n(a)) \to \tr_{Q_{\Sigma A}(a)}(\kappa_A^n(p), t_A^n(a, p)) = t_A^{n + 1}(a, \incl_A^n p)
+\end{displaymath}
+by case analysis on $n$. In both cases, the identification $K_A^{\bullet}(a, p)$ is the inverse of the computation rule of $t_A^{n + 1}$ as the dependent cogap of $d_A^n(a)$.
+#+end_constr
+
+The maps and coherences fit together to define dependent cocones under the sequential diagrams $P_B^{\bullet}(a)$ and $P_A^{\bullet}(b)$, which induce dependent maps out of their respective colimits.
+
+#+begin_constr
+Define the maps
+\begin{align*}
+  &t_A : (a : A) (p : P_A^{\infty}(a)) \to Q_{\Sigma A}(a, p) \\
+  &t_B : (b : B) (p : P_B^{\infty}(b)) \to Q_{\Sigma B}(b, p)
+\end{align*}
+using the dependent universal property of sequential colimits of $P_A^{\infty}(a)$ and $P_B^{\infty}$, from the families of dependent cocones
+\begin{align*}
+  (\lambda a \to (\lambda n \to t_A^n, \lambda n \to K_A^n)) : (a : A) \to \depCoconeN(P_A^{\bullet}(a), Q_{\Sigma A}(a)) \\
+  (\lambda b \to (\lambda n \to t_B^n, \lambda n \to K_B^n)) : (b : B) \to \depCoconeN(P_B^{\bullet}(b), Q_{\Sigma B}(b)).
+\end{align*}
+#+end_constr
+
+It remains to define the families of identifications $t_S^n$ and coherences $K_S^n$.
+
+#+name: lemma:comp-tB
+#+begin_lemma
+For all natural numbers $n$, elements $s : S$ and $p : P_A^n(f s)$, there is an identification
+\begin{displaymath}
+  t_B^{n + 1}(g s)(p \concat_n s) = \tr_{Q_{\Sigma B}(g s)}(C^n(s, p), Q_{\Sigma S}(s, \iota_A^n(p), f s, t_A^n(p))).
+\end{displaymath}
+#+end_lemma
+
+#+begin_proof
+Doing case analysis on $n$ allows the underlying dependent cocones to compute, and the identification holds by the computation rule of $\depCogap$.
+#+end_proof
+
+#+begin_constr
+Given a natural number $n$, construct the family of identifications
+\begin{displaymath}
+  t_S^n : (s : S) (p : P_A^n(f s)) \to Q_{\Sigma S}(s, \iota_A^n(p), t_A(f s, \iota_A^n(p))) = t_B(g s, (\iota_A^n(p)) \concat_{\infty} s)
+\end{displaymath}
+by concatenating
+#+begin_center
+\begin{tikzcd}
+  Q_{\Sigma S}(s, \iota_A^n(p), t_A(f s, \iota_A^n(p)))
+  \arrow[d, equals] \\
+  Q_{\Sigma S}(s, \iota_A^n(p), t_A^n(f s, p))
+  \arrow[d, equals] \\
+  t_B(g s, (\iota_A^n(p)) \concat_{\infty} s),
+\end{tikzcd}
+#+end_center
+where the top identification is obtained from the computation rule for maps out of sequential colimits defined by dependent cocones, and the bottom identification follows from the observation that there is an identification
+#+begin_center
+\begin{tikzcd}
+  \tr_{Q_{\Sigma B}(g s)}(C^n(s, p), Q_{\Sigma S}(s, \iota_A^n(p), t_A^n(f s, p)))
+  \arrow[d, equals] \\
+  t_B^{n + 1}(g s, p \concat_n s)
+  \arrow[d, equals] \\
+  t_B(g s, \iota_B^{n + 1}(p \concat_n s))
+  \arrow[d, equals] \\
+  \tr_{Q_{\Sigma B}(g s)}(C^n(s, p), t_B(g s, (\iota_A^n(p)) \concat_{\infty} s)),
+\end{tikzcd}
+#+end_center
+where the top identification is [[lemma:comp-tB]], the middle identification is the computation rule of $t_B$, and the bottom identification is the inverse of \linebreak $\apd_{t_B(g s)}(C^n(s, p))$. We may "unapply" the transport from the composite, because transporting is an equivalence.
+#+end_constr
+
+At the time of writing, the coherences $K_S^n$ have not been formally constructed, so we leave their existence as a conjecture, and claim only a partial proof of correctness.
 
 #+name: conj:zigzag-coherence
 #+begin_conj
-A family of coherences $K_S$ exists.
+The coherences $K_S^n$ exist.
 #+end_conj
+
+#+begin_constr
+Construct the family of coherences
+\begin{displaymath}
+  t_S : (s : S) (p : P_A^{\infty}(f s)) \to Q_{\Sigma S}(s, p, t_A(f s, p)) = t_B(g s, p \concat_{\infty} s)
+\end{displaymath}
+using the dependent universal property of $P_A^{\infty}(f s)$, from the families of dependent cocones
+\begin{align*}
+  &(\lambda s \to (\lambda n \to t_S^n, \lambda n \to K_S^n)) : \\
+  &\quad (s : S) \to \depCoconeN(P_A^{\bullet}(f s), \lambda p \to (Q_{\Sigma S}(s, p, t_A(f s, p)) = t_B(g s, p \concat_{\infty} s)))
+\end{align*}
+#+end_constr
 
 #+name: thm:is-identity-system-zigzag
 #+begin_thm
