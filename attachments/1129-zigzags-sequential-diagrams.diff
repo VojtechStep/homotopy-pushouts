@@ -1,13 +1,3 @@
-From e063ced7101acfdc5463c5ac05fa7f61fca26746 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Fri, 26 Apr 2024 22:51:17 +0200
-Subject: [PATCH 1/7] Collapsing squares in tesselated rectangles
-
----
- .../commuting-squares-of-maps.lagda.md        | 168 ++++++++++++++++++
- .../commuting-triangles-of-maps.lagda.md      |  27 +++
- 2 files changed, 195 insertions(+)
-
 diff --git a/src/foundation/commuting-squares-of-maps.lagda.md b/src/foundation/commuting-squares-of-maps.lagda.md
 index 12fbe4c18f..715937f221 100644
 --- a/src/foundation/commuting-squares-of-maps.lagda.md
@@ -235,18 +225,18 @@ index 55d8859dee..f657e5d08d 100644
 +  horizontal-pasting-up-diagonal-coherence-triangle-maps H K =
 +    (K ·r left) ∙h (right ·l H)
 +```
-
-From 76a94edddb757066e5341cf1723fb8086f2dc331 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Fri, 26 Apr 2024 23:21:18 +0200
-Subject: [PATCH 2/7] Inverting homotopies of cocones under sequential diagrams
-
----
- ...cocones-under-sequential-diagrams.lagda.md | 22 +++++++++++++++++++
- 1 file changed, 22 insertions(+)
-
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index dbe44b253b..66c514fe1b 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -124,4 +124,5 @@ open import synthetic-homotopy-theory.universal-property-sequential-colimits pub
+ open import synthetic-homotopy-theory.universal-property-suspensions public
+ open import synthetic-homotopy-theory.universal-property-suspensions-of-pointed-types public
+ open import synthetic-homotopy-theory.wedges-of-pointed-types public
++open import synthetic-homotopy-theory.zigzags-sequential-diagrams public
+ ```
 diff --git a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-index b6633f561e..75319885da 100644
+index b6633f561e..ca4adb47b0 100644
 --- a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
 +++ b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
 @@ -157,6 +157,28 @@ module _
@@ -278,22 +268,7 @@ index b6633f561e..75319885da 100644
  ### Concatenation of homotopies of cocones under a sequential diagram
  
  ```agda
-
-From 7073185022473181c1da02e06c57cf0517e661a7 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Fri, 26 Apr 2024 23:22:22 +0200
-Subject: [PATCH 3/7] Decomposing constructions
-
----
- ...cocones-under-sequential-diagrams.lagda.md | 37 ++++++++++++-------
- .../morphisms-sequential-diagrams.lagda.md    | 19 +++++++---
- 2 files changed, 37 insertions(+), 19 deletions(-)
-
-diff --git a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-index 75319885da..ca4adb47b0 100644
---- a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-+++ b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-@@ -363,16 +363,19 @@ module _
+@@ -341,16 +363,19 @@ module _
    ( c : cocone-sequential-diagram A X)
    where
  
@@ -321,7 +296,7 @@ index 75319885da..ca4adb47b0 100644
  ```
  
  ### Postcomposing cocones under a sequential colimit distributes over function composition
-@@ -388,6 +391,18 @@ module _
+@@ -366,6 +391,18 @@ module _
    ( c : cocone-sequential-diagram A X)
    where
  
@@ -340,7 +315,7 @@ index 75319885da..ca4adb47b0 100644
    cocone-map-comp-sequential-diagram :
      ( h : X → Y) (k : Y → Z) →
      cocone-map-sequential-diagram c (k ∘ h) ＝
-@@ -396,11 +411,7 @@ module _
+@@ -374,11 +411,7 @@ module _
      eq-htpy-cocone-sequential-diagram A
        ( cocone-map-sequential-diagram c (k ∘ h))
        ( cocone-map-sequential-diagram (cocone-map-sequential-diagram c h) k)
@@ -393,88 +368,6 @@ index 28bc2708eb..a094834153 100644
  ```
  
  ### Homotopies between morphisms of sequential diagrams
-
-From e941cb71045f442e345bd23a334a666b94ad3535 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Fri, 26 Apr 2024 23:32:36 +0200
-Subject: [PATCH 4/7] Lemmas about induced maps out of sequential colimits
-
----
- ...rsal-property-sequential-colimits.lagda.md | 43 +++++++++++++++++++
- 1 file changed, 43 insertions(+)
-
-diff --git a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-index 8cf231f399..e214baf664 100644
---- a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-+++ b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-@@ -17,6 +17,7 @@ open import foundation.contractible-types
- open import foundation.dependent-pair-types
- open import foundation.equivalences
- open import foundation.fibers-of-maps
-+open import foundation.function-extensionality
- open import foundation.function-types
- open import foundation.functoriality-dependent-pair-types
- open import foundation.homotopies
-@@ -150,6 +151,48 @@ module _
-         ( is-contr-map-is-equiv (up-sequential-colimit Y) c')
- ```
- 
-+### The cocone of a sequential colimit induces the identity function by its universal property
-+
-+```agda
-+module _
-+  {l1 l2 : Level} {A : sequential-diagram l1}
-+  {X : UU l2} {c : cocone-sequential-diagram A X}
-+  (up-c : universal-property-sequential-colimit c)
-+  where
-+
-+  compute-map-universal-property-sequential-colimit-id :
-+    map-universal-property-sequential-colimit up-c c ~ id
-+  compute-map-universal-property-sequential-colimit-id =
-+    htpy-eq
-+      ( ap pr1
-+        ( eq-is-contr'
-+          ( uniqueness-map-universal-property-sequential-colimit up-c c)
-+          ( ( map-universal-property-sequential-colimit up-c c) ,
-+            ( htpy-cocone-universal-property-sequential-colimit up-c c))
-+          ( id , htpy-cocone-map-id-sequential-diagram A c)))
-+```
-+
-+### Homotopies between cocones under sequential diagrams induce homotopies between the induced maps out of sequential colimits
-+
-+```agda
-+module _
-+  {l1 l2 l3 : Level} {A : sequential-diagram l1}
-+  {X : UU l2} {c : cocone-sequential-diagram A X}
-+  (up-c : universal-property-sequential-colimit c)
-+  {Y : UU l3} {c' c'' : cocone-sequential-diagram A Y}
-+  (H : htpy-cocone-sequential-diagram c' c'')
-+  where
-+
-+  htpy-map-universal-property-htpy-cocone-sequential-diagram :
-+    map-universal-property-sequential-colimit up-c c' ~
-+    map-universal-property-sequential-colimit up-c c''
-+  htpy-map-universal-property-htpy-cocone-sequential-diagram =
-+    htpy-eq
-+      ( ap
-+        ( map-universal-property-sequential-colimit up-c)
-+        ( eq-htpy-cocone-sequential-diagram A c' c'' H))
-+```
-+
- ### Correspondence between universal properties of sequential colimits and coequalizers
- 
- A cocone under a sequential diagram has the universal property of sequential
-
-From 8236eaf2f6ce71545ccd02903fbd88ea8420d8b0 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Sat, 27 Apr 2024 00:35:47 +0200
-Subject: [PATCH 5/7] Computing maps induced by inclusions of shifted
- sequential diagrams
-
----
- .../shifts-sequential-diagrams.lagda.md       | 202 ++++++++++++++++++
- 1 file changed, 202 insertions(+)
-
 diff --git a/src/synthetic-homotopy-theory/shifts-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/shifts-sequential-diagrams.lagda.md
 index 66cb304593..c7c6e22f6f 100644
 --- a/src/synthetic-homotopy-theory/shifts-sequential-diagrams.lagda.md
@@ -703,34 +596,73 @@ index 66cb304593..c7c6e22f6f 100644
 +        ( up-shift-cocone-sequential-diagram k up-c))
 +      ( compute-map-colimit-hom-shift-sequential-diagram k))
 +```
-
-From b2040b27ef70544a54a4997ccf65e26be7464035 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Sat, 27 Apr 2024 16:54:55 +0200
-Subject: [PATCH 6/7] Zigzags between sequential diagrams
-
----
- src/synthetic-homotopy-theory.lagda.md        |   1 +
- .../zigzags-sequential-diagrams.lagda.md      | 601 ++++++++++++++++++
- 2 files changed, 602 insertions(+)
- create mode 100644 src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md
-
-diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
-index dbe44b253b..66c514fe1b 100644
---- a/src/synthetic-homotopy-theory.lagda.md
-+++ b/src/synthetic-homotopy-theory.lagda.md
-@@ -124,4 +124,5 @@ open import synthetic-homotopy-theory.universal-property-sequential-colimits pub
- open import synthetic-homotopy-theory.universal-property-suspensions public
- open import synthetic-homotopy-theory.universal-property-suspensions-of-pointed-types public
- open import synthetic-homotopy-theory.wedges-of-pointed-types public
-+open import synthetic-homotopy-theory.zigzags-sequential-diagrams public
+diff --git a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
+index 8cf231f399..e214baf664 100644
+--- a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
+@@ -17,6 +17,7 @@ open import foundation.contractible-types
+ open import foundation.dependent-pair-types
+ open import foundation.equivalences
+ open import foundation.fibers-of-maps
++open import foundation.function-extensionality
+ open import foundation.function-types
+ open import foundation.functoriality-dependent-pair-types
+ open import foundation.homotopies
+@@ -150,6 +151,48 @@ module _
+         ( is-contr-map-is-equiv (up-sequential-colimit Y) c')
  ```
+ 
++### The cocone of a sequential colimit induces the identity function by its universal property
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2} {c : cocone-sequential-diagram A X}
++  (up-c : universal-property-sequential-colimit c)
++  where
++
++  compute-map-universal-property-sequential-colimit-id :
++    map-universal-property-sequential-colimit up-c c ~ id
++  compute-map-universal-property-sequential-colimit-id =
++    htpy-eq
++      ( ap pr1
++        ( eq-is-contr'
++          ( uniqueness-map-universal-property-sequential-colimit up-c c)
++          ( ( map-universal-property-sequential-colimit up-c c) ,
++            ( htpy-cocone-universal-property-sequential-colimit up-c c))
++          ( id , htpy-cocone-map-id-sequential-diagram A c)))
++```
++
++### Homotopies between cocones under sequential diagrams induce homotopies between the induced maps out of sequential colimits
++
++```agda
++module _
++  {l1 l2 l3 : Level} {A : sequential-diagram l1}
++  {X : UU l2} {c : cocone-sequential-diagram A X}
++  (up-c : universal-property-sequential-colimit c)
++  {Y : UU l3} {c' c'' : cocone-sequential-diagram A Y}
++  (H : htpy-cocone-sequential-diagram c' c'')
++  where
++
++  htpy-map-universal-property-htpy-cocone-sequential-diagram :
++    map-universal-property-sequential-colimit up-c c' ~
++    map-universal-property-sequential-colimit up-c c''
++  htpy-map-universal-property-htpy-cocone-sequential-diagram =
++    htpy-eq
++      ( ap
++        ( map-universal-property-sequential-colimit up-c)
++        ( eq-htpy-cocone-sequential-diagram A c' c'' H))
++```
++
+ ### Correspondence between universal properties of sequential colimits and coequalizers
+ 
+ A cocone under a sequential diagram has the universal property of sequential
 diff --git a/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md
 new file mode 100644
-index 0000000000..ea7c783c1e
+index 0000000000..71068b80e1
 --- /dev/null
 +++ b/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md
-@@ -0,0 +1,601 @@
+@@ -0,0 +1,604 @@
 +# Zigzags between sequential diagrams
 +
 +```agda
@@ -889,11 +821,11 @@ index 0000000000..ea7c783c1e
 +           a₁
 +```
 +
-+We call this a _half-shift_ of the original zigzag, and it provides certain
-+symmetry between the downward-going `f` maps and upward-going `g` maps. We
-+exploit this symmetry in the proceeding constructions by formulating the
-+definitions and lemmas for the downwards directions, and then applying them to
-+the half-shift of a zigzag to get the constructions for the upward direction.
++We call this a _half-shift_ of the original zigzag, and it provides a symmetry
++between the downward-going `f` maps and upward-going `g` maps. We exploit this
++symmetry in the proceeding constructions by formulating the definitions and
++lemmas for the downwards directions, and then applying them to the half-shift of
++a zigzag to get the constructions for the upward direction.
 +
 +Repeating a half-shift twice gets us a shift of a zigzag.
 +
@@ -967,9 +899,12 @@ index 0000000000..ea7c783c1e
 +  g₀ |   f₁ /  | g₁   /  | g₂
 +     |    /    |    / f₂ |
 +     ∨  /      ∨  /      ∨
-+     A₁ -----> A₂ -----> A₃ -----> ⋯ .
++     A₁ -----> A₂ -----> A₃ -----> ⋯ ,
 +          a₁        a₂
 +```
++
++which should be thought of as an inverse of `f` --- and we show that it indeed
++induces an inverse in the colimit further down.
 +
 +```agda
 +module _
@@ -1332,49 +1267,3 @@ index 0000000000..ea7c783c1e
 +  pr2 equiv-colimit-zigzag-sequential-diagram =
 +    is-equiv-map-inv-equiv inv-equiv-colimit-zigzag-sequential-diagram
 +```
-
-From d70e84ac287ea41a068aebe8540a47fd7f842f12 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Thu, 23 May 2024 16:53:09 +0200
-Subject: [PATCH 7/7] Improve wording
-
----
- .../zigzags-sequential-diagrams.lagda.md          | 15 +++++++++------
- 1 file changed, 9 insertions(+), 6 deletions(-)
-
-diff --git a/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md
-index ea7c783c1e..71068b80e1 100644
---- a/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md
-+++ b/src/synthetic-homotopy-theory/zigzags-sequential-diagrams.lagda.md
-@@ -156,11 +156,11 @@ get a zigzag between `(B, b)` and the
-            a₁
- ```
- 
--We call this a _half-shift_ of the original zigzag, and it provides certain
--symmetry between the downward-going `f` maps and upward-going `g` maps. We
--exploit this symmetry in the proceeding constructions by formulating the
--definitions and lemmas for the downwards directions, and then applying them to
--the half-shift of a zigzag to get the constructions for the upward direction.
-+We call this a _half-shift_ of the original zigzag, and it provides a symmetry
-+between the downward-going `f` maps and upward-going `g` maps. We exploit this
-+symmetry in the proceeding constructions by formulating the definitions and
-+lemmas for the downwards directions, and then applying them to the half-shift of
-+a zigzag to get the constructions for the upward direction.
- 
- Repeating a half-shift twice gets us a shift of a zigzag.
- 
-@@ -234,10 +234,13 @@ Similarly, we can realign the half-shift of a zigzag to get the morphism
-   g₀ |   f₁ /  | g₁   /  | g₂
-      |    /    |    / f₂ |
-      ∨  /      ∨  /      ∨
--     A₁ -----> A₂ -----> A₃ -----> ⋯ .
-+     A₁ -----> A₂ -----> A₃ -----> ⋯ ,
-           a₁        a₂
- ```
- 
-+which should be thought of as an inverse of `f` --- and we show that it indeed
-+induces an inverse in the colimit further down.
-+
- ```agda
- module _
-   {l1 l2 : Level} {A : sequential-diagram l1} {B : sequential-diagram l2}

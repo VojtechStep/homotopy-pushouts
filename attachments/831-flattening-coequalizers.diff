@@ -1,0 +1,1057 @@
+diff --git a/src/synthetic-homotopy-theory/coequalizers.lagda.md b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+index 58b565106d..23b837f960 100644
+--- a/src/synthetic-homotopy-theory/coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/coequalizers.lagda.md
+@@ -7,8 +7,6 @@ module synthetic-homotopy-theory.coequalizers where
+ <details><summary>Imports</summary>
+ 
+ ```agda
+-open import foundation.codiagonal-maps-of-types
+-open import foundation.coproduct-types
+ open import foundation.equivalences
+ open import foundation.identity-types
+ open import foundation.transport-along-identifications
+@@ -16,7 +14,6 @@ open import foundation.universe-levels
+ 
+ open import synthetic-homotopy-theory.coforks
+ open import synthetic-homotopy-theory.dependent-cocones-under-spans
+-open import synthetic-homotopy-theory.dependent-coforks
+ open import synthetic-homotopy-theory.dependent-universal-property-coequalizers
+ open import synthetic-homotopy-theory.pushouts
+ open import synthetic-homotopy-theory.universal-property-coequalizers
+@@ -64,50 +61,45 @@ module _
+   abstract
+     canonical-coequalizer : UU (l1 ⊔ l2)
+     canonical-coequalizer =
+-      pushout (codiagonal A) (ind-coprod (λ _ → B) f g)
++      pushout
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+ 
+     cofork-canonical-coequalizer : cofork f g canonical-coequalizer
+     cofork-canonical-coequalizer =
+       cofork-cocone-codiagonal f g
+-        ( cocone-pushout (codiagonal A) (ind-coprod (λ _ → B) f g))
++        ( cocone-pushout
++          ( vertical-map-span-cocone-cofork f g)
++          ( horizontal-map-span-cocone-cofork f g))
+ 
+     dup-canonical-coequalizer :
+       { l : Level} →
+       dependent-universal-property-coequalizer l f g
+         ( cofork-canonical-coequalizer)
+-    dup-canonical-coequalizer P =
+-      is-equiv-comp-htpy
+-        ( dependent-cofork-map f g cofork-canonical-coequalizer)
+-        ( dependent-cofork-dependent-cocone-codiagonal f g
+-          ( cofork-canonical-coequalizer)
+-          ( P))
+-        ( dependent-cocone-map
+-          ( codiagonal A)
+-          ( ind-coprod (λ _ → B) f g)
+-          ( cocone-codiagonal-cofork f g cofork-canonical-coequalizer)
+-          ( P))
+-        ( triangle-dependent-cofork-dependent-cocone-codiagonal f g
+-          ( cofork-canonical-coequalizer)
+-          ( P))
+-        ( tr
+-          ( λ c →
+-            is-equiv
+-              ( dependent-cocone-map
+-                ( codiagonal A)
+-                ( ind-coprod (λ _ → B) f g)
+-                ( c)
+-                ( P)))
+-          ( inv
+-            ( is-retraction-map-inv-is-equiv
+-              ( is-equiv-cofork-cocone-codiagonal f g)
+-              ( cocone-pushout (codiagonal A) (ind-coprod (λ _ → B) f g))))
+-          ( dependent-up-pushout
+-            ( codiagonal A)
+-            ( ind-coprod (λ _ → B) f g)
+-            ( P)))
+-        ( is-equiv-dependent-cofork-dependent-cocone-codiagonal f g
+-          ( cofork-canonical-coequalizer)
+-          ( P))
++    dup-canonical-coequalizer =
++      dependent-universal-property-coequalizer-dependent-universal-property-pushout
++        ( f)
++        ( g)
++        ( cofork-canonical-coequalizer)
++        ( λ P →
++          tr
++            ( λ c →
++              is-equiv
++                ( dependent-cocone-map
++                  ( vertical-map-span-cocone-cofork f g)
++                  ( horizontal-map-span-cocone-cofork f g)
++                  ( c)
++                  ( P)))
++            ( inv
++              ( is-retraction-map-inv-is-equiv
++                ( is-equiv-cofork-cocone-codiagonal f g)
++                ( cocone-pushout
++                  ( vertical-map-span-cocone-cofork f g)
++                  ( horizontal-map-span-cocone-cofork f g))))
++            ( dependent-up-pushout
++              ( vertical-map-span-cocone-cofork f g)
++              ( horizontal-map-span-cocone-cofork f g)
++              ( P)))
+ 
+     up-canonical-coequalizer :
+       { l : Level} →
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index 00aadf444e..d5e691f471 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -9,6 +9,7 @@ module synthetic-homotopy-theory.coforks where
+ ```agda
+ open import foundation.action-on-identifications-functions
+ open import foundation.codiagonal-maps-of-types
++open import foundation.commuting-squares-of-maps
+ open import foundation.commuting-triangles-of-maps
+ open import foundation.contractible-types
+ open import foundation.coproduct-types
+@@ -21,7 +22,6 @@ open import foundation.fundamental-theorem-of-identity-types
+ open import foundation.homotopies
+ open import foundation.homotopy-induction
+ open import foundation.identity-types
+-open import foundation.path-algebra
+ open import foundation.structure-identity-principle
+ open import foundation.universe-levels
+ open import foundation.whiskering-homotopies
+@@ -222,35 +222,66 @@ module _
+   { l1 l2 : Level} {A : UU l1} {B : UU l2} (f g : A → B)
+   where
+ 
++  vertical-map-span-cocone-cofork : A + A → A
++  vertical-map-span-cocone-cofork = codiagonal A
++
++  horizontal-map-span-cocone-cofork : A + A → B
++  horizontal-map-span-cocone-cofork (inl a) = f a
++  horizontal-map-span-cocone-cofork (inr a) = g a
++
+   module _
+     { l3 : Level} {X : UU l3}
+     where
+ 
+     cofork-cocone-codiagonal :
+-      cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X →
++      cocone
++        ( vertical-map-span-cocone-cofork)
++        ( horizontal-map-span-cocone-cofork)
++        ( X) →
+       cofork f g X
+     pr1 (cofork-cocone-codiagonal c) =
+-      vertical-map-cocone (codiagonal A) (ind-coprod (λ _ → B) f g) c
++      vertical-map-cocone
++        ( vertical-map-span-cocone-cofork)
++        ( horizontal-map-span-cocone-cofork)
++        ( c)
+     pr2 (cofork-cocone-codiagonal c) =
+       ( ( inv-htpy
+           ( coherence-square-cocone
+-            ( codiagonal A)
+-            ( ind-coprod (λ _ → B) f g)
++            ( vertical-map-span-cocone-cofork)
++            ( horizontal-map-span-cocone-cofork)
+             ( c))) ·r
+         ( inl)) ∙h
+       ( ( coherence-square-cocone
+-          ( codiagonal A)
+-          ( ind-coprod (λ _ → B) f g)
++          ( vertical-map-span-cocone-cofork)
++          ( horizontal-map-span-cocone-cofork)
+           ( c)) ·r
+         ( inr))
+ 
++    horizontal-map-cocone-cofork : cofork f g X → A → X
++    horizontal-map-cocone-cofork e = map-cofork f g e ∘ f
++
++    vertical-map-cocone-cofork : cofork f g X → B → X
++    vertical-map-cocone-cofork e = map-cofork f g e
++
++    coherence-square-cocone-cofork :
++      ( e : cofork f g X) →
++      coherence-square-maps
++        ( horizontal-map-span-cocone-cofork)
++        ( vertical-map-span-cocone-cofork)
++        ( vertical-map-cocone-cofork e)
++        ( horizontal-map-cocone-cofork e)
++    coherence-square-cocone-cofork e (inl a) = refl
++    coherence-square-cocone-cofork e (inr a) = coherence-cofork f g e a
++
+     cocone-codiagonal-cofork :
+       cofork f g X →
+-      cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X
+-    pr1 (cocone-codiagonal-cofork e) = map-cofork f g e ∘ f
+-    pr1 (pr2 (cocone-codiagonal-cofork e)) = map-cofork f g e
+-    pr2 (pr2 (cocone-codiagonal-cofork e)) (inl a) = refl
+-    pr2 (pr2 (cocone-codiagonal-cofork e)) (inr a) = coherence-cofork f g e a
++      cocone
++        ( vertical-map-span-cocone-cofork)
++        ( horizontal-map-span-cocone-cofork)
++        ( X)
++    pr1 (cocone-codiagonal-cofork e) = horizontal-map-cocone-cofork e
++    pr1 (pr2 (cocone-codiagonal-cofork e)) = vertical-map-cocone-cofork e
++    pr2 (pr2 (cocone-codiagonal-cofork e)) = coherence-square-cocone-cofork e
+ 
+     abstract
+       is-section-cocone-codiagonal-cofork :
+@@ -265,14 +296,14 @@ module _
+         cocone-codiagonal-cofork ∘ cofork-cocone-codiagonal ~ id
+       is-retraction-cocone-codiagonal-fork c =
+         eq-htpy-cocone
+-          ( codiagonal A)
+-          ( ind-coprod (λ _ → B) f g)
++          ( vertical-map-span-cocone-cofork)
++          ( horizontal-map-span-cocone-cofork)
+           ( cocone-codiagonal-cofork (cofork-cocone-codiagonal c))
+           ( c)
+           ( ( ( inv-htpy
+                 ( coherence-square-cocone
+-                  ( codiagonal A)
+-                  ( ind-coprod (λ _ → B) f g)
++                  ( vertical-map-span-cocone-cofork)
++                  ( horizontal-map-span-cocone-cofork)
+                   ( c))) ·r
+               ( inl)) ,
+             ( refl-htpy) ,
+@@ -281,8 +312,8 @@ module _
+                 inv
+                   ( left-inv
+                     ( coherence-square-cocone
+-                      ( codiagonal A)
+-                      ( ind-coprod (λ _ → B) f g)
++                      ( vertical-map-span-cocone-cofork)
++                      ( horizontal-map-span-cocone-cofork)
+                       ( c)
+                       ( inl a)))
+               ( inr a) → right-unit))
+@@ -296,49 +327,33 @@ module _
+         ( is-retraction-cocone-codiagonal-fork)
+ 
+     equiv-cocone-codiagonal-cofork :
+-      cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X ≃
++      cocone
++        ( vertical-map-span-cocone-cofork)
++        ( horizontal-map-span-cocone-cofork)
++        ( X) ≃
+       cofork f g X
+     pr1 equiv-cocone-codiagonal-cofork = cofork-cocone-codiagonal
+     pr2 equiv-cocone-codiagonal-cofork = is-equiv-cofork-cocone-codiagonal
+ 
+   triangle-cofork-cocone :
+     { l3 l4 : Level} {X : UU l3} {Y : UU l4} →
+-    ( c : cocone (codiagonal A) (ind-coprod (λ _ → B) f g) X) →
++    ( e : cofork f g X) →
+     coherence-triangle-maps
+-      ( cofork-map f g (cofork-cocone-codiagonal c) {Y = Y})
++      ( cofork-map f g e {Y = Y})
+       ( cofork-cocone-codiagonal)
+-      ( cocone-map (codiagonal A) (ind-coprod (λ _ → B) f g) c)
+-  triangle-cofork-cocone c h =
++      ( cocone-map
++        ( vertical-map-span-cocone-cofork)
++        ( horizontal-map-span-cocone-cofork)
++        ( cocone-codiagonal-cofork e))
++  triangle-cofork-cocone e h =
+     eq-htpy-cofork f g
+-      ( cofork-map f g (cofork-cocone-codiagonal c) h)
++      ( cofork-map f g e h)
+       ( cofork-cocone-codiagonal
+-        ( cocone-map (codiagonal A) (ind-coprod (λ _ → B) f g) c h))
++        ( cocone-map
++          ( vertical-map-span-cocone-cofork)
++          ( horizontal-map-span-cocone-cofork)
++          ( cocone-codiagonal-cofork e)
++          ( h)))
+       ( refl-htpy ,
+-        ( right-unit-htpy ∙h
+-          ( λ a →
+-            ( ap-concat h
+-              ( inv
+-                ( coherence-square-cocone
+-                  ( codiagonal A)
+-                  ( ind-coprod (λ _ → B) f g)
+-                  ( c)
+-                  ( inl a)))
+-              ( coherence-square-cocone
+-                ( codiagonal A)
+-                ( ind-coprod (λ _ → B) f g)
+-                ( c)
+-                ( inr a))) ∙
+-            ( identification-right-whisk
+-              ( ap-inv h
+-                ( coherence-square-cocone
+-                  ( codiagonal A)
+-                  ( ind-coprod (λ _ → B) f g)
+-                  ( c)
+-                  ( inl a)))
+-              ( ap h
+-                ( coherence-square-cocone
+-                  ( codiagonal A)
+-                  ( ind-coprod (λ _ → B) f g)
+-                  ( c)
+-                  ( inr a)))))))
++        right-unit-htpy)
+ ```
+diff --git a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+index f21a37d7fa..842249dcd1 100644
+--- a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+@@ -268,15 +268,15 @@ module _
+ 
+     dependent-cofork-dependent-cocone-codiagonal :
+       dependent-cocone
+-        ( codiagonal A)
+-        ( ind-coprod (λ _ → B) f g)
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P) →
+       dependent-cofork f g e P
+     pr1 (dependent-cofork-dependent-cocone-codiagonal k) =
+       vertical-map-dependent-cocone
+-        ( codiagonal A)
+-        ( ind-coprod (λ _ → B) f g)
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P)
+         ( k)
+@@ -285,15 +285,15 @@ module _
+         ( ap
+           ( tr P (coherence-cofork f g e a))
+           ( coherence-square-dependent-cocone
+-            ( codiagonal A)
+-            ( ind-coprod (λ _ → B) f g)
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
+             ( cocone-codiagonal-cofork f g e)
+             ( P)
+             ( k)
+             ( inl a))) ∙
+       coherence-square-dependent-cocone
+-        ( codiagonal A)
+-        ( ind-coprod (λ _ → B) f g)
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P)
+         ( k)
+@@ -302,8 +302,8 @@ module _
+     dependent-cocone-codiagonal-dependent-cofork :
+       dependent-cofork f g e P →
+       dependent-cocone
+-        ( codiagonal A)
+-        ( ind-coprod (λ _ → B) f g)
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P)
+     pr1 (dependent-cocone-codiagonal-dependent-cofork k) =
+@@ -333,8 +333,8 @@ module _
+         ( id)
+       is-retraction-dependent-cocone-codiagonal-dependent-cofork d =
+         eq-htpy-dependent-cocone
+-          ( codiagonal A)
+-          ( ind-coprod (λ _ → B) f g)
++          ( vertical-map-span-cocone-cofork f g)
++          ( horizontal-map-span-cocone-cofork f g)
+           ( cocone-codiagonal-cofork f g e)
+           ( P)
+           ( dependent-cocone-codiagonal-dependent-cofork
+@@ -342,8 +342,8 @@ module _
+           ( d)
+           ( inv-htpy
+             ( ( coherence-square-dependent-cocone
+-                ( codiagonal A)
+-                ( ind-coprod (λ _ → B) f g)
++                ( vertical-map-span-cocone-cofork f g)
++                ( horizontal-map-span-cocone-cofork f g)
+                 ( cocone-codiagonal-cofork f g e)
+                 ( P)
+                 ( d)) ∘
+@@ -356,8 +356,8 @@ module _
+                     ( ( ap
+                         ( _∙
+                           coherence-square-dependent-cocone
+-                            ( codiagonal A)
+-                            ( ind-coprod (λ _ → B) f g)
++                            ( vertical-map-span-cocone-cofork f g)
++                            ( horizontal-map-span-cocone-cofork f g)
+                             ( cocone-codiagonal-cofork f g e)
+                             ( P)
+                             ( d)
+@@ -365,16 +365,16 @@ module _
+                         ( ap-id
+                           ( inv
+                             ( coherence-square-dependent-cocone
+-                              ( codiagonal A)
+-                              ( ind-coprod (λ _ → B) f g)
++                              ( vertical-map-span-cocone-cofork f g)
++                              ( horizontal-map-span-cocone-cofork f g)
+                               ( cocone-codiagonal-cofork f g e)
+                               ( P)
+                               ( d)
+                               ( inl a))))) ∙
+                       ( left-inv
+                         ( coherence-square-dependent-cocone
+-                              ( codiagonal A)
+-                              ( ind-coprod (λ _ → B) f g)
++                              ( vertical-map-span-cocone-cofork f g)
++                              ( horizontal-map-span-cocone-cofork f g)
+                               ( cocone-codiagonal-cofork f g e)
+                               ( P)
+                               ( d)
+@@ -383,8 +383,8 @@ module _
+                   ap
+                     ( _∙
+                       coherence-square-dependent-cocone
+-                        ( codiagonal A)
+-                        ( ind-coprod (λ _ → B) f g)
++                        ( vertical-map-span-cocone-cofork f g)
++                        ( horizontal-map-span-cocone-cofork f g)
+                         ( cocone-codiagonal-cofork f g e)
+                         ( P)
+                         ( d)
+@@ -393,8 +393,8 @@ module _
+                       ( ap-inv
+                         ( tr P (coherence-cofork f g e a))
+                         ( coherence-square-dependent-cocone
+-                          ( codiagonal A)
+-                          ( ind-coprod (λ _ → B) f g)
++                          ( vertical-map-span-cocone-cofork f g)
++                          ( horizontal-map-span-cocone-cofork f g)
+                           ( cocone-codiagonal-cofork f g e)
+                           ( P)
+                           ( d)
+@@ -410,8 +410,8 @@ module _
+ 
+     equiv-dependent-cofork-dependent-cocone-codiagonal :
+       dependent-cocone
+-        ( codiagonal A)
+-        ( ind-coprod (λ _ → B) f g)
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P) ≃
+       dependent-cofork f g e P
+@@ -426,8 +426,8 @@ module _
+       ( dependent-cofork-map f g e)
+       ( dependent-cofork-dependent-cocone-codiagonal P)
+       ( dependent-cocone-map
+-        ( codiagonal A)
+-        ( ind-coprod (λ _ → B) f g)
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
+         ( cocone-codiagonal-cofork f g e)
+         ( P))
+   triangle-dependent-cofork-dependent-cocone-codiagonal P h =
+@@ -435,8 +435,8 @@ module _
+       ( dependent-cofork-map f g e h)
+       ( dependent-cofork-dependent-cocone-codiagonal P
+         ( dependent-cocone-map
+-          ( codiagonal A)
+-          ( ind-coprod (λ _ → B) f g)
++          ( vertical-map-span-cocone-cofork f g)
++          ( horizontal-map-span-cocone-cofork f g)
+           ( cocone-codiagonal-cofork f g e)
+           ( P)
+           ( h)))
+diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+index 2a5d19fb95..dbf0179475 100644
+--- a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+@@ -17,7 +17,9 @@ open import foundation.homotopies
+ open import foundation.universe-levels
+ 
+ open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.dependent-cocones-under-spans
+ open import synthetic-homotopy-theory.dependent-coforks
++open import synthetic-homotopy-theory.dependent-universal-property-pushouts
+ open import synthetic-homotopy-theory.universal-property-coequalizers
+ ```
+ 
+@@ -132,3 +134,64 @@ module _
+         ( is-equiv-map-equiv
+           ( compute-dependent-cofork-constant-family f g e Y))
+ ```
++
++### A cofork has the dependent universal property of coequalizers if and only if the corresponding cocone has the dependent universal property of pushouts
++
++As mentioned in [coforks](synthetic-homotopy-theory.coforks.md), coforks can be
++thought of as special cases of cocones under spans. This theorem makes it more
++precise, asserting that under this mapping,
++[coequalizers](synthetic-homotopy-theory.coequalizers.md) correspond to
++[pushouts](synthetic-homotopy-theory.pushouts.md).
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {X : UU l3} (f g : A → B)
++  ( e : cofork f g X)
++  where
++
++  dependent-universal-property-coequalizer-dependent-universal-property-pushout :
++    ( {l : Level} →
++      dependent-universal-property-pushout l
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e)) →
++    ( {l : Level} →
++      dependent-universal-property-coequalizer l f g e)
++  dependent-universal-property-coequalizer-dependent-universal-property-pushout
++    ( dup-pushout)
++    ( P) =
++    is-equiv-comp-htpy
++      ( dependent-cofork-map f g e)
++      ( dependent-cofork-dependent-cocone-codiagonal f g e P)
++      ( dependent-cocone-map
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P))
++      ( triangle-dependent-cofork-dependent-cocone-codiagonal f g e P)
++      ( dup-pushout P)
++      ( is-equiv-dependent-cofork-dependent-cocone-codiagonal f g e P)
++
++  dependent-universal-property-pushout-dependent-universal-property-coequalizer :
++    ( {l : Level} →
++      dependent-universal-property-coequalizer l f g e) →
++    ( {l : Level} →
++      dependent-universal-property-pushout l
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e))
++  dependent-universal-property-pushout-dependent-universal-property-coequalizer
++    ( dup-coequalizer)
++    ( P) =
++    is-equiv-right-factor-htpy
++      ( dependent-cofork-map f g e)
++      ( dependent-cofork-dependent-cocone-codiagonal f g e P)
++      ( dependent-cocone-map
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e)
++        ( P))
++      ( triangle-dependent-cofork-dependent-cocone-codiagonal f g e P)
++      ( is-equiv-dependent-cofork-dependent-cocone-codiagonal f g e P)
++      ( dup-coequalizer P)
++```
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+index 0b8d958fda..f8948f88e8 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -7,24 +7,24 @@ module synthetic-homotopy-theory.flattening-lemma-coequalizers where
+ <details><summary>Imports</summary>
+ 
+ ```agda
+-open import foundation.commuting-triangles-of-maps
++open import foundation.action-on-identifications-functions
++open import foundation.coproduct-types
+ open import foundation.dependent-pair-types
+ open import foundation.equality-dependent-pair-types
+ open import foundation.equivalences
+-open import foundation.function-extensionality
+ open import foundation.function-types
+-open import foundation.functoriality-dependent-function-types
+ open import foundation.functoriality-dependent-pair-types
+ open import foundation.homotopies
+ open import foundation.identity-types
+ open import foundation.transport-along-identifications
+-open import foundation.universal-property-dependent-pair-types
++open import foundation.type-arithmetic-coproduct-types
+ open import foundation.universe-levels
+ 
+ open import synthetic-homotopy-theory.coforks
+-open import synthetic-homotopy-theory.dependent-coforks
+ open import synthetic-homotopy-theory.dependent-universal-property-coequalizers
++open import synthetic-homotopy-theory.flattening-lemma-pushouts
+ open import synthetic-homotopy-theory.universal-property-coequalizers
++open import synthetic-homotopy-theory.universal-property-pushouts
+ ```
+ 
+ </details>
+@@ -48,8 +48,8 @@ with homotopy `H : e ∘ f ~ e ∘ g`, and a type family `P : X → 𝓤` over `
+ cofork
+ 
+ ```text
+-                 ----->
+-Σ (a : A) P(efa) -----> Σ (b : B) P(eb) ---> Σ (x : X) P(x)
++                  ----->
++ Σ (a : A) P(efa) -----> Σ (b : B) P(eb) ---> Σ (x : X) P(x)
+ ```
+ 
+ is again a coequalizer.
+@@ -64,10 +64,20 @@ module _
+   ( P : X → UU l4) (e : cofork f g X)
+   where
+ 
++  bottom-map-cofork-flattening-lemma-coequalizer :
++    Σ A (P ∘ map-cofork f g e ∘ f) → Σ B (P ∘ map-cofork f g e)
++  bottom-map-cofork-flattening-lemma-coequalizer =
++    map-Σ-map-base f (P ∘ map-cofork f g e)
++
++  top-map-cofork-flattening-lemma-coequalizer :
++    Σ A (P ∘ map-cofork f g e ∘ f) → Σ B (P ∘ map-cofork f g e)
++  top-map-cofork-flattening-lemma-coequalizer =
++    map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a))
++
+   cofork-flattening-lemma-coequalizer :
+     cofork
+-      ( map-Σ-map-base f (P ∘ map-cofork f g e))
+-      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
++      ( bottom-map-cofork-flattening-lemma-coequalizer)
++      ( top-map-cofork-flattening-lemma-coequalizer)
+       ( Σ X P)
+   pr1 cofork-flattening-lemma-coequalizer = map-Σ-map-base (map-cofork f g e) P
+   pr2 cofork-flattening-lemma-coequalizer =
+@@ -81,8 +91,8 @@ module _
+     ( {l : Level} → dependent-universal-property-coequalizer l f g e) →
+     { l : Level} →
+     universal-property-coequalizer l
+-      ( map-Σ-map-base f (P ∘ map-cofork f g e))
+-      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
++      ( bottom-map-cofork-flattening-lemma-coequalizer)
++      ( top-map-cofork-flattening-lemma-coequalizer)
+       ( cofork-flattening-lemma-coequalizer)
+ ```
+ 
+@@ -90,8 +100,19 @@ module _
+ 
+ ### Proof of the flattening lemma for coequalizers
+ 
+-The proof is analogous to the one of the
+-[flattening lemma for pushouts](synthetic-homotopy-theory.flattening-lemma-pushouts.md).
++To show that the cofork of total spaces is a coequalizer, it
++[suffices to show](synthetic-homotopy-theory.universal-property-coequalizers.md)
++that the induced cocone is a pushout. This is accomplished by constructing a
++[commuting cube](foundation.commuting-cubes-of-maps.md) where the bottom is this
++cocone, and the top is the cocone of total spaces for the cocone induced by the
++cofork.
++
++Assuming that the given cofork is a coequalizer, we get that its induced cocone
++is a pushout, so by the
++[flattening lemma for pushouts](synthetic-homotopy-theory.flattening-lemma-pushouts.md),
++the top square is a pushout as well. The vertical maps of the cube are
++[equivalences](foundation.equivalences.md), so it follows that the bottom square
++is a pushout.
+ 
+ ```agda
+ module _
+@@ -99,71 +120,92 @@ module _
+   ( P : X → UU l4) (e : cofork f g X)
+   where
+ 
+-  cofork-map-flattening-coequalizer :
+-    { l : Level} (Y : UU l) →
+-    ( Σ X P → Y) →
+-    cofork
+-      ( map-Σ-map-base f (P ∘ map-cofork f g e))
+-      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
+-      ( Y)
+-  cofork-map-flattening-coequalizer Y =
+-    cofork-map
+-      ( map-Σ-map-base f (P ∘ map-cofork f g e))
+-      ( map-Σ (P ∘ map-cofork f g e) g (λ a → tr P (coherence-cofork f g e a)))
+-      ( cofork-flattening-lemma-coequalizer f g P e)
+-
+-  comparison-dependent-cofork-ind-Σ-cofork :
+-    { l : Level} (Y : UU l) →
+-    Σ ( (b : B) → P (map-cofork f g e b) → Y)
+-      ( λ k →
+-        ( a : A) (t : P (map-cofork f g e (f a))) →
+-        ( k (f a) t) ＝
+-        ( k (g a) (tr P (coherence-cofork f g e a) t))) ≃
+-    dependent-cofork f g e (λ x → P x → Y)
+-  comparison-dependent-cofork-ind-Σ-cofork Y =
+-    equiv-tot
+-      ( λ k →
+-        equiv-Π-equiv-family
+-          ( equiv-htpy-dependent-function-dependent-identification-function-type
+-            ( Y)
+-            ( coherence-cofork f g e)
+-            ( k ∘ f)
+-            ( k ∘ g)))
+-
+-  triangle-comparison-dependent-cofork-ind-Σ-cofork :
+-    { l : Level} (Y : UU l) →
+-    coherence-triangle-maps
+-      ( dependent-cofork-map f g e {P = (λ x → P x → Y)})
+-      ( map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
+-      ( map-equiv equiv-ev-pair² ∘ cofork-map-flattening-coequalizer Y ∘ ind-Σ)
+-  triangle-comparison-dependent-cofork-ind-Σ-cofork Y h =
+-    eq-pair-Σ
+-      ( refl)
+-      ( eq-htpy
+-        ( inv-htpy
+-          ( compute-equiv-htpy-dependent-function-dependent-identification-function-type
+-            ( Y)
+-            ( coherence-cofork f g e)
+-            ( h))))
+-
+-  flattening-lemma-coequalizer :
+-    flattening-lemma-coequalizer-statement f g P e
+-  flattening-lemma-coequalizer dup-coequalizer Y =
+-    is-equiv-left-factor
+-      ( cofork-map-flattening-coequalizer Y)
+-      ( ind-Σ)
+-      ( is-equiv-right-factor
+-        ( map-equiv equiv-ev-pair²)
+-        ( cofork-map-flattening-coequalizer Y ∘ ind-Σ)
+-        ( is-equiv-map-equiv equiv-ev-pair²)
+-        ( is-equiv-right-factor-htpy
+-          ( dependent-cofork-map f g e {P = (λ x → P x → Y)})
+-          ( map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
+-          ( ( map-equiv equiv-ev-pair²) ∘
+-            ( cofork-map-flattening-coequalizer Y) ∘
+-            ( ind-Σ))
+-          ( triangle-comparison-dependent-cofork-ind-Σ-cofork Y)
+-          ( is-equiv-map-equiv (comparison-dependent-cofork-ind-Σ-cofork Y))
+-          ( dup-coequalizer (λ x → P x → Y))))
+-      ( is-equiv-ind-Σ)
++  abstract
++    flattening-lemma-coequalizer :
++      flattening-lemma-coequalizer-statement f g P e
++    flattening-lemma-coequalizer dup-coequalizer =
++      universal-property-coequalizer-universal-property-pushout
++        ( bottom-map-cofork-flattening-lemma-coequalizer f g P e)
++        ( top-map-cofork-flattening-lemma-coequalizer f g P e)
++        ( cofork-flattening-lemma-coequalizer f g P e)
++        ( universal-property-pushout-bottom-universal-property-pushout-top-cube-is-equiv
++          ( vertical-map-span-cocone-cofork
++            ( bottom-map-cofork-flattening-lemma-coequalizer f g P e)
++            ( top-map-cofork-flattening-lemma-coequalizer f g P e))
++          ( horizontal-map-span-cocone-cofork
++            ( bottom-map-cofork-flattening-lemma-coequalizer f g P e)
++            ( top-map-cofork-flattening-lemma-coequalizer f g P e))
++          ( horizontal-map-cocone-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( vertical-map-cocone-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( vertical-map-span-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( horizontal-map-span-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( horizontal-map-cocone-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( vertical-map-cocone-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( map-equiv
++            ( right-distributive-Σ-coprod A A
++              ( ( P) ∘
++                ( horizontal-map-cocone-cofork f g e) ∘
++                ( vertical-map-span-cocone-cofork f g))))
++          ( id)
++          ( id)
++          ( id)
++          ( coherence-square-cocone-flattening-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e))
++          ( λ where
++            (inl a , t) → refl
++            (inr a , t) → refl)
++          ( λ where
++            (inl a , t) → refl
++            (inr a , t) → refl)
++          ( refl-htpy)
++          ( refl-htpy)
++          ( coherence-square-cocone-cofork
++            ( bottom-map-cofork-flattening-lemma-coequalizer f g P e)
++            ( top-map-cofork-flattening-lemma-coequalizer f g P e)
++            ( cofork-flattening-lemma-coequalizer f g P e))
++          ( λ where
++            (inl a , t) → refl
++            (inr a , t) →
++              ( ap-id
++                ( eq-pair-Σ
++                  ( coherence-cofork f g e a)
++                  ( refl))) ∙
++              ( inv right-unit))
++          ( is-equiv-map-equiv
++            ( right-distributive-Σ-coprod A A
++              ( ( P) ∘
++                ( horizontal-map-cocone-cofork f g e) ∘
++                ( vertical-map-span-cocone-cofork f g))))
++          ( is-equiv-id)
++          ( is-equiv-id)
++          ( is-equiv-id)
++          ( flattening-lemma-pushout P
++            ( vertical-map-span-cocone-cofork f g)
++            ( horizontal-map-span-cocone-cofork f g)
++            ( cocone-codiagonal-cofork f g e)
++            ( dependent-universal-property-pushout-dependent-universal-property-coequalizer
++              ( f)
++              ( g)
++              ( e)
++              ( dup-coequalizer))))
+ ```
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+index ac45412aa7..436acad6cf 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
+@@ -74,6 +74,21 @@ module _
+   ( f : S → A) (g : S → B) (c : cocone f g X)
+   where
+ 
++  vertical-map-span-flattening-pushout :
++    Σ S (P ∘ horizontal-map-cocone f g c ∘ f) →
++    Σ A (P ∘ horizontal-map-cocone f g c)
++  vertical-map-span-flattening-pushout =
++    map-Σ-map-base f (P ∘ horizontal-map-cocone f g c)
++
++  horizontal-map-span-flattening-pushout :
++    Σ S (P ∘ horizontal-map-cocone f g c ∘ f) →
++    Σ B (P ∘ vertical-map-cocone f g c)
++  horizontal-map-span-flattening-pushout =
++    map-Σ
++      ( P ∘ vertical-map-cocone f g c)
++      ( g)
++      ( λ s → tr P (coherence-square-cocone f g c s))
++
+   horizontal-map-cocone-flattening-pushout :
+     Σ A (P ∘ horizontal-map-cocone f g c) → Σ X P
+   horizontal-map-cocone-flattening-pushout =
+@@ -86,11 +101,8 @@ module _
+ 
+   coherence-square-cocone-flattening-pushout :
+     coherence-square-maps
+-      ( map-Σ
+-        ( P ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr P (coherence-square-cocone f g c s)))
+-      ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
++      ( horizontal-map-span-flattening-pushout)
++      ( vertical-map-span-flattening-pushout)
+       ( vertical-map-cocone-flattening-pushout)
+       ( horizontal-map-cocone-flattening-pushout)
+   coherence-square-cocone-flattening-pushout =
+@@ -101,11 +113,8 @@ module _
+ 
+   cocone-flattening-pushout :
+     cocone
+-      ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
+-      ( map-Σ
+-        ( P ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr P (coherence-square-cocone f g c s)))
++      ( vertical-map-span-flattening-pushout)
++      ( horizontal-map-span-flattening-pushout)
+       ( Σ X P)
+   pr1 cocone-flattening-pushout =
+     horizontal-map-cocone-flattening-pushout
+@@ -119,11 +128,8 @@ module _
+     ( {l : Level} → dependent-universal-property-pushout l f g c) →
+     { l : Level} →
+     universal-property-pushout l
+-      ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
+-      ( map-Σ
+-        ( P ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr P (coherence-square-cocone f g c s)))
++      ( vertical-map-span-flattening-pushout)
++      ( horizontal-map-span-flattening-pushout)
+       ( cocone-flattening-pushout)
+ ```
+ 
+@@ -142,6 +148,16 @@ module _
+   ( e : equiv-Fam-pushout P (desc-fam c Q))
+   where
+ 
++  vertical-map-span-flattening-descent-data-pushout :
++    Σ S (pr1 P ∘ f) → Σ A (pr1 P)
++  vertical-map-span-flattening-descent-data-pushout =
++    map-Σ-map-base f (pr1 P)
++
++  horizontal-map-span-flattening-descent-data-pushout :
++    Σ S (pr1 P ∘ f) → Σ B (pr1 (pr2 P))
++  horizontal-map-span-flattening-descent-data-pushout =
++    map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s))
++
+   horizontal-map-cocone-flattening-descent-data-pushout :
+     Σ A (pr1 P) → Σ X Q
+   horizontal-map-cocone-flattening-descent-data-pushout =
+@@ -158,8 +174,8 @@ module _
+ 
+   coherence-square-cocone-flattening-descent-data-pushout :
+     coherence-square-maps
+-      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
+-      ( map-Σ-map-base f (pr1 P))
++      ( horizontal-map-span-flattening-descent-data-pushout)
++      ( vertical-map-span-flattening-descent-data-pushout)
+       ( vertical-map-cocone-flattening-descent-data-pushout)
+       ( horizontal-map-cocone-flattening-descent-data-pushout)
+   coherence-square-cocone-flattening-descent-data-pushout =
+@@ -170,8 +186,8 @@ module _
+ 
+   cocone-flattening-descent-data-pushout :
+     cocone
+-      ( map-Σ-map-base f (pr1 P))
+-      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( vertical-map-span-flattening-descent-data-pushout)
++      ( horizontal-map-span-flattening-descent-data-pushout)
+       ( Σ X Q)
+   pr1 cocone-flattening-descent-data-pushout =
+     horizontal-map-cocone-flattening-descent-data-pushout
+@@ -185,8 +201,8 @@ module _
+     ( {l : Level} → dependent-universal-property-pushout l f g c) →
+     { l : Level} →
+     universal-property-pushout l
+-      ( map-Σ-map-base f (pr1 P))
+-      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( vertical-map-span-flattening-descent-data-pushout)
++      ( horizontal-map-span-flattening-descent-data-pushout)
+       ( cocone-flattening-descent-data-pushout)
+ ```
+ 
+@@ -209,19 +225,13 @@ module _
+     { l : Level} (Y : UU l) →
+     ( Σ X P → Y) →
+     cocone
+-      ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
+-      ( map-Σ
+-        ( P ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr P (coherence-square-cocone f g c s)))
++      ( vertical-map-span-flattening-pushout P f g c)
++      ( horizontal-map-span-flattening-pushout P f g c)
+       ( Y)
+   cocone-map-flattening-pushout Y =
+     cocone-map
+-      ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
+-      ( map-Σ
+-        ( P ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr P (coherence-square-cocone f g c s)))
++      ( vertical-map-span-flattening-pushout P f g c)
++      ( horizontal-map-span-flattening-pushout P f g c)
+       ( cocone-flattening-pushout P f g c)
+ 
+   comparison-dependent-cocone-ind-Σ-cocone :
+@@ -318,15 +328,12 @@ module _
+ 
+   coherence-cube-flattening-lemma-descent-data-pushout :
+     coherence-cube-maps
+-      ( map-Σ-map-base f (Q ∘ horizontal-map-cocone f g c))
+-      ( map-Σ
+-        ( Q ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr Q (coherence-square-cocone f g c s)))
++      ( vertical-map-span-flattening-pushout Q f g c)
++      ( horizontal-map-span-flattening-pushout Q f g c)
+       ( horizontal-map-cocone-flattening-pushout Q f g c)
+       ( vertical-map-cocone-flattening-pushout Q f g c)
+-      ( map-Σ-map-base f (pr1 P))
+-      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( vertical-map-span-flattening-descent-data-pushout f g c P Q e)
++      ( horizontal-map-span-flattening-descent-data-pushout f g c P Q e)
+       ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
+       ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
+       ( tot (λ s → map-equiv (pr1 e (f s))))
+@@ -365,15 +372,12 @@ module _
+     flattening-lemma-descent-data-pushout-statement f g c P Q e
+   flattening-lemma-descent-data-pushout dup-pushout =
+     universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
+-      ( map-Σ-map-base f (Q ∘ horizontal-map-cocone f g c))
+-      ( map-Σ
+-        ( Q ∘ vertical-map-cocone f g c)
+-        ( g)
+-        ( λ s → tr Q (coherence-square-cocone f g c s)))
++      ( vertical-map-span-flattening-pushout Q f g c)
++      ( horizontal-map-span-flattening-pushout Q f g c)
+       ( horizontal-map-cocone-flattening-pushout Q f g c)
+       ( vertical-map-cocone-flattening-pushout Q f g c)
+-      ( map-Σ-map-base f (pr1 P))
+-      ( map-Σ (pr1 (pr2 P)) g (λ s → map-equiv (pr2 (pr2 P) s)))
++      ( vertical-map-span-flattening-descent-data-pushout f g c P Q e)
++      ( horizontal-map-span-flattening-descent-data-pushout f g c P Q e)
+       ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
+       ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
+       ( tot (λ s → map-equiv (pr1 e (f s))))
+diff --git a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+index 9671b76938..32751a8e2c 100644
+--- a/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/universal-property-coequalizers.lagda.md
+@@ -15,7 +15,9 @@ open import foundation.fibers-of-maps
+ open import foundation.functoriality-dependent-pair-types
+ open import foundation.universe-levels
+ 
++open import synthetic-homotopy-theory.cocones-under-spans
+ open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.universal-property-pushouts
+ ```
+ 
+ </details>
+@@ -92,3 +94,58 @@ module _
+           ( λ h → is-equiv-htpy-cofork-eq f g (cofork-map f g e h) e'))
+         ( is-contr-map-is-equiv (up-coequalizer Y) e')
+ ```
++
++### A cofork has the universal property of coequalizers if and only if the corresponding cocone has the universal property of pushouts
++
++As mentioned in [coforks](synthetic-homotopy-theory.coforks.md), coforks can be
++thought of as special cases of cocones under spans. This theorem makes it more
++precise, asserting that under this mapping,
++[coequalizers](synthetic-homotopy-theory.coequalizers.md) correspond to
++[pushouts](synthetic-homotopy-theory.pushouts.md).
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {X : UU l3} (f g : A → B)
++  ( e : cofork f g X)
++  where
++
++  universal-property-coequalizer-universal-property-pushout :
++    ( {l : Level} →
++      universal-property-pushout l
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e)) →
++    ( {l : Level} →
++      universal-property-coequalizer l f g e)
++  universal-property-coequalizer-universal-property-pushout up-pushout Y =
++    is-equiv-comp-htpy
++      ( cofork-map f g e)
++      ( cofork-cocone-codiagonal f g)
++      ( cocone-map
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e))
++      ( triangle-cofork-cocone f g e)
++      ( up-pushout Y)
++      ( is-equiv-cofork-cocone-codiagonal f g)
++
++  universal-property-pushout-universal-property-coequalizer :
++    ( {l : Level} →
++      universal-property-coequalizer l f g e) →
++    ( {l : Level} →
++      universal-property-pushout l
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e))
++  universal-property-pushout-universal-property-coequalizer up-coequalizer Y =
++    is-equiv-right-factor-htpy
++      ( cofork-map f g e)
++      ( cofork-cocone-codiagonal f g)
++      ( cocone-map
++        ( vertical-map-span-cocone-cofork f g)
++        ( horizontal-map-span-cocone-cofork f g)
++        ( cocone-codiagonal-cofork f g e))
++      ( triangle-cofork-cocone f g e)
++      ( is-equiv-cofork-cocone-codiagonal f g)
++      ( up-coequalizer Y)
++```

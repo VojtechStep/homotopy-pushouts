@@ -1,13 +1,17 @@
-From 19567ecc6dcd67e7ef31477898655c4a5523aee2 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 17 Apr 2024 20:48:26 +0200
-Subject: [PATCH 1/3] Maps in sequential diagrams of contractibles are
- equivalences
-
----
- .../sequential-diagrams.lagda.md              | 23 +++++++++++++++++++
- 1 file changed, 23 insertions(+)
-
+diff --git a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
+index 3863a8f311..5f4d6c625b 100644
+--- a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
++++ b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
+@@ -91,6 +91,9 @@ module _
+       ( map-cocone-sequential-diagram (succ-ℕ n))
+       ( map-sequential-diagram A n)
+   coherence-cocone-sequential-diagram = pr2 c
++
++  first-map-cocone-sequential-diagram : family-sequential-diagram A 0 → X
++  first-map-cocone-sequential-diagram = map-cocone-sequential-diagram 0
+ ```
+ 
+ ### Homotopies of cocones under a sequential diagram
 diff --git a/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
 index 34fe7194f0..36b3ab63ed 100644
 --- a/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
@@ -50,33 +54,8 @@ index 34fe7194f0..36b3ab63ed 100644
  ## References
  
  {{#bibliography}} {{#reference SDR20}}
-
-From a51d2eb590c2c9bddb01efd15536665d84c6dd49 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 17 Apr 2024 23:33:07 +0200
-Subject: [PATCH 2/3] is-equiv diagram -> is-equiv inclusion into colimit
-
----
- ...cocones-under-sequential-diagrams.lagda.md |   3 +
- ...rsal-property-sequential-colimits.lagda.md | 333 ++++++++++++++++++
- 2 files changed, 336 insertions(+)
-
-diff --git a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-index 3863a8f311..5f4d6c625b 100644
---- a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-+++ b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
-@@ -91,6 +91,9 @@ module _
-       ( map-cocone-sequential-diagram (succ-ℕ n))
-       ( map-sequential-diagram A n)
-   coherence-cocone-sequential-diagram = pr2 c
-+
-+  first-map-cocone-sequential-diagram : family-sequential-diagram A 0 → X
-+  first-map-cocone-sequential-diagram = map-cocone-sequential-diagram 0
- ```
- 
- ### Homotopies of cocones under a sequential diagram
 diff --git a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-index 54ca756368..714f25f962 100644
+index 54ca756368..beebe0f79a 100644
 --- a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
 +++ b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
 @@ -7,20 +7,28 @@ module synthetic-homotopy-theory.universal-property-sequential-colimits where
@@ -108,7 +87,7 @@ index 54ca756368..714f25f962 100644
  
  open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
  open import synthetic-homotopy-theory.coforks
-@@ -360,3 +368,328 @@ module _
+@@ -360,3 +368,332 @@ module _
            ( up-c)
            ( up-c'))
  ```
@@ -200,26 +179,27 @@ index 54ca756368..714f25f962 100644
 +which we construct by induction as
 +
 +```text
-+  K₀ : (j₀')₀ ≐ j₀ ~ j₀             by reflexivity
-+  Kₙ₊₁ : (j₀')ₙ₊₁ ≐ (j₀')ₙ ∘ aₙ⁻¹
-+       ~ jₙ ∘ aₙ⁻¹                  by Kₙ
-+       ~ jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹           by coherence Hₙ of c
-+       ~ jₙ₊₁                       by aₙ⁻¹ being a section of aₙ ,
++  K₀ : (j₀')₀ ≐ j₀ ~ j₀     by reflexivity
++  Kₙ₊₁ : (j₀')ₙ₊₁
++       ≐ (j₀')ₙ ∘ aₙ⁻¹      by definition
++       ~ jₙ ∘ aₙ⁻¹          by Kₙ
++       ~ jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹   by coherence Hₙ of c
++       ~ jₙ₊₁               by aₙ⁻¹ being a section of aₙ ,
 +```
 +
 +and a coherence datum which upon some pondering boils down to the following
 +[commuting square of homotopies](foundation-core.commuting-squares-of-homotopies.md):
 +
 +```text
-+                      Kₙ ·r (aₙ⁻¹ ∘ aₙ)                  Hₙ ·r (aₙ⁻¹ ∘ aₙ)
-+  (j₀')ₙ ∘ aₙ⁻¹ ∘ aₙ ------------------> jₙ ∘ aₙ⁻¹ ∘ aₙ -------------------> jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹ ∘ aₙ
-+           |                                   |                                       |
-+           |                                   |                                       |
-+           | (j₀')ₙ ·l is-retraction aₙ⁻¹      |  jₙ ·l is-retraction aₙ⁻¹             | jₙ₊₁ ·l is-section aₙ⁻¹ ·r aₙ
-+           |                                   |                                       |
-+           ∨                                   ∨                                       ∨
-+        (j₀')ₙ ------------------------------> jₙ ----------------------------->  jₙ₊₁ ∘ aₙ .
-+                             Kₙ                                   Hₙ
++                        Kₙ ·r (aₙ⁻¹ ∘ aₙ)                Hₙ ·r (aₙ⁻¹ ∘ aₙ)
++     (j₀')ₙ ∘ aₙ⁻¹ ∘ aₙ ----------------> jₙ ∘ aₙ⁻¹ ∘ aₙ ----------------> jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹ ∘ aₙ
++              |                                 |                                    |
++              |                                 |                                    |
++  (j₀')ₙ ·l is-retraction aₙ⁻¹      jₙ ·l is-retraction aₙ⁻¹            jₙ₊₁ ·l is-section aₙ⁻¹ ·r aₙ
++              |                                 |                                    |
++              ∨                                 ∨                                    ∨
++           (j₀')ₙ ----------------------------> jₙ -------------------------->  jₙ₊₁ ∘ aₙ .
++                               Kₙ                                 Hₙ
 +```
 +
 +This rectangle is almost a pasting of the squares of naturality of `Kₙ` and `Hₙ`
@@ -349,14 +329,17 @@ index 54ca756368..714f25f962 100644
 +              ( coherence-cocone-sequential-diagram c n))
 +            ( is-retraction-map-inv-is-equiv (equivs n) a)))
 +
-+  is-retraction-cocone-first-map-is-equiv-sequential-diagram :
-+    is-retraction
-+      ( first-map-cocone-sequential-diagram)
-+      ( cocone-first-map-is-equiv-sequential-diagram)
-+  is-retraction-cocone-first-map-is-equiv-sequential-diagram c =
-+    eq-htpy-cocone-sequential-diagram A _ _
-+      ( htpy-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram c ,
-+        coh-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram c)
++  abstract
++    is-retraction-cocone-first-map-is-equiv-sequential-diagram :
++      is-retraction
++        ( first-map-cocone-sequential-diagram)
++        ( cocone-first-map-is-equiv-sequential-diagram)
++    is-retraction-cocone-first-map-is-equiv-sequential-diagram c =
++      eq-htpy-cocone-sequential-diagram A _ _
++        ( ( htpy-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram
++            ( c)) ,
++          ( coh-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram
++            ( c)))
 +
 +  is-equiv-first-map-cocone-is-equiv-sequential-diagram :
 +    is-equiv first-map-cocone-sequential-diagram
@@ -437,85 +420,3 @@ index 54ca756368..714f25f962 100644
 +        ( 0))
 +      ( contrs 0)
 +```
-
-From 2d27765e4374b2cd4bc81db28a2e829de9c131ce Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Thu, 18 Apr 2024 12:06:04 +0200
-Subject: [PATCH 3/3] Review comments
-
----
- ...rsal-property-sequential-colimits.lagda.md | 48 ++++++++++---------
- 1 file changed, 26 insertions(+), 22 deletions(-)
-
-diff --git a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-index 714f25f962..beebe0f79a 100644
---- a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-+++ b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
-@@ -456,26 +456,27 @@ The homotopy of cocones consists of homotopies
- which we construct by induction as
- 
- ```text
--  K₀ : (j₀')₀ ≐ j₀ ~ j₀             by reflexivity
--  Kₙ₊₁ : (j₀')ₙ₊₁ ≐ (j₀')ₙ ∘ aₙ⁻¹
--       ~ jₙ ∘ aₙ⁻¹                  by Kₙ
--       ~ jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹           by coherence Hₙ of c
--       ~ jₙ₊₁                       by aₙ⁻¹ being a section of aₙ ,
-+  K₀ : (j₀')₀ ≐ j₀ ~ j₀     by reflexivity
-+  Kₙ₊₁ : (j₀')ₙ₊₁
-+       ≐ (j₀')ₙ ∘ aₙ⁻¹      by definition
-+       ~ jₙ ∘ aₙ⁻¹          by Kₙ
-+       ~ jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹   by coherence Hₙ of c
-+       ~ jₙ₊₁               by aₙ⁻¹ being a section of aₙ ,
- ```
- 
- and a coherence datum which upon some pondering boils down to the following
- [commuting square of homotopies](foundation-core.commuting-squares-of-homotopies.md):
- 
- ```text
--                      Kₙ ·r (aₙ⁻¹ ∘ aₙ)                  Hₙ ·r (aₙ⁻¹ ∘ aₙ)
--  (j₀')ₙ ∘ aₙ⁻¹ ∘ aₙ ------------------> jₙ ∘ aₙ⁻¹ ∘ aₙ -------------------> jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹ ∘ aₙ
--           |                                   |                                       |
--           |                                   |                                       |
--           | (j₀')ₙ ·l is-retraction aₙ⁻¹      |  jₙ ·l is-retraction aₙ⁻¹             | jₙ₊₁ ·l is-section aₙ⁻¹ ·r aₙ
--           |                                   |                                       |
--           ∨                                   ∨                                       ∨
--        (j₀')ₙ ------------------------------> jₙ ----------------------------->  jₙ₊₁ ∘ aₙ .
--                             Kₙ                                   Hₙ
-+                        Kₙ ·r (aₙ⁻¹ ∘ aₙ)                Hₙ ·r (aₙ⁻¹ ∘ aₙ)
-+     (j₀')ₙ ∘ aₙ⁻¹ ∘ aₙ ----------------> jₙ ∘ aₙ⁻¹ ∘ aₙ ----------------> jₙ₊₁ ∘ aₙ ∘ aₙ⁻¹ ∘ aₙ
-+              |                                 |                                    |
-+              |                                 |                                    |
-+  (j₀')ₙ ·l is-retraction aₙ⁻¹      jₙ ·l is-retraction aₙ⁻¹            jₙ₊₁ ·l is-section aₙ⁻¹ ·r aₙ
-+              |                                 |                                    |
-+              ∨                                 ∨                                    ∨
-+           (j₀')ₙ ----------------------------> jₙ -------------------------->  jₙ₊₁ ∘ aₙ .
-+                               Kₙ                                 Hₙ
- ```
- 
- This rectangle is almost a pasting of the squares of naturality of `Kₙ` and `Hₙ`
-@@ -605,14 +606,17 @@ module _
-               ( coherence-cocone-sequential-diagram c n))
-             ( is-retraction-map-inv-is-equiv (equivs n) a)))
- 
--  is-retraction-cocone-first-map-is-equiv-sequential-diagram :
--    is-retraction
--      ( first-map-cocone-sequential-diagram)
--      ( cocone-first-map-is-equiv-sequential-diagram)
--  is-retraction-cocone-first-map-is-equiv-sequential-diagram c =
--    eq-htpy-cocone-sequential-diagram A _ _
--      ( htpy-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram c ,
--        coh-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram c)
-+  abstract
-+    is-retraction-cocone-first-map-is-equiv-sequential-diagram :
-+      is-retraction
-+        ( first-map-cocone-sequential-diagram)
-+        ( cocone-first-map-is-equiv-sequential-diagram)
-+    is-retraction-cocone-first-map-is-equiv-sequential-diagram c =
-+      eq-htpy-cocone-sequential-diagram A _ _
-+        ( ( htpy-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram
-+            ( c)) ,
-+          ( coh-htpy-is-retraction-cocone-first-map-is-equiv-sequential-diagram
-+            ( c)))
- 
-   is-equiv-first-map-cocone-is-equiv-sequential-diagram :
-     is-equiv first-map-cocone-sequential-diagram

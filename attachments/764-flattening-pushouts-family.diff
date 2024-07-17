@@ -1,16 +1,3 @@
-From 474f3e488841a115cedb680ab4d9519265729d62 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Mon, 11 Sep 2023 19:41:04 +0200
-Subject: [PATCH 1/9] Various computation lemmas
-
----
- .../dependent-identifications.lagda.md         |  8 ++++++++
- .../equality-dependent-pair-types.lagda.md     | 12 ++++++++++++
- src/foundation/equivalences.lagda.md           | 18 ++++++++++++++++++
- .../functoriality-function-types.lagda.md      | 16 ++++++++++++++++
- src/foundation/univalence.lagda.md             |  5 +++++
- 5 files changed, 59 insertions(+)
-
 diff --git a/src/foundation/dependent-identifications.lagda.md b/src/foundation/dependent-identifications.lagda.md
 index a2738f938a..deb51a2aeb 100644
 --- a/src/foundation/dependent-identifications.lagda.md
@@ -38,13 +25,15 @@ index a2738f938a..deb51a2aeb 100644
  
  #### Inverses of dependent identifications
 diff --git a/src/foundation/equality-dependent-pair-types.lagda.md b/src/foundation/equality-dependent-pair-types.lagda.md
-index 4e3a6aae09..11488d781e 100644
+index 4e3a6aae09..68770562f6 100644
 --- a/src/foundation/equality-dependent-pair-types.lagda.md
 +++ b/src/foundation/equality-dependent-pair-types.lagda.md
-@@ -109,6 +109,18 @@ module _
+@@ -109,6 +109,20 @@ module _
    pr1-pair-eq-Σ-ap refl = refl
  ```
  
++### Computing action of functions on identifications of the form `eq-pair-Σ p q`
++
 +```agda
 +module _
 +  { l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {Y : UU l3} (f : Σ A B → Y)
@@ -89,73 +78,11 @@ index 47fb87b058..b84c810ea4 100644
  ### The groupoid laws for equivalences
  
  #### Composition of equivalences is associative
-diff --git a/src/foundation/functoriality-function-types.lagda.md b/src/foundation/functoriality-function-types.lagda.md
-index 400f1ea750..e523d71135 100644
---- a/src/foundation/functoriality-function-types.lagda.md
-+++ b/src/foundation/functoriality-function-types.lagda.md
-@@ -19,6 +19,7 @@ open import foundation-core.constant-maps
- open import foundation-core.embeddings
- open import foundation-core.equivalences
- open import foundation-core.function-types
-+open import foundation-core.homotopies
- open import foundation-core.identity-types
- open import foundation-core.propositional-maps
- open import foundation-core.truncated-maps
-@@ -60,6 +61,21 @@ module _
-   pr2 equiv-function-type = is-equiv-map-equiv-function-type
- ```
- 
-+### Two maps being homotopic is equivalent to them being homotopic after precomposition by an equivalence
-+
-+```agda
-+equiv-htpy-precomp-htpy :
-+  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {C : UU l3}
-+  ( f g : B → C) (e : A ≃ B) →
-+  ( (f ∘ map-equiv e) ~ (g ∘ map-equiv e)) ≃
-+  ( f ~ g)
-+equiv-htpy-precomp-htpy {C = C} f g e =
-+  equiv-Π
-+    ( eq-value f g)
-+    ( e)
-+    ( λ a → id-equiv)
-+```
-+
- ### A map is truncated iff postcomposition by it is truncated
- 
- ```agda
-diff --git a/src/foundation/univalence.lagda.md b/src/foundation/univalence.lagda.md
-index 09cc2fddf1..98638395e7 100644
---- a/src/foundation/univalence.lagda.md
-+++ b/src/foundation/univalence.lagda.md
-@@ -165,6 +165,11 @@ compute-eq-equiv-comp-equiv A B C f g =
-             ( λ e → map-equiv e (g ∘e f))
-             ( inv (right-inverse-law-equiv equiv-univalence))))))
- 
-+compute-equiv-eq-ap-inv :
-+  {l1 l2 : Level} {A : UU l1} {B : A → UU l2} {x y : A} (p : x ＝ y) →
-+  map-equiv (equiv-eq (ap B (inv p)) ∘e (equiv-eq (ap B p))) ~ id
-+compute-equiv-eq-ap-inv refl = refl-htpy
-+
- commutativity-inv-equiv-eq :
-   {l : Level} (A B : UU l) (p : A ＝ B) →
-   inv-equiv (equiv-eq p) ＝ equiv-eq (inv p)
-
-From 92456f1bb5ed2a76b0ff76a593eae12e178ae147 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 16:45:06 +0200
-Subject: [PATCH 2/9] Proof of the flattening lemma for pushouts
-
----
- src/foundation/function-types.lagda.md        |  85 +++++++++++-
- ...sal-property-dependent-pair-types.lagda.md |  75 +++++++++--
- .../flattening-lemma-pushouts.lagda.md        | 127 +++++++++++++++++-
- 3 files changed, 263 insertions(+), 24 deletions(-)
-
 diff --git a/src/foundation/function-types.lagda.md b/src/foundation/function-types.lagda.md
-index cbafd7364a..54bbffbbbd 100644
+index cbafd7364a..297c558ada 100644
 --- a/src/foundation/function-types.lagda.md
 +++ b/src/foundation/function-types.lagda.md
-@@ -10,11 +10,15 @@ open import foundation-core.function-types public
+@@ -10,11 +10,16 @@ open import foundation-core.function-types public
  
  ```agda
  open import foundation.action-on-identifications-dependent-functions
@@ -163,6 +90,7 @@ index cbafd7364a..54bbffbbbd 100644
 +open import foundation.dependent-pair-types
  open import foundation.function-extensionality
 +open import foundation.homotopies
++open import foundation.homotopy-induction
  open import foundation.universe-levels
  
 +open import foundation-core.dependent-identifications
@@ -172,7 +100,7 @@ index cbafd7364a..54bbffbbbd 100644
  open import foundation-core.identity-types
  open import foundation-core.transport-along-identifications
  ```
-@@ -50,8 +54,7 @@ module _
+@@ -50,8 +55,7 @@ module _
      map-equiv (compute-dependent-identification-function-type p f g)
  ```
  
@@ -182,7 +110,7 @@ index cbafd7364a..54bbffbbbd 100644
  
  ```agda
  module _
-@@ -67,3 +70,79 @@ module _
+@@ -67,3 +71,79 @@ module _
      inv-htpy (preserves-tr f p) a
    preserves-tr-apd-function refl = refl-htpy
  ```
@@ -262,6 +190,106 @@ index cbafd7364a..54bbffbbbd 100644
 +            ( λ k l s → inv-equiv (equiv-funext)))) ∙
 +        ( eq-htpy-refl-htpy (h (i s))))
 +```
+diff --git a/src/foundation/functoriality-dependent-function-types.lagda.md b/src/foundation/functoriality-dependent-function-types.lagda.md
+index b1c60b64ad..5f118b35ed 100644
+--- a/src/foundation/functoriality-dependent-function-types.lagda.md
++++ b/src/foundation/functoriality-dependent-function-types.lagda.md
+@@ -127,6 +127,34 @@ id-map-equiv-Π :
+ id-map-equiv-Π B h = eq-htpy (compute-map-equiv-Π B id-equiv (λ _ → id-equiv) h)
+ ```
+ 
++### Two maps being homotopic is equivalent to them being homotopic after pre- or postcomposition by an equivalence
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1}
++  where
++
++  equiv-htpy-Π-precomp-htpy :
++    { B : UU l2} {C : B → UU l3} →
++    ( f g : (b : B) → C b) (e : A ≃ B) →
++    ( (f ∘ map-equiv e) ~ (g ∘ map-equiv e)) ≃
++    ( f ~ g)
++  equiv-htpy-Π-precomp-htpy f g e =
++    equiv-Π
++      ( eq-value f g)
++      ( e)
++      ( λ a → id-equiv)
++
++  equiv-htpy-Π-postcomp-htpy :
++    { B : A → UU l2} { C : UU l3} →
++    ( e : (a : A) → B a ≃ C) (f g : (a : A) → B a) →
++    ( f ~ g) ≃
++    ( (a : A) → ( map-equiv (e a) (f a) ＝ map-equiv (e a) (g a)))
++  equiv-htpy-Π-postcomp-htpy e f g =
++    equiv-Π-equiv-family
++      ( λ a → equiv-ap (e a) (f a) (g a))
++```
++
+ ### Truncated families of maps induce truncated maps on dependent function types
+ 
+ ```agda
+diff --git a/src/foundation/functoriality-function-types.lagda.md b/src/foundation/functoriality-function-types.lagda.md
+index 400f1ea750..23ff47ae51 100644
+--- a/src/foundation/functoriality-function-types.lagda.md
++++ b/src/foundation/functoriality-function-types.lagda.md
+@@ -19,6 +19,7 @@ open import foundation-core.constant-maps
+ open import foundation-core.embeddings
+ open import foundation-core.equivalences
+ open import foundation-core.function-types
++open import foundation-core.homotopies
+ open import foundation-core.identity-types
+ open import foundation-core.propositional-maps
+ open import foundation-core.truncated-maps
+@@ -60,6 +61,32 @@ module _
+   pr2 equiv-function-type = is-equiv-map-equiv-function-type
+ ```
+ 
++### Two maps being homotopic is equivalent to them being homotopic after pre- or postcomposition by an equivalence
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {C : UU l3}
++  where
++
++  equiv-htpy-precomp-htpy :
++    ( f g : B → C) (e : A ≃ B) →
++    ( (f ∘ map-equiv e) ~ (g ∘ map-equiv e)) ≃
++    ( f ~ g)
++  equiv-htpy-precomp-htpy f g e =
++    equiv-Π
++      ( eq-value f g)
++      ( e)
++      ( λ a → id-equiv)
++
++  equiv-htpy-postcomp-htpy :
++    ( e : B ≃ C) (f g : A → B) →
++    ( f ~ g) ≃
++    ( (map-equiv e ∘ f) ~ (map-equiv e ∘ g))
++  equiv-htpy-postcomp-htpy e f g =
++    equiv-Π-equiv-family
++      ( λ a → equiv-ap e (f a) (g a))
++```
++
+ ### A map is truncated iff postcomposition by it is truncated
+ 
+ ```agda
+diff --git a/src/foundation/univalence.lagda.md b/src/foundation/univalence.lagda.md
+index 09cc2fddf1..98638395e7 100644
+--- a/src/foundation/univalence.lagda.md
++++ b/src/foundation/univalence.lagda.md
+@@ -165,6 +165,11 @@ compute-eq-equiv-comp-equiv A B C f g =
+             ( λ e → map-equiv e (g ∘e f))
+             ( inv (right-inverse-law-equiv equiv-univalence))))))
+ 
++compute-equiv-eq-ap-inv :
++  {l1 l2 : Level} {A : UU l1} {B : A → UU l2} {x y : A} (p : x ＝ y) →
++  map-equiv (equiv-eq (ap B (inv p)) ∘e (equiv-eq (ap B p))) ~ id
++compute-equiv-eq-ap-inv refl = refl-htpy
++
+ commutativity-inv-equiv-eq :
+   {l : Level} (A B : UU l) (p : A ＝ B) →
+   inv-equiv (equiv-eq p) ＝ equiv-eq (inv p)
 diff --git a/src/foundation/universal-property-dependent-pair-types.lagda.md b/src/foundation/universal-property-dependent-pair-types.lagda.md
 index 29487b71cb..1ceba44e79 100644
 --- a/src/foundation/universal-property-dependent-pair-types.lagda.md
@@ -354,7 +382,7 @@ index 29487b71cb..1ceba44e79 100644
 +    ( λ k → equiv-ev-pair²)
  ```
 diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-index 0280f9eac0..f2912b9ebf 100644
+index 0280f9eac0..0c7235224f 100644
 --- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
 +++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
 @@ -7,14 +7,27 @@ module synthetic-homotopy-theory.flattening-lemma-pushouts where
@@ -405,21 +433,20 @@ index 0280f9eac0..f2912b9ebf 100644
    where
  
    horizontal-map-cocone-flattening-pushout :
-@@ -102,8 +115,11 @@ module _
+@@ -102,9 +115,9 @@ module _
    pr2 (pr2 cocone-flattening-pushout) =
      coherence-square-cocone-flattening-pushout
  
 -  flattening-lemma-statement : UUω
 -  flattening-lemma-statement =
-+  UωU : UUω₁
-+  UωU = UUω
-+
-+  flattening-lemma-pushout-statement : UωU
+-    {l : Level} →
++  flattening-lemma-pushout-statement : UUω
 +  flattening-lemma-pushout-statement =
-     {l : Level} →
++    { l : Level} →
      universal-property-pushout l
        ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
-@@ -113,3 +129,100 @@ module _
+       ( map-Σ
+@@ -113,3 +126,98 @@ module _
          ( λ s → tr P (coherence-square-cocone f g c s)))
        ( cocone-flattening-pushout)
  ```
@@ -493,13 +520,11 @@ index 0280f9eac0..f2912b9ebf 100644
 +      ( eq-pair-Σ
 +        ( refl)
 +        ( eq-htpy
-+          ( λ s →
-+            inv
-+              ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
-+                ( Y)
-+                ( coherence-square-cocone f g c)
-+                ( h)
-+                ( s)))))
++          ( inv-htpy
++            ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
++              ( Y)
++              ( coherence-square-cocone f g c)
++              ( h)))))
 +
 +  flattening-lemma-pushout :
 +    flattening-lemma-pushout-statement P f g c dup-pushout
@@ -520,262 +545,3 @@ index 0280f9eac0..f2912b9ebf 100644
 +          ( dup-pushout (λ x → P x → Y))))
 +      ( is-equiv-ind-Σ)
 +```
-
-From b415cb999da4e4386fe6c2c1f4f1b1ba8225746c Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 17:00:19 +0200
-Subject: [PATCH 3/9] UwUps
-
----
- .../flattening-lemma-pushouts.lagda.md                       | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
-
-diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-index f2912b9ebf..d5dcaad73f 100644
---- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-+++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-@@ -115,10 +115,7 @@ module _
-   pr2 (pr2 cocone-flattening-pushout) =
-     coherence-square-cocone-flattening-pushout
- 
--  UωU : UUω₁
--  UωU = UUω
--
--  flattening-lemma-pushout-statement : UωU
-+  flattening-lemma-pushout-statement : UUω
-   flattening-lemma-pushout-statement =
-     {l : Level} →
-     universal-property-pushout l
-
-From f56e6e9796c62cba7fca39316d0000391776591b Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 17:14:52 +0200
-Subject: [PATCH 4/9] Fix rebase moving stuff
-
----
- src/foundation/function-types.lagda.md | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/src/foundation/function-types.lagda.md b/src/foundation/function-types.lagda.md
-index 54bbffbbbd..297c558ada 100644
---- a/src/foundation/function-types.lagda.md
-+++ b/src/foundation/function-types.lagda.md
-@@ -14,6 +14,7 @@ open import foundation.action-on-identifications-functions
- open import foundation.dependent-pair-types
- open import foundation.function-extensionality
- open import foundation.homotopies
-+open import foundation.homotopy-induction
- open import foundation.universe-levels
- 
- open import foundation-core.dependent-identifications
-
-From ec24749604c58f552f0eb71968d8699d956aa91b Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 17:15:06 +0200
-Subject: [PATCH 5/9] Formatting
-
----
- .../flattening-lemma-pushouts.lagda.md                          | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-index d5dcaad73f..900892f60c 100644
---- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-+++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-@@ -117,7 +117,7 @@ module _
- 
-   flattening-lemma-pushout-statement : UUω
-   flattening-lemma-pushout-statement =
--    {l : Level} →
-+    { l : Level} →
-     universal-property-pushout l
-       ( map-Σ-map-base f (P ∘ horizontal-map-cocone f g c))
-       ( map-Σ
-
-From 7f0c4403038b64ede0fc97c41db3a83860d97363 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 17:16:33 +0200
-Subject: [PATCH 6/9] Add section title
-
----
- src/foundation/equality-dependent-pair-types.lagda.md | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/src/foundation/equality-dependent-pair-types.lagda.md b/src/foundation/equality-dependent-pair-types.lagda.md
-index 11488d781e..68770562f6 100644
---- a/src/foundation/equality-dependent-pair-types.lagda.md
-+++ b/src/foundation/equality-dependent-pair-types.lagda.md
-@@ -109,6 +109,8 @@ module _
-   pr1-pair-eq-Σ-ap refl = refl
- ```
- 
-+### Computing action of functions on identifications of the form `eq-pair-Σ p q`
-+
- ```agda
- module _
-   { l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {Y : UU l3} (f : Σ A B → Y)
-
-From ed362d120ca4054212e4c2f4a1ffec64f40e4c31 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 17:21:35 +0200
-Subject: [PATCH 7/9] Cosmetic change
-
----
- .../flattening-lemma-pushouts.lagda.md               | 12 +++++-------
- 1 file changed, 5 insertions(+), 7 deletions(-)
-
-diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-index 900892f60c..0c7235224f 100644
---- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-+++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-@@ -196,13 +196,11 @@ module _
-       ( eq-pair-Σ
-         ( refl)
-         ( eq-htpy
--          ( λ s →
--            inv
--              ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
--                ( Y)
--                ( coherence-square-cocone f g c)
--                ( h)
--                ( s)))))
-+          ( inv-htpy
-+            ( compute-equiv-htpy-dependent-fuction-dependent-identification-function-type
-+              ( Y)
-+              ( coherence-square-cocone f g c)
-+              ( h)))))
- 
-   flattening-lemma-pushout :
-     flattening-lemma-pushout-statement P f g c dup-pushout
-
-From a855562c66ad7a2c4ccd1442577707947d9fc3c4 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 18:19:43 +0200
-Subject: [PATCH 8/9] Elaborate on pre/postcomposition lemmas
-
----
- ...oriality-dependent-function-types.lagda.md | 28 +++++++++++++++++
- .../functoriality-function-types.lagda.md     | 31 +++++++++++++------
- 2 files changed, 49 insertions(+), 10 deletions(-)
-
-diff --git a/src/foundation/functoriality-dependent-function-types.lagda.md b/src/foundation/functoriality-dependent-function-types.lagda.md
-index b1c60b64ad..1e701682dd 100644
---- a/src/foundation/functoriality-dependent-function-types.lagda.md
-+++ b/src/foundation/functoriality-dependent-function-types.lagda.md
-@@ -127,6 +127,34 @@ id-map-equiv-Π :
- id-map-equiv-Π B h = eq-htpy (compute-map-equiv-Π B id-equiv (λ _ → id-equiv) h)
- ```
- 
-+### Two maps being homotopic is equivalent to them being homotopic after pre- and postcomposition by an equivalence
-+
-+```agda
-+module _
-+  { l1 l2 l3 : Level} {A : UU l1}
-+  where
-+
-+  equiv-htpy-Π-precomp-htpy :
-+    { B : UU l2} {C : B → UU l3} →
-+    ( f g : (b : B) → C b) (e : A ≃ B) →
-+    ( (f ∘ map-equiv e) ~ (g ∘ map-equiv e)) ≃
-+    ( f ~ g)
-+  equiv-htpy-Π-precomp-htpy f g e =
-+    equiv-Π
-+      ( eq-value f g)
-+      ( e)
-+      ( λ a → id-equiv)
-+
-+  equiv-htpy-Π-postcomp-htpy :
-+    { B : A → UU l2} { C : UU l3} →
-+    ( e : (a : A) → B a ≃ C) (f g : (a : A) → B a) →
-+    ( f ~ g) ≃
-+    ( (a : A) → ( map-equiv (e a) (f a) ＝ map-equiv (e a) (g a)))
-+  equiv-htpy-Π-postcomp-htpy e f g =
-+    equiv-Π-equiv-family
-+      ( λ a → equiv-ap (e a) (f a) (g a))
-+```
-+
- ### Truncated families of maps induce truncated maps on dependent function types
- 
- ```agda
-diff --git a/src/foundation/functoriality-function-types.lagda.md b/src/foundation/functoriality-function-types.lagda.md
-index e523d71135..9041174d5e 100644
---- a/src/foundation/functoriality-function-types.lagda.md
-+++ b/src/foundation/functoriality-function-types.lagda.md
-@@ -61,19 +61,30 @@ module _
-   pr2 equiv-function-type = is-equiv-map-equiv-function-type
- ```
- 
--### Two maps being homotopic is equivalent to them being homotopic after precomposition by an equivalence
-+### Two maps being homotopic is equivalent to them being homotopic after pre- and postcomposition by an equivalence
- 
- ```agda
--equiv-htpy-precomp-htpy :
-+module _
-   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {C : UU l3}
--  ( f g : B → C) (e : A ≃ B) →
--  ( (f ∘ map-equiv e) ~ (g ∘ map-equiv e)) ≃
--  ( f ~ g)
--equiv-htpy-precomp-htpy {C = C} f g e =
--  equiv-Π
--    ( eq-value f g)
--    ( e)
--    ( λ a → id-equiv)
-+  where
-+
-+  equiv-htpy-precomp-htpy :
-+    ( f g : B → C) (e : A ≃ B) →
-+    ( (f ∘ map-equiv e) ~ (g ∘ map-equiv e)) ≃
-+    ( f ~ g)
-+  equiv-htpy-precomp-htpy f g e =
-+    equiv-Π
-+      ( eq-value f g)
-+      ( e)
-+      ( λ a → id-equiv)
-+
-+  equiv-htpy-postcomp-htpy :
-+    ( e : B ≃ C) (f g : A → B) →
-+    ( f ~ g) ≃
-+    ( (map-equiv e ∘ f) ~ (map-equiv e ∘ g))
-+  equiv-htpy-postcomp-htpy e f g =
-+    equiv-Π-equiv-family
-+      ( λ a → equiv-ap e (f a) (g a))
- ```
- 
- ### A map is truncated iff postcomposition by it is truncated
-
-From d684cbb5a65b6a571c7af17004961c47a82c0af4 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Wed, 13 Sep 2023 18:23:55 +0200
-Subject: [PATCH 9/9] Pesky grammar
-
----
- src/foundation/functoriality-dependent-function-types.lagda.md | 2 +-
- src/foundation/functoriality-function-types.lagda.md           | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/src/foundation/functoriality-dependent-function-types.lagda.md b/src/foundation/functoriality-dependent-function-types.lagda.md
-index 1e701682dd..5f118b35ed 100644
---- a/src/foundation/functoriality-dependent-function-types.lagda.md
-+++ b/src/foundation/functoriality-dependent-function-types.lagda.md
-@@ -127,7 +127,7 @@ id-map-equiv-Π :
- id-map-equiv-Π B h = eq-htpy (compute-map-equiv-Π B id-equiv (λ _ → id-equiv) h)
- ```
- 
--### Two maps being homotopic is equivalent to them being homotopic after pre- and postcomposition by an equivalence
-+### Two maps being homotopic is equivalent to them being homotopic after pre- or postcomposition by an equivalence
- 
- ```agda
- module _
-diff --git a/src/foundation/functoriality-function-types.lagda.md b/src/foundation/functoriality-function-types.lagda.md
-index 9041174d5e..23ff47ae51 100644
---- a/src/foundation/functoriality-function-types.lagda.md
-+++ b/src/foundation/functoriality-function-types.lagda.md
-@@ -61,7 +61,7 @@ module _
-   pr2 equiv-function-type = is-equiv-map-equiv-function-type
- ```
- 
--### Two maps being homotopic is equivalent to them being homotopic after pre- and postcomposition by an equivalence
-+### Two maps being homotopic is equivalent to them being homotopic after pre- or postcomposition by an equivalence
- 
- ```agda
- module _

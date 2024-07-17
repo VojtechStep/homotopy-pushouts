@@ -1,292 +1,5 @@
-From 1252a774c9ca09641d9193f5403c1fc5a4915eac Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Sun, 2 Jun 2024 15:06:26 +0200
-Subject: [PATCH 1/3] Make flattening lemmas take non-dependent universal
- properties
-
----
- ...ndent-universal-property-pushouts.lagda.md |  34 ++---
- .../flattening-lemma-coequalizers.lagda.md    |  10 +-
- .../flattening-lemma-pushouts.lagda.md        | 116 +++++++++---------
- ...ttening-lemma-sequential-colimits.lagda.md |   6 +-
- .../pushouts.lagda.md                         |   2 +-
- 5 files changed, 85 insertions(+), 83 deletions(-)
-
-diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md
-index e9bd8ae099..22394d4c95 100644
---- a/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md
-+++ b/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md
-@@ -251,20 +251,22 @@ module _
-   (f : S → A) (g : S → B) (c : cocone f g X)
-   where
- 
--  universal-property-dependent-universal-property-pushout :
--    dependent-universal-property-pushout f g c →
--    universal-property-pushout f g c
--  universal-property-dependent-universal-property-pushout dup-c {l} =
--    universal-property-pushout-pullback-property-pushout f g c
--      ( pullback-property-dependent-pullback-property-pushout f g c
--        ( dependent-pullback-property-dependent-universal-property-pushout f g c
--          ( dup-c)))
--
--  dependent-universal-property-universal-property-pushout :
--    universal-property-pushout f g c →
--    dependent-universal-property-pushout f g c
--  dependent-universal-property-universal-property-pushout up-c =
--    dependent-universal-property-dependent-pullback-property-pushout f g c
--      ( dependent-pullback-property-pullback-property-pushout f g c
--        ( pullback-property-pushout-universal-property-pushout f g c up-c))
-+  abstract
-+    universal-property-dependent-universal-property-pushout :
-+      dependent-universal-property-pushout f g c →
-+      universal-property-pushout f g c
-+    universal-property-dependent-universal-property-pushout dup-c {l} =
-+      universal-property-pushout-pullback-property-pushout f g c
-+        ( pullback-property-dependent-pullback-property-pushout f g c
-+          ( dependent-pullback-property-dependent-universal-property-pushout f g
-+            ( c)
-+            ( dup-c)))
-+
-+    dependent-universal-property-universal-property-pushout :
-+      universal-property-pushout f g c →
-+      dependent-universal-property-pushout f g c
-+    dependent-universal-property-universal-property-pushout up-c =
-+      dependent-universal-property-dependent-pullback-property-pushout f g c
-+        ( dependent-pullback-property-pullback-property-pushout f g c
-+          ( pullback-property-pushout-universal-property-pushout f g c up-c))
- ```
-diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
-index 96888b334f..d7951a5d85 100644
---- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
-+++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
-@@ -101,7 +101,7 @@ module _
- 
-   flattening-lemma-coequalizer-statement : UUω
-   flattening-lemma-coequalizer-statement =
--    dependent-universal-property-coequalizer a e →
-+    universal-property-coequalizer a e →
-     universal-property-coequalizer
-       ( double-arrow-flattening-lemma-coequalizer)
-       ( cofork-flattening-lemma-coequalizer)
-@@ -133,7 +133,7 @@ module _
- 
-   abstract
-     flattening-lemma-coequalizer : flattening-lemma-coequalizer-statement a P e
--    flattening-lemma-coequalizer dup-coequalizer =
-+    flattening-lemma-coequalizer up-e =
-       universal-property-coequalizer-universal-property-pushout
-         ( double-arrow-flattening-lemma-coequalizer a P e)
-         ( cofork-flattening-lemma-coequalizer a P e)
-@@ -205,8 +205,6 @@ module _
-             ( vertical-map-span-cocone-cofork a)
-             ( horizontal-map-span-cocone-cofork a)
-             ( cocone-codiagonal-cofork a e)
--            ( dependent-universal-property-pushout-dependent-universal-property-coequalizer
--              ( a)
--              ( e)
--              ( dup-coequalizer))))
-+            ( universal-property-pushout-universal-property-coequalizer a e
-+              ( up-e))))
- ```
-diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-index 39b71b5028..e7306fdf50 100644
---- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-+++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-@@ -127,7 +127,7 @@ module _
- 
-   flattening-lemma-pushout-statement : UUω
-   flattening-lemma-pushout-statement =
--    dependent-universal-property-pushout f g c →
-+    universal-property-pushout f g c →
-     universal-property-pushout
-       ( vertical-map-span-flattening-pushout)
-       ( horizontal-map-span-flattening-pushout)
-@@ -233,7 +233,7 @@ module _
- 
-   flattening-lemma-descent-data-pushout-statement : UUω
-   flattening-lemma-descent-data-pushout-statement =
--    dependent-universal-property-pushout f g c →
-+    universal-property-pushout f g c →
-     universal-property-pushout
-       ( vertical-map-span-flattening-descent-data-pushout P)
-       ( horizontal-map-span-flattening-descent-data-pushout P)
-@@ -305,25 +305,28 @@ module _
-               ( Y)
-               ( coherence-square-cocone f g c)
-               ( h)))))
--
--  flattening-lemma-pushout :
--    flattening-lemma-pushout-statement P f g c
--  flattening-lemma-pushout dup-pushout Y =
--    is-equiv-left-factor
--      ( cocone-map-flattening-pushout Y)
--      ( ind-Σ)
--      ( is-equiv-right-factor
--        ( map-equiv equiv-ev-pair³)
--        ( cocone-map-flattening-pushout Y ∘ ind-Σ)
--        ( is-equiv-map-equiv equiv-ev-pair³)
--        ( is-equiv-top-map-triangle
--          ( dependent-cocone-map f g c (λ x → P x → Y))
--          ( map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
--          ( map-equiv equiv-ev-pair³ ∘ cocone-map-flattening-pushout Y ∘ ind-Σ)
--          ( triangle-comparison-dependent-cocone-ind-Σ-cocone Y)
--          ( is-equiv-map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
--          ( dup-pushout (λ x → P x → Y))))
--      ( is-equiv-ind-Σ)
-+  abstract
-+    flattening-lemma-pushout :
-+      flattening-lemma-pushout-statement P f g c
-+    flattening-lemma-pushout up-c Y =
-+      is-equiv-left-factor
-+        ( cocone-map-flattening-pushout Y)
-+        ( ind-Σ)
-+        ( is-equiv-right-factor
-+          ( map-equiv equiv-ev-pair³)
-+          ( cocone-map-flattening-pushout Y ∘ ind-Σ)
-+          ( is-equiv-map-equiv equiv-ev-pair³)
-+          ( is-equiv-top-map-triangle
-+            ( dependent-cocone-map f g c (λ x → P x → Y))
-+            ( map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
-+            ( ( map-equiv equiv-ev-pair³) ∘
-+              ( cocone-map-flattening-pushout Y) ∘
-+              ( ind-Σ))
-+            ( triangle-comparison-dependent-cocone-ind-Σ-cocone Y)
-+            ( is-equiv-map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
-+            ( dependent-universal-property-universal-property-pushout _ _ _ up-c
-+              ( λ x → P x → Y))))
-+        ( is-equiv-ind-Σ)
- ```
- 
- ### Proof of the descent data statement of the flattening lemma
-@@ -401,40 +404,41 @@ module _
-             ( refl)
-             ( inv (pr2 (pr2 e) s t))))))
- 
--  flattening-lemma-descent-data-pushout :
--    flattening-lemma-descent-data-pushout-statement f g c P Q e
--  flattening-lemma-descent-data-pushout dup-pushout =
--    universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
--      ( vertical-map-span-flattening-pushout Q f g c)
--      ( horizontal-map-span-flattening-pushout Q f g c)
--      ( horizontal-map-cocone-flattening-pushout Q f g c)
--      ( vertical-map-cocone-flattening-pushout Q f g c)
--      ( vertical-map-span-flattening-descent-data-pushout P)
--      ( horizontal-map-span-flattening-descent-data-pushout P)
--      ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
--      ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
--      ( tot (λ s → map-equiv (pr1 e (f s))))
--      ( tot (λ a → map-equiv (pr1 e a)))
--      ( tot (λ b → map-equiv (pr1 (pr2 e) b)))
--      ( id)
--      ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e)
--      ( refl-htpy)
--      ( htpy-map-Σ
--        ( Q ∘ vertical-map-cocone f g c)
-+  abstract
-+    flattening-lemma-descent-data-pushout :
-+      flattening-lemma-descent-data-pushout-statement f g c P Q e
-+    flattening-lemma-descent-data-pushout up-c =
-+      universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
-+        ( vertical-map-span-flattening-pushout Q f g c)
-+        ( horizontal-map-span-flattening-pushout Q f g c)
-+        ( horizontal-map-cocone-flattening-pushout Q f g c)
-+        ( vertical-map-cocone-flattening-pushout Q f g c)
-+        ( vertical-map-span-flattening-descent-data-pushout P)
-+        ( horizontal-map-span-flattening-descent-data-pushout P)
-+        ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
-+        ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
-+        ( tot (λ s → map-equiv (pr1 e (f s))))
-+        ( tot (λ a → map-equiv (pr1 e a)))
-+        ( tot (λ b → map-equiv (pr1 (pr2 e) b)))
-+        ( id)
-+        ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e)
-         ( refl-htpy)
--        ( λ s →
--          tr Q (coherence-square-cocone f g c s) ∘ (map-equiv (pr1 e (f s))))
--        ( λ s → inv-htpy (pr2 (pr2 e) s)))
--      ( refl-htpy)
--      ( refl-htpy)
--      ( coherence-square-cocone-flattening-pushout Q f g c)
--      ( coherence-cube-flattening-lemma-descent-data-pushout)
--      ( is-equiv-tot-is-fiberwise-equiv
--        ( λ s → is-equiv-map-equiv (pr1 e (f s))))
--      ( is-equiv-tot-is-fiberwise-equiv
--        ( λ a → is-equiv-map-equiv (pr1 e a)))
--      ( is-equiv-tot-is-fiberwise-equiv
--        ( λ b → is-equiv-map-equiv (pr1 (pr2 e) b)))
--      ( is-equiv-id)
--      ( flattening-lemma-pushout Q f g c dup-pushout)
-+        ( htpy-map-Σ
-+          ( Q ∘ vertical-map-cocone f g c)
-+          ( refl-htpy)
-+          ( λ s →
-+            tr Q (coherence-square-cocone f g c s) ∘ (map-equiv (pr1 e (f s))))
-+          ( λ s → inv-htpy (pr2 (pr2 e) s)))
-+        ( refl-htpy)
-+        ( refl-htpy)
-+        ( coherence-square-cocone-flattening-pushout Q f g c)
-+        ( coherence-cube-flattening-lemma-descent-data-pushout)
-+        ( is-equiv-tot-is-fiberwise-equiv
-+          ( λ s → is-equiv-map-equiv (pr1 e (f s))))
-+        ( is-equiv-tot-is-fiberwise-equiv
-+          ( λ a → is-equiv-map-equiv (pr1 e a)))
-+        ( is-equiv-tot-is-fiberwise-equiv
-+          ( λ b → is-equiv-map-equiv (pr1 (pr2 e) b)))
-+        ( is-equiv-id)
-+        ( flattening-lemma-pushout Q f g c up-c)
- ```
-diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
-index 9dd5911269..1e014f974d 100644
---- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
-+++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
-@@ -176,11 +176,9 @@ module _
-           ( flattening-lemma-coequalizer _
-             ( P)
-             ( cofork-cocone-sequential-diagram c)
--            ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
-+            ( universal-property-coequalizer-universal-property-sequential-colimit
-               ( c)
--              ( dependent-universal-property-universal-property-sequential-colimit
--                ( c)
--                ( up-c)))))
-+              ( up-c))))
- ```
- 
- ### Flattening lemma for sequential colimits with descent data
-diff --git a/src/synthetic-homotopy-theory/pushouts.lagda.md b/src/synthetic-homotopy-theory/pushouts.lagda.md
-index 11b54821d0..1b5112681f 100644
---- a/src/synthetic-homotopy-theory/pushouts.lagda.md
-+++ b/src/synthetic-homotopy-theory/pushouts.lagda.md
-@@ -578,7 +578,7 @@ square commute (almost) trivially.
-         ( f)
-         ( g)
-         ( cocone-pushout f g)
--        ( dup-pushout f g))
-+        ( up-pushout f g))
-       ( refl-htpy)
-       ( λ _ →
-         inv
-
-From 9dc53f799792283cda2eebf664a70c4ae28a90b5 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Sun, 2 Jun 2024 21:07:33 +0200
-Subject: [PATCH 2/3] Descent data as identity systems
-
----
- references.bib                                |  16 +
- ...universal-property-identity-types.lagda.md |  70 ++-
- src/synthetic-homotopy-theory.lagda.md        |   2 +-
- .../26-id-pushout.lagda.md                    | 490 ----------------
- .../cocones-under-spans.lagda.md              |   4 +-
- .../families-descent-data-pushouts.lagda.md   |  12 +
- .../flattening-lemma-pushouts.lagda.md        |   2 +-
- ...ity-systems-descent-data-pushouts.lagda.md | 523 ++++++++++++++++++
- 8 files changed, 620 insertions(+), 499 deletions(-)
- delete mode 100644 src/synthetic-homotopy-theory/26-id-pushout.lagda.md
- create mode 100644 src/synthetic-homotopy-theory/identity-systems-descent-data-pushouts.lagda.md
-
 diff --git a/references.bib b/references.bib
-index c2d2c7db82..2a5dc88d5c 100644
+index c2d2c7db82..aced02fe79 100644
 --- a/references.bib
 +++ b/references.bib
 @@ -263,6 +263,22 @@ @article{KECA17
@@ -297,7 +10,7 @@ index c2d2c7db82..2a5dc88d5c 100644
 +  title       =  {{Path Spaces of Higher Inductive Types in Homotopy Type Theory}},
 +  booktitle   =  {Proceedings of the 34th {{Annual ACM}}/{{IEEE Symposium}} on {{Logic}} in {{Computer Science}}},
 +  author      =  {Kraus, Nicolai and von Raumer, Jakob},
-+  year        =  {2021},
++  year        =  {2019},
 +  publisher   =  {IEEE Press},
 +  abstract    =  {The study of equality types is central to homotopy type theory. Characterizing these types is often tricky, and various strategies, such as the encode-decode method, have been developed. We prove a theorem about equality types of coequalizers and pushouts, reminiscent of an induction principle and without any restrictions on the truncation levels. This result makes it possible to reason directly about certain equality types and to streamline existing proofs by eliminating the necessity of auxiliary constructions. To demonstrate this, we give a very short argument for the calculation of the fundamental group of the circle (Licata and Shulman [1]), and for the fact that pushouts preserve embeddings. Further, our development suggests a higher version of the Seifert-van Kampen theorem, and the set-truncation operator maps it to the standard Seifert-van Kampen theorem (due to Favonia and Shulman [2]). We provide a formalization of the main technical results in the proof assistant Lean.},
 +  articleno   =  {7},
@@ -960,6 +673,49 @@ index d18ceee431..b3ac5c1716 100644
      ∨   j    ∨
      B -----> Y
      |        |
+diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md
+index e9bd8ae099..22394d4c95 100644
+--- a/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-universal-property-pushouts.lagda.md
+@@ -251,20 +251,22 @@ module _
+   (f : S → A) (g : S → B) (c : cocone f g X)
+   where
+ 
+-  universal-property-dependent-universal-property-pushout :
+-    dependent-universal-property-pushout f g c →
+-    universal-property-pushout f g c
+-  universal-property-dependent-universal-property-pushout dup-c {l} =
+-    universal-property-pushout-pullback-property-pushout f g c
+-      ( pullback-property-dependent-pullback-property-pushout f g c
+-        ( dependent-pullback-property-dependent-universal-property-pushout f g c
+-          ( dup-c)))
+-
+-  dependent-universal-property-universal-property-pushout :
+-    universal-property-pushout f g c →
+-    dependent-universal-property-pushout f g c
+-  dependent-universal-property-universal-property-pushout up-c =
+-    dependent-universal-property-dependent-pullback-property-pushout f g c
+-      ( dependent-pullback-property-pullback-property-pushout f g c
+-        ( pullback-property-pushout-universal-property-pushout f g c up-c))
++  abstract
++    universal-property-dependent-universal-property-pushout :
++      dependent-universal-property-pushout f g c →
++      universal-property-pushout f g c
++    universal-property-dependent-universal-property-pushout dup-c {l} =
++      universal-property-pushout-pullback-property-pushout f g c
++        ( pullback-property-dependent-pullback-property-pushout f g c
++          ( dependent-pullback-property-dependent-universal-property-pushout f g
++            ( c)
++            ( dup-c)))
++
++    dependent-universal-property-universal-property-pushout :
++      universal-property-pushout f g c →
++      dependent-universal-property-pushout f g c
++    dependent-universal-property-universal-property-pushout up-c =
++      dependent-universal-property-dependent-pullback-property-pushout f g c
++        ( dependent-pullback-property-pullback-property-pushout f g c
++          ( pullback-property-pushout-universal-property-pushout f g c up-c))
+ ```
 diff --git a/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md b/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md
 index 573147d1a5..0a68a9200c 100644
 --- a/src/synthetic-homotopy-theory/families-descent-data-pushouts.lagda.md
@@ -983,8 +739,41 @@ index 573147d1a5..0a68a9200c 100644
    left-equiv-family-with-descent-data-pushout :
      (a : domain-span-diagram 𝒮) →
      family-cocone-family-with-descent-data-pushout
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+index 96888b334f..d7951a5d85 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-coequalizers.lagda.md
+@@ -101,7 +101,7 @@ module _
+ 
+   flattening-lemma-coequalizer-statement : UUω
+   flattening-lemma-coequalizer-statement =
+-    dependent-universal-property-coequalizer a e →
++    universal-property-coequalizer a e →
+     universal-property-coequalizer
+       ( double-arrow-flattening-lemma-coequalizer)
+       ( cofork-flattening-lemma-coequalizer)
+@@ -133,7 +133,7 @@ module _
+ 
+   abstract
+     flattening-lemma-coequalizer : flattening-lemma-coequalizer-statement a P e
+-    flattening-lemma-coequalizer dup-coequalizer =
++    flattening-lemma-coequalizer up-e =
+       universal-property-coequalizer-universal-property-pushout
+         ( double-arrow-flattening-lemma-coequalizer a P e)
+         ( cofork-flattening-lemma-coequalizer a P e)
+@@ -205,8 +205,6 @@ module _
+             ( vertical-map-span-cocone-cofork a)
+             ( horizontal-map-span-cocone-cofork a)
+             ( cocone-codiagonal-cofork a e)
+-            ( dependent-universal-property-pushout-dependent-universal-property-coequalizer
+-              ( a)
+-              ( e)
+-              ( dup-coequalizer))))
++            ( universal-property-pushout-universal-property-coequalizer a e
++              ( up-e))))
+ ```
 diff --git a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
-index e7306fdf50..a5842aaa89 100644
+index 39b71b5028..a5842aaa89 100644
 --- a/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
 +++ b/src/synthetic-homotopy-theory/flattening-lemma-pushouts.lagda.md
 @@ -46,7 +46,7 @@ given a pushout square
@@ -996,6 +785,167 @@ index e7306fdf50..a5842aaa89 100644
    ∨      ⌜ ∨
    A -----> X
        i
+@@ -127,7 +127,7 @@ module _
+ 
+   flattening-lemma-pushout-statement : UUω
+   flattening-lemma-pushout-statement =
+-    dependent-universal-property-pushout f g c →
++    universal-property-pushout f g c →
+     universal-property-pushout
+       ( vertical-map-span-flattening-pushout)
+       ( horizontal-map-span-flattening-pushout)
+@@ -233,7 +233,7 @@ module _
+ 
+   flattening-lemma-descent-data-pushout-statement : UUω
+   flattening-lemma-descent-data-pushout-statement =
+-    dependent-universal-property-pushout f g c →
++    universal-property-pushout f g c →
+     universal-property-pushout
+       ( vertical-map-span-flattening-descent-data-pushout P)
+       ( horizontal-map-span-flattening-descent-data-pushout P)
+@@ -305,25 +305,28 @@ module _
+               ( Y)
+               ( coherence-square-cocone f g c)
+               ( h)))))
+-
+-  flattening-lemma-pushout :
+-    flattening-lemma-pushout-statement P f g c
+-  flattening-lemma-pushout dup-pushout Y =
+-    is-equiv-left-factor
+-      ( cocone-map-flattening-pushout Y)
+-      ( ind-Σ)
+-      ( is-equiv-right-factor
+-        ( map-equiv equiv-ev-pair³)
+-        ( cocone-map-flattening-pushout Y ∘ ind-Σ)
+-        ( is-equiv-map-equiv equiv-ev-pair³)
+-        ( is-equiv-top-map-triangle
+-          ( dependent-cocone-map f g c (λ x → P x → Y))
+-          ( map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
+-          ( map-equiv equiv-ev-pair³ ∘ cocone-map-flattening-pushout Y ∘ ind-Σ)
+-          ( triangle-comparison-dependent-cocone-ind-Σ-cocone Y)
+-          ( is-equiv-map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
+-          ( dup-pushout (λ x → P x → Y))))
+-      ( is-equiv-ind-Σ)
++  abstract
++    flattening-lemma-pushout :
++      flattening-lemma-pushout-statement P f g c
++    flattening-lemma-pushout up-c Y =
++      is-equiv-left-factor
++        ( cocone-map-flattening-pushout Y)
++        ( ind-Σ)
++        ( is-equiv-right-factor
++          ( map-equiv equiv-ev-pair³)
++          ( cocone-map-flattening-pushout Y ∘ ind-Σ)
++          ( is-equiv-map-equiv equiv-ev-pair³)
++          ( is-equiv-top-map-triangle
++            ( dependent-cocone-map f g c (λ x → P x → Y))
++            ( map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
++            ( ( map-equiv equiv-ev-pair³) ∘
++              ( cocone-map-flattening-pushout Y) ∘
++              ( ind-Σ))
++            ( triangle-comparison-dependent-cocone-ind-Σ-cocone Y)
++            ( is-equiv-map-equiv (comparison-dependent-cocone-ind-Σ-cocone Y))
++            ( dependent-universal-property-universal-property-pushout _ _ _ up-c
++              ( λ x → P x → Y))))
++        ( is-equiv-ind-Σ)
+ ```
+ 
+ ### Proof of the descent data statement of the flattening lemma
+@@ -401,40 +404,41 @@ module _
+             ( refl)
+             ( inv (pr2 (pr2 e) s t))))))
+ 
+-  flattening-lemma-descent-data-pushout :
+-    flattening-lemma-descent-data-pushout-statement f g c P Q e
+-  flattening-lemma-descent-data-pushout dup-pushout =
+-    universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
+-      ( vertical-map-span-flattening-pushout Q f g c)
+-      ( horizontal-map-span-flattening-pushout Q f g c)
+-      ( horizontal-map-cocone-flattening-pushout Q f g c)
+-      ( vertical-map-cocone-flattening-pushout Q f g c)
+-      ( vertical-map-span-flattening-descent-data-pushout P)
+-      ( horizontal-map-span-flattening-descent-data-pushout P)
+-      ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
+-      ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
+-      ( tot (λ s → map-equiv (pr1 e (f s))))
+-      ( tot (λ a → map-equiv (pr1 e a)))
+-      ( tot (λ b → map-equiv (pr1 (pr2 e) b)))
+-      ( id)
+-      ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e)
+-      ( refl-htpy)
+-      ( htpy-map-Σ
+-        ( Q ∘ vertical-map-cocone f g c)
++  abstract
++    flattening-lemma-descent-data-pushout :
++      flattening-lemma-descent-data-pushout-statement f g c P Q e
++    flattening-lemma-descent-data-pushout up-c =
++      universal-property-pushout-top-universal-property-pushout-bottom-cube-is-equiv
++        ( vertical-map-span-flattening-pushout Q f g c)
++        ( horizontal-map-span-flattening-pushout Q f g c)
++        ( horizontal-map-cocone-flattening-pushout Q f g c)
++        ( vertical-map-cocone-flattening-pushout Q f g c)
++        ( vertical-map-span-flattening-descent-data-pushout P)
++        ( horizontal-map-span-flattening-descent-data-pushout P)
++        ( horizontal-map-cocone-flattening-descent-data-pushout f g c P Q e)
++        ( vertical-map-cocone-flattening-descent-data-pushout f g c P Q e)
++        ( tot (λ s → map-equiv (pr1 e (f s))))
++        ( tot (λ a → map-equiv (pr1 e a)))
++        ( tot (λ b → map-equiv (pr1 (pr2 e) b)))
++        ( id)
++        ( coherence-square-cocone-flattening-descent-data-pushout f g c P Q e)
+         ( refl-htpy)
+-        ( λ s →
+-          tr Q (coherence-square-cocone f g c s) ∘ (map-equiv (pr1 e (f s))))
+-        ( λ s → inv-htpy (pr2 (pr2 e) s)))
+-      ( refl-htpy)
+-      ( refl-htpy)
+-      ( coherence-square-cocone-flattening-pushout Q f g c)
+-      ( coherence-cube-flattening-lemma-descent-data-pushout)
+-      ( is-equiv-tot-is-fiberwise-equiv
+-        ( λ s → is-equiv-map-equiv (pr1 e (f s))))
+-      ( is-equiv-tot-is-fiberwise-equiv
+-        ( λ a → is-equiv-map-equiv (pr1 e a)))
+-      ( is-equiv-tot-is-fiberwise-equiv
+-        ( λ b → is-equiv-map-equiv (pr1 (pr2 e) b)))
+-      ( is-equiv-id)
+-      ( flattening-lemma-pushout Q f g c dup-pushout)
++        ( htpy-map-Σ
++          ( Q ∘ vertical-map-cocone f g c)
++          ( refl-htpy)
++          ( λ s →
++            tr Q (coherence-square-cocone f g c s) ∘ (map-equiv (pr1 e (f s))))
++          ( λ s → inv-htpy (pr2 (pr2 e) s)))
++        ( refl-htpy)
++        ( refl-htpy)
++        ( coherence-square-cocone-flattening-pushout Q f g c)
++        ( coherence-cube-flattening-lemma-descent-data-pushout)
++        ( is-equiv-tot-is-fiberwise-equiv
++          ( λ s → is-equiv-map-equiv (pr1 e (f s))))
++        ( is-equiv-tot-is-fiberwise-equiv
++          ( λ a → is-equiv-map-equiv (pr1 e a)))
++        ( is-equiv-tot-is-fiberwise-equiv
++          ( λ b → is-equiv-map-equiv (pr1 (pr2 e) b)))
++        ( is-equiv-id)
++        ( flattening-lemma-pushout Q f g c up-c)
+ ```
+diff --git a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+index 9dd5911269..1e014f974d 100644
+--- a/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
++++ b/src/synthetic-homotopy-theory/flattening-lemma-sequential-colimits.lagda.md
+@@ -176,11 +176,9 @@ module _
+           ( flattening-lemma-coequalizer _
+             ( P)
+             ( cofork-cocone-sequential-diagram c)
+-            ( dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
++            ( universal-property-coequalizer-universal-property-sequential-colimit
+               ( c)
+-              ( dependent-universal-property-universal-property-sequential-colimit
+-                ( c)
+-                ( up-c)))))
++              ( up-c))))
+ ```
+ 
+ ### Flattening lemma for sequential colimits with descent data
 diff --git a/src/synthetic-homotopy-theory/identity-systems-descent-data-pushouts.lagda.md b/src/synthetic-homotopy-theory/identity-systems-descent-data-pushouts.lagda.md
 new file mode 100644
 index 0000000000..ed4ca2232d
@@ -1525,26 +1475,16 @@ index 0000000000..ed4ca2232d
 +        p₀' =
 +          map-compute-inv-left-family-cocone-descent-data-pushout up-c P a₀ p₀
 +```
-
-From db0beed2a4148a8a2240fc57a263be83bb222b7b Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Sun, 2 Jun 2024 22:23:02 +0200
-Subject: [PATCH 3/3] Fix KvR19 year
-
----
- references.bib | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/references.bib b/references.bib
-index 2a5dc88d5c..aced02fe79 100644
---- a/references.bib
-+++ b/references.bib
-@@ -267,7 +267,7 @@ @inproceedings{KvR19
-   title       =  {{Path Spaces of Higher Inductive Types in Homotopy Type Theory}},
-   booktitle   =  {Proceedings of the 34th {{Annual ACM}}/{{IEEE Symposium}} on {{Logic}} in {{Computer Science}}},
-   author      =  {Kraus, Nicolai and von Raumer, Jakob},
--  year        =  {2021},
-+  year        =  {2019},
-   publisher   =  {IEEE Press},
-   abstract    =  {The study of equality types is central to homotopy type theory. Characterizing these types is often tricky, and various strategies, such as the encode-decode method, have been developed. We prove a theorem about equality types of coequalizers and pushouts, reminiscent of an induction principle and without any restrictions on the truncation levels. This result makes it possible to reason directly about certain equality types and to streamline existing proofs by eliminating the necessity of auxiliary constructions. To demonstrate this, we give a very short argument for the calculation of the fundamental group of the circle (Licata and Shulman [1]), and for the fact that pushouts preserve embeddings. Further, our development suggests a higher version of the Seifert-van Kampen theorem, and the set-truncation operator maps it to the standard Seifert-van Kampen theorem (due to Favonia and Shulman [2]). We provide a formalization of the main technical results in the proof assistant Lean.},
-   articleno   =  {7},
+diff --git a/src/synthetic-homotopy-theory/pushouts.lagda.md b/src/synthetic-homotopy-theory/pushouts.lagda.md
+index 11b54821d0..1b5112681f 100644
+--- a/src/synthetic-homotopy-theory/pushouts.lagda.md
++++ b/src/synthetic-homotopy-theory/pushouts.lagda.md
+@@ -578,7 +578,7 @@ square commute (almost) trivially.
+         ( f)
+         ( g)
+         ( cocone-pushout f g)
+-        ( dup-pushout f g))
++        ( up-pushout f g))
+       ( refl-htpy)
+       ( λ _ →
+         inv

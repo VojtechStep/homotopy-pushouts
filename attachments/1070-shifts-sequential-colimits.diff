@@ -1,0 +1,1052 @@
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index 89173b31c2..d0edc20c56 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -86,6 +86,7 @@ open import synthetic-homotopy-theory.sections-descent-circle public
+ open import synthetic-homotopy-theory.sequential-colimits public
+ open import synthetic-homotopy-theory.sequential-diagrams public
+ open import synthetic-homotopy-theory.sequentially-compact-types public
++open import synthetic-homotopy-theory.shifts-sequential-diagrams public
+ open import synthetic-homotopy-theory.smash-products-of-pointed-types public
+ open import synthetic-homotopy-theory.spectra public
+ open import synthetic-homotopy-theory.sphere-prespectrum public
+@@ -95,6 +96,7 @@ open import synthetic-homotopy-theory.suspension-structures public
+ open import synthetic-homotopy-theory.suspensions-of-pointed-types public
+ open import synthetic-homotopy-theory.suspensions-of-types public
+ open import synthetic-homotopy-theory.tangent-spheres public
++open import synthetic-homotopy-theory.total-sequential-diagrams public
+ open import synthetic-homotopy-theory.triple-loop-spaces public
+ open import synthetic-homotopy-theory.truncated-acyclic-maps public
+ open import synthetic-homotopy-theory.truncated-acyclic-types public
+diff --git a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
+index 7eb8ec69fd..1da0704bf2 100644
+--- a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
++++ b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
+@@ -35,10 +35,11 @@ open import synthetic-homotopy-theory.sequential-diagrams
+ 
+ ## Idea
+ 
+-A **cocone under a
+-[sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
+-`(A, a)`** with codomain `X : 𝓤` consists of a family of maps `iₙ : A n → C` and
+-a family of [homotopies](foundation.homotopies.md) `Hₙ` asserting that the
++A
++{{#concept "cocone" Disambiguation="sequential diagram" Agda=cocone-sequential-diagram}}
++under a [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
++`(A, a)` with codomain `X : 𝒰` consists of a family of maps `iₙ : A n → C` and a
++family of [homotopies](foundation.homotopies.md) `Hₙ` asserting that the
+ triangles
+ 
+ ```text
+@@ -154,6 +155,35 @@ module _
+   coherence-htpy-htpy-cocone-sequential-diagram = pr2 H
+ ```
+ 
++### Concatenation of homotopies of cocones under a sequential diagram
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} {X : UU l2}
++  {c c' c'' : cocone-sequential-diagram A X}
++  (H : htpy-cocone-sequential-diagram c c')
++  (K : htpy-cocone-sequential-diagram c' c'')
++  where
++
++  concat-htpy-cocone-sequential-diagram : htpy-cocone-sequential-diagram c c''
++  pr1 concat-htpy-cocone-sequential-diagram n =
++    ( htpy-htpy-cocone-sequential-diagram H n) ∙h
++    ( htpy-htpy-cocone-sequential-diagram K n)
++  pr2 concat-htpy-cocone-sequential-diagram n =
++    horizontal-pasting-coherence-square-homotopies
++      ( htpy-htpy-cocone-sequential-diagram H n)
++      ( htpy-htpy-cocone-sequential-diagram K n)
++      ( coherence-cocone-sequential-diagram c n)
++      ( coherence-cocone-sequential-diagram c' n)
++      ( coherence-cocone-sequential-diagram c'' n)
++      ( ( htpy-htpy-cocone-sequential-diagram H (succ-ℕ n)) ·r
++        ( map-sequential-diagram A n))
++      ( ( htpy-htpy-cocone-sequential-diagram K (succ-ℕ n)) ·r
++        ( map-sequential-diagram A n))
++      ( coherence-htpy-htpy-cocone-sequential-diagram H n)
++      ( coherence-htpy-htpy-cocone-sequential-diagram K n)
++```
++
+ ### Postcomposing cocones under a sequential diagram with a map
+ 
+ Given a cocone `c` with vertex `X` under `(A, a)` and a map `f : X → Y`, we may
+diff --git a/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md
+index dcee6298d0..6711f8276f 100644
+--- a/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md
+@@ -41,7 +41,7 @@ open import synthetic-homotopy-theory.sequential-diagrams
+ Given a [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
+ `(A, a)`, a
+ [cocone](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md) `c`
+-with vertex `X` under it, and a type family `P : X → 𝓤`, we may construct
++with vertex `X` under it, and a type family `P : X → 𝒰`, we may construct
+ _dependent_ cocones on `P` over `c`.
+ 
+ A **dependent cocone under a
+diff --git a/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md
+index 7cafe2e7ee..a4554336de 100644
+--- a/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md
+@@ -24,7 +24,7 @@ open import synthetic-homotopy-theory.sequential-diagrams
+ A **dependent sequential diagram** over a
+ [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md) `(A, a)`
+ is a [sequence](foundation.dependent-sequences.md) of families of types
+-`B : (n : ℕ) → Aₙ → 𝓤` over the types in the base sequential diagram, equipped
++`B : (n : ℕ) → Aₙ → 𝒰` over the types in the base sequential diagram, equipped
+ with fiberwise maps
+ 
+ ```text
+diff --git a/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md
+index 86c6950684..47a9948110 100644
+--- a/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md
++++ b/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md
+@@ -71,8 +71,8 @@ module _
+ 
+   hom-sequential-diagram : UU (l1 ⊔ l2)
+   hom-sequential-diagram =
+-    section-dependent-sequential-diagram A
+-      ( constant-dependent-sequential-diagram A B)
++    Σ ( (n : ℕ) → family-sequential-diagram A n → family-sequential-diagram B n)
++      ( naturality-hom-sequential-diagram)
+ ```
+ 
+ ### Components of morphisms of sequential diagrams
+@@ -91,17 +91,11 @@ module _
+ 
+   map-hom-sequential-diagram :
+     ( n : ℕ) → family-sequential-diagram A n → family-sequential-diagram B n
+-  map-hom-sequential-diagram =
+-    map-section-dependent-sequential-diagram A
+-      ( constant-dependent-sequential-diagram A B)
+-      ( h)
++  map-hom-sequential-diagram = pr1 h
+ 
+   naturality-map-hom-sequential-diagram :
+     naturality-hom-sequential-diagram A B map-hom-sequential-diagram
+-  naturality-map-hom-sequential-diagram =
+-    naturality-map-section-dependent-sequential-diagram A
+-      ( constant-dependent-sequential-diagram A B)
+-      ( h)
++  naturality-map-hom-sequential-diagram = pr2 h
+ ```
+ 
+ ### The identity morphism of sequential diagrams
+diff --git a/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
+index 33166e8430..34fe7194f0 100644
+--- a/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
++++ b/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
+@@ -18,7 +18,7 @@ open import foundation.universe-levels
+ ## Idea
+ 
+ A **sequential diagram** `(A, a)` is a [sequence](foundation.sequences.md) of
+-types `A : ℕ → 𝓤` over the natural numbers, equipped with a family of maps
++types `A : ℕ → 𝒰` over the natural numbers, equipped with a family of maps
+ `aₙ : Aₙ → Aₙ₊₁` for all `n`.
+ 
+ They can be represented by diagrams
+diff --git a/src/synthetic-homotopy-theory/shifts-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/shifts-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..66cb304593
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/shifts-sequential-diagrams.lagda.md
+@@ -0,0 +1,773 @@
++# Shifts of sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.shifts-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.commuting-triangles-of-maps
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.homotopies
++open import foundation.identity-types
++open import foundation.retractions
++open import foundation.sections
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies-composition
++
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.morphisms-sequential-diagrams
++open import synthetic-homotopy-theory.sequential-colimits
++open import synthetic-homotopy-theory.sequential-diagrams
++open import synthetic-homotopy-theory.universal-property-sequential-colimits
++```
++
++</details>
++
++## Idea
++
++A
++{{#concept "shift" Disambiguation="sequential diagram" Agda=shift-sequential-diagram}}
++of a [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md) is a
++sequential diagram consisting of the types and maps shifted by one. It is also
++denoted `A[1]`. This shifting can be iterated for any
++[natural number](elementary-number-theory.natural-numbers.md) `k`; then the
++resulting sequential diagram is denoted `A[k]`.
++
++Similarly, a
++{{#concept "shift" Disambiguation="morphism of sequential diagrams" Agda=shift-hom-sequential-diagram}}
++of a
++[morphism of sequential diagrams](synthetic-homotopy-theory.morphisms-sequential-diagrams.md)
++is a morphism from the shifted domain into the shifted codomain. In symbols,
++given a morphism `f : A → B`, we have `f[k] : A[k] → B[k]`.
++
++We also define shifts of
++[cocones](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md) and
++[homotopies of cocones](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md),
++which can additionally be unshifted.
++
++Importantly the type of cocones under a sequential diagram is
++[equivalent](foundation-core.equivalences.md) to the type of cocones under its
++shift, which implies that the
++[sequential colimit](synthetic-homotopy-theory.sequential-colimits.md) of a
++shifted sequential diagram is equivalent to the colimit of the original diagram.
++
++## Definitions
++
++_Implementation note_: the constructions are defined by first defining a shift
++by one, and then recursively shifting by one according to the argument. An
++alternative would be to shift all data using
++[addition](elementary-number-theory.addition-natural-numbers.md) on the natural
++numbers.
++
++However, addition computes only on one side, so we have a choice to make: given
++a shift `k`, do we define the `n`-th level of the shifted structure to be the
++`n+k`-th or `k+n`-th level of the original?
++
++The former runs into issues already when defining the shifted sequence, since
++`aₙ₊ₖ : Aₙ₊ₖ → A₍ₙ₊₁₎₊ₖ`, but we need a map of type `Aₙ₊ₖ → A₍ₙ₊ₖ₎₊₁`, which
++forces us to introduce a
++[transport](foundation-core.transport-along-identifications.md).
++
++On the other hand, the latter requires transport when proving anything by
++induction on `k` and doesn't satisfy the judgmental equality `A[0] ≐ A`, because
++`A₍ₖ₊₁₎₊ₙ` is not `A₍ₖ₊ₙ₎₊₁` and `A₀₊ₙ` is not `Aₙ`, and it requires more
++infrastructure for working with horizontal compositions in sequential colimit to
++be formalized in terms of addition.
++
++To contrast, defining the operations by induction does satisfy `A[0] ≐ A`, it
++computes when proving properties by induction, which is the expected primary
++use-case, and no further infrastructure is necessary.
++
++### Shifts of sequential diagrams
++
++Given a sequential diagram `A`
++
++```text
++     a₀      a₁      a₂
++ A₀ ---> A₁ ---> A₂ ---> ⋯ ,
++```
++
++we can forget the first type and map to get the diagram
++
++```text
++     a₁      a₂
++ A₁ ---> A₂ ---> ⋯ ,
++```
++
++which we call `A[1]`. Inductively, we define `A[k + 1] ≐ A[k][1]`.
++
++```agda
++module _
++  {l1 : Level} (A : sequential-diagram l1)
++  where
++
++  shift-once-sequential-diagram : sequential-diagram l1
++  pr1 shift-once-sequential-diagram n = family-sequential-diagram A (succ-ℕ n)
++  pr2 shift-once-sequential-diagram n = map-sequential-diagram A (succ-ℕ n)
++
++module _
++  {l1 : Level}
++  where
++
++  shift-sequential-diagram : ℕ → sequential-diagram l1 → sequential-diagram l1
++  shift-sequential-diagram zero-ℕ A = A
++  shift-sequential-diagram (succ-ℕ k) A =
++    shift-once-sequential-diagram (shift-sequential-diagram k A)
++```
++
++### Shifts of morphisms of sequential diagrams
++
++Given a morphism of sequential diagrams `f : A → B`
++
++```text
++        a₀      a₁
++    A₀ ---> A₁ ---> A₂ ---> ⋯
++    |       |       |
++ f₀ |       | f₁    | f₂
++    ∨       ∨       ∨
++    B₀ ---> B₁ ---> B₂ ---> ⋯ ,
++        b₀      b₁
++```
++
++we can drop the first square to get the morphism
++
++```text
++        a₁
++    A₁ ---> A₂ ---> ⋯
++    |       |
++ f₁ |       | f₂
++    ∨       ∨
++    B₁ ---> B₂ ---> ⋯ ,
++        b₁
++```
++
++which we call `f[1] : A[1] → B[1]`. Inductively, we define `f[k + 1] ≐ f[k][1]`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} (B : sequential-diagram l2)
++  (f : hom-sequential-diagram A B)
++  where
++
++  shift-once-hom-sequential-diagram :
++    hom-sequential-diagram
++      ( shift-once-sequential-diagram A)
++      ( shift-once-sequential-diagram B)
++  pr1 shift-once-hom-sequential-diagram n =
++    map-hom-sequential-diagram B f (succ-ℕ n)
++  pr2 shift-once-hom-sequential-diagram n =
++    naturality-map-hom-sequential-diagram B f (succ-ℕ n)
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} (B : sequential-diagram l2)
++  where
++
++  shift-hom-sequential-diagram :
++    (k : ℕ) →
++    hom-sequential-diagram A B →
++    hom-sequential-diagram
++      ( shift-sequential-diagram k A)
++      ( shift-sequential-diagram k B)
++  shift-hom-sequential-diagram zero-ℕ f = f
++  shift-hom-sequential-diagram (succ-ℕ k) f =
++    shift-once-hom-sequential-diagram
++      ( shift-sequential-diagram k B)
++      ( shift-hom-sequential-diagram k f)
++```
++
++### Shifts of cocones under sequential diagrams
++
++Given a cocone `c`
++
++```text
++      a₀      a₁
++  A₀ ---> A₁ ---> A₂ ---> ⋯
++   \      |      /
++    \     |     /
++  i₀ \    | i₁ / i₂
++      \   |   /
++       ∨  ∨  ∨
++          X
++```
++
++under `A`, we may forget the first inclusion and homotopy to get the cocone
++
++```text
++         a₁
++     A₁ ---> A₂ ---> ⋯
++     |      /
++     |     /
++  i₁ |    / i₂
++     |   /
++     ∨  ∨
++     X
++```
++
++under `A[1]`. We denote this cocone `c[1]`. Inductively, we define
++`c[k + 1] ≐ c[k][1]`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2} (c : cocone-sequential-diagram A X)
++  where
++
++  shift-once-cocone-sequential-diagram :
++    cocone-sequential-diagram (shift-once-sequential-diagram A) X
++  pr1 shift-once-cocone-sequential-diagram n =
++    map-cocone-sequential-diagram c (succ-ℕ n)
++  pr2 shift-once-cocone-sequential-diagram n =
++    coherence-cocone-sequential-diagram c (succ-ℕ n)
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2}
++  where
++
++  shift-cocone-sequential-diagram :
++    (k : ℕ) →
++    cocone-sequential-diagram A X →
++    cocone-sequential-diagram (shift-sequential-diagram k A) X
++  shift-cocone-sequential-diagram zero-ℕ c =
++    c
++  shift-cocone-sequential-diagram (succ-ℕ k) c =
++    shift-once-cocone-sequential-diagram
++      ( shift-cocone-sequential-diagram k c)
++```
++
++### Unshifts of cocones under sequential diagrams
++
++Conversely, given a cocone `c`
++
++```text
++         a₁
++     A₁ ---> A₂ ---> ⋯
++     |      /
++     |     /
++  i₁ |    / i₂
++     |   /
++     ∨  ∨
++     X
++```
++
++under `A[1]`, we may prepend a map
++
++```text
++           a₀      a₁
++       A₀ ---> A₁ ---> A₂ ---> ⋯
++        \      |      /
++         \     |     /
++  i₁ ∘ a₀ \    | i₁ / i₂
++           \   |   /
++            ∨  ∨  ∨
++               X
++```
++
++which commutes by reflexivity, giving us a cocone under `A`, which we call
++`c[-1]`.
++
++Notice that by restricting the type of `c` to be the cocones under an already
++shifted diagram, we ensure that unshifting cannot get out of bounds of the
++original diagram.
++
++Inductively, we define `c[-(k + 1)] ≐ c[-1][-k]`. One might expect that
++following the pattern of shifts, this should be `c[-k][-1]`, but recall that we
++only know how to unshift a cocone under `A[n]` by `n`; since this `c` is under
++`A[k][1]`, we first need to unshift by 1 to get `c[-1]` under `A[k]`, and only
++then we can unshift by `k` to get `c[-1][-k]` under `A`.
++
++```agda
++module _
++  {l1 l2 : Level} (A : sequential-diagram l1)
++  {X : UU l2}
++  (c : cocone-sequential-diagram (shift-once-sequential-diagram A) X)
++  where
++
++  unshift-once-cocone-sequential-diagram :
++    cocone-sequential-diagram A X
++  pr1 unshift-once-cocone-sequential-diagram zero-ℕ =
++    map-cocone-sequential-diagram c zero-ℕ ∘ map-sequential-diagram A zero-ℕ
++  pr1 unshift-once-cocone-sequential-diagram (succ-ℕ n) =
++    map-cocone-sequential-diagram c n
++  pr2 unshift-once-cocone-sequential-diagram zero-ℕ =
++    refl-htpy
++  pr2 unshift-once-cocone-sequential-diagram (succ-ℕ n) =
++    coherence-cocone-sequential-diagram c n
++
++module _
++  {l1 l2 : Level} (A : sequential-diagram l1)
++  {X : UU l2}
++  where
++
++  unshift-cocone-sequential-diagram :
++    (k : ℕ) →
++    cocone-sequential-diagram (shift-sequential-diagram k A) X →
++    cocone-sequential-diagram A X
++  unshift-cocone-sequential-diagram zero-ℕ c =
++    c
++  unshift-cocone-sequential-diagram (succ-ℕ k) c =
++    unshift-cocone-sequential-diagram k
++      ( unshift-once-cocone-sequential-diagram
++        ( shift-sequential-diagram k A)
++        ( c))
++```
++
++### Shifts of homotopies of cocones under sequential diagrams
++
++Given cocones `c` and `c'` under `A`
++
++```text
++     a₀      a₁                   a₀      a₁
++ A₀ ---> A₁ ---> A₂ ---> ⋯    A₀ ---> A₁ ---> A₂ ---> ⋯
++  \      |      /              \      |      /
++   \     | i₁  /                \     | i'₁ /
++ i₀ \    |    / i₂     ~     i'₀ \    |    / i'₂
++     \   |   /                    \   |   /
++      ∨  ∨  ∨                      ∨  ∨  ∨
++         X                            X
++```
++
++and a homotopy `H : c ~ c'` between them, we can again forget the first homotopy
++of maps and coherence to get the homotopy `H[1] : c[1] ~ c'[1]`. Inductively, we
++define `H[k + 1] ≐ H[k][1]`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} {X : UU l2}
++  {c c' : cocone-sequential-diagram A X}
++  (H : htpy-cocone-sequential-diagram c c')
++  where
++
++  shift-once-htpy-cocone-sequential-diagram :
++    htpy-cocone-sequential-diagram
++      ( shift-once-cocone-sequential-diagram c)
++      ( shift-once-cocone-sequential-diagram c')
++  pr1 shift-once-htpy-cocone-sequential-diagram n =
++    htpy-htpy-cocone-sequential-diagram H (succ-ℕ n)
++  pr2 shift-once-htpy-cocone-sequential-diagram n =
++    coherence-htpy-htpy-cocone-sequential-diagram
++      ( H)
++      ( succ-ℕ n)
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} {X : UU l2}
++  {c c' : cocone-sequential-diagram A X}
++  where
++
++  shift-htpy-cocone-sequential-diagram :
++    (k : ℕ) →
++    htpy-cocone-sequential-diagram c c' →
++    htpy-cocone-sequential-diagram
++      ( shift-cocone-sequential-diagram k c)
++      ( shift-cocone-sequential-diagram k c')
++  shift-htpy-cocone-sequential-diagram zero-ℕ H =
++    H
++  shift-htpy-cocone-sequential-diagram (succ-ℕ k) H =
++    shift-once-htpy-cocone-sequential-diagram
++      ( shift-htpy-cocone-sequential-diagram k H)
++```
++
++### Unshifts of homotopies of cocones under sequential diagrams
++
++Similarly to unshifting cocones, we can recover the first homotopy and coherence
++to unshift a homotopy of cocones. Given two cocones `c`, `c'` under `A[1]`
++
++```text
++         a₁                     a₁
++     A₁ ---> A₂ ---> ⋯      A₁ ---> A₂ ---> ⋯
++     |      /               |      /
++     |     /                |     /
++  i₁ |    / i₂     ~    i'₁ |    / i'₂
++     |   /                  |   /
++     ∨  ∨                   ∨  ∨
++     X                      X
++```
++
++and a homotopy `H : c ~ c'`, we need to show that `i₁ ∘ a₀ ~ i'₁ ∘ a₀`. This can
++be obtained by whiskering `H₀ ·r a₀`, which makes the coherence trivial.
++
++Inductively, we define `H[-(k + 1)] ≐ H[-1][-k]`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} {X : UU l2}
++  {c c' : cocone-sequential-diagram (shift-once-sequential-diagram A) X}
++  (H : htpy-cocone-sequential-diagram c c')
++  where
++
++  unshift-once-htpy-cocone-sequential-diagram :
++    htpy-cocone-sequential-diagram
++      ( unshift-once-cocone-sequential-diagram A c)
++      ( unshift-once-cocone-sequential-diagram A c')
++  pr1 unshift-once-htpy-cocone-sequential-diagram zero-ℕ =
++    ( htpy-htpy-cocone-sequential-diagram H zero-ℕ) ·r
++    ( map-sequential-diagram A zero-ℕ)
++  pr1 unshift-once-htpy-cocone-sequential-diagram (succ-ℕ n) =
++    htpy-htpy-cocone-sequential-diagram H n
++  pr2 unshift-once-htpy-cocone-sequential-diagram zero-ℕ =
++    inv-htpy-right-unit-htpy
++  pr2 unshift-once-htpy-cocone-sequential-diagram (succ-ℕ n) =
++    coherence-htpy-htpy-cocone-sequential-diagram H n
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1} {X : UU l2}
++  where
++
++  unshift-htpy-cocone-sequential-diagram :
++    (k : ℕ) →
++    {c c' : cocone-sequential-diagram (shift-sequential-diagram k A) X} →
++    htpy-cocone-sequential-diagram c c' →
++    htpy-cocone-sequential-diagram
++      ( unshift-cocone-sequential-diagram A k c)
++      ( unshift-cocone-sequential-diagram A k c')
++  unshift-htpy-cocone-sequential-diagram zero-ℕ H =
++    H
++  unshift-htpy-cocone-sequential-diagram (succ-ℕ k) H =
++    unshift-htpy-cocone-sequential-diagram k
++      (unshift-once-htpy-cocone-sequential-diagram H)
++```
++
++### Morphisms from sequential diagrams into their shifts
++
++The morphism is obtained by observing that the squares in the diagram
++
++```text
++        a₀      a₁
++    A₀ ---> A₁ ---> A₂ ---> ⋯
++    |       |       |
++ a₀ |       | a₁    | a₂
++    ∨       ∨       ∨
++    A₁ ---> A₂ ---> A₃ ---> ⋯
++        a₁      a₂
++```
++
++commute by reflexivity.
++
++```agda
++module _
++  {l1 : Level} (A : sequential-diagram l1)
++  where
++
++  hom-shift-once-sequential-diagram :
++    hom-sequential-diagram
++      ( A)
++      ( shift-once-sequential-diagram A)
++  pr1 hom-shift-once-sequential-diagram = map-sequential-diagram A
++  pr2 hom-shift-once-sequential-diagram n = refl-htpy
++
++module _
++  {l1 : Level} (A : sequential-diagram l1)
++  where
++
++  hom-shift-sequential-diagram :
++    (k : ℕ) →
++    hom-sequential-diagram
++      ( A)
++      ( shift-sequential-diagram k A)
++  hom-shift-sequential-diagram zero-ℕ = id-hom-sequential-diagram A
++  hom-shift-sequential-diagram (succ-ℕ k) =
++    comp-hom-sequential-diagram
++      ( A)
++      ( shift-sequential-diagram k A)
++      ( shift-sequential-diagram (succ-ℕ k) A)
++      ( hom-shift-once-sequential-diagram
++        ( shift-sequential-diagram k A))
++      ( hom-shift-sequential-diagram k)
++```
++
++## Properties
++
++### The type of cocones under a sequential diagram is equivalent to the type of cocones under its shift
++
++This is shown by proving that shifting and unshifting of cocones are mutually
++inverse operations.
++
++To show that `shift ∘ unshift ~ id` is trivial, since the first step synthesizes
++some data for the first level, which the second step promptly forgets.
++
++In the inductive step, we need to show `c[-(k + 1)][k + 1] ~ c`. The left-hand
++side computes to `c[-1][-k][k][1]`, which is homotopic to `c[-1][1]` by shifting
++the homotopy given by the inductive hypothesis, and that computes to `c`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2}
++  where
++
++  htpy-is-section-unshift-once-cocone-sequential-diagram :
++    (c : cocone-sequential-diagram (shift-once-sequential-diagram A) X) →
++    htpy-cocone-sequential-diagram
++      ( shift-once-cocone-sequential-diagram
++        ( unshift-once-cocone-sequential-diagram A c))
++      ( c)
++  htpy-is-section-unshift-once-cocone-sequential-diagram c =
++    refl-htpy-cocone-sequential-diagram (shift-once-sequential-diagram A) c
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2}
++  where
++
++  htpy-is-section-unshift-cocone-sequential-diagram :
++    (k : ℕ) →
++    (c : cocone-sequential-diagram (shift-sequential-diagram k A) X) →
++    htpy-cocone-sequential-diagram
++      ( shift-cocone-sequential-diagram k
++        ( unshift-cocone-sequential-diagram A k c))
++      ( c)
++  htpy-is-section-unshift-cocone-sequential-diagram zero-ℕ c =
++    refl-htpy-cocone-sequential-diagram A c
++  htpy-is-section-unshift-cocone-sequential-diagram (succ-ℕ k) c =
++    shift-once-htpy-cocone-sequential-diagram
++      ( htpy-is-section-unshift-cocone-sequential-diagram k
++        ( unshift-once-cocone-sequential-diagram
++          ( shift-sequential-diagram k A)
++          ( c)))
++
++  is-section-unshift-cocone-sequential-diagram :
++    (k : ℕ) →
++    is-section
++      ( shift-cocone-sequential-diagram k)
++      ( unshift-cocone-sequential-diagram A {X} k)
++  is-section-unshift-cocone-sequential-diagram k c =
++    eq-htpy-cocone-sequential-diagram
++      ( shift-sequential-diagram k A)
++      ( _)
++      ( _)
++      ( htpy-is-section-unshift-cocone-sequential-diagram k c)
++```
++
++For the other direction, we need to show that the synthesized data, namely the
++map `i₁ ∘ a₀ : A₀ → X` and the reflexive homotopy, is consistent with the
++original data `i₀ : A₀ → X` and the homotopy `H₀ : i₀ ~ i₁ ∘ a₀`. It is more
++convenient to show the inverse homotopy `id ~ unshift ∘ shift`, because `H₀`
++gives us exactly the right homotopy for the first level, so the rest of the
++coherences are also trivial.
++
++In the inductive step, we need to show
++`c ~ c[k + 1][-(k + 1)] ≐ c[k][1][-1][-k]`. This follows from the inductive
++hypothesis, which states that `c ~ c[k][-k]`, and which we compose with the
++homotopy `c[k] ~ c[k][1][-1]` unshifted by `k`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2}
++  where
++
++  inv-htpy-is-retraction-unshift-once-cocone-sequential-diagram :
++    (c : cocone-sequential-diagram A X) →
++    htpy-cocone-sequential-diagram
++      ( c)
++      ( unshift-once-cocone-sequential-diagram A
++        ( shift-once-cocone-sequential-diagram c))
++  pr1 (inv-htpy-is-retraction-unshift-once-cocone-sequential-diagram c)
++    zero-ℕ =
++    coherence-cocone-sequential-diagram c zero-ℕ
++  pr1 (inv-htpy-is-retraction-unshift-once-cocone-sequential-diagram c)
++    (succ-ℕ n) =
++    refl-htpy
++  pr2 (inv-htpy-is-retraction-unshift-once-cocone-sequential-diagram c)
++    zero-ℕ =
++    refl-htpy
++  pr2 (inv-htpy-is-retraction-unshift-once-cocone-sequential-diagram c)
++    (succ-ℕ n) =
++    right-unit-htpy
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2}
++  where
++
++  inv-htpy-is-retraction-unshift-cocone-sequential-diagram :
++    (k : ℕ) →
++    (c : cocone-sequential-diagram A X) →
++    htpy-cocone-sequential-diagram
++      ( c)
++      ( unshift-cocone-sequential-diagram A k
++        ( shift-cocone-sequential-diagram k c))
++  inv-htpy-is-retraction-unshift-cocone-sequential-diagram zero-ℕ c =
++    refl-htpy-cocone-sequential-diagram A c
++  inv-htpy-is-retraction-unshift-cocone-sequential-diagram (succ-ℕ k) c =
++    concat-htpy-cocone-sequential-diagram
++      ( inv-htpy-is-retraction-unshift-cocone-sequential-diagram k c)
++      ( unshift-htpy-cocone-sequential-diagram k
++        ( inv-htpy-is-retraction-unshift-once-cocone-sequential-diagram
++          ( shift-cocone-sequential-diagram k c)))
++
++  is-retraction-unshift-cocone-sequential-diagram :
++    (k : ℕ) →
++    is-retraction
++      ( shift-cocone-sequential-diagram k)
++      ( unshift-cocone-sequential-diagram A {X} k)
++  is-retraction-unshift-cocone-sequential-diagram k c =
++    inv
++      ( eq-htpy-cocone-sequential-diagram A _ _
++        ( inv-htpy-is-retraction-unshift-cocone-sequential-diagram k c))
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2}
++  where
++
++  is-equiv-shift-cocone-sequential-diagram :
++    (k : ℕ) →
++    is-equiv (shift-cocone-sequential-diagram {X = X} k)
++  is-equiv-shift-cocone-sequential-diagram k =
++    is-equiv-is-invertible
++      ( unshift-cocone-sequential-diagram A k)
++      ( is-section-unshift-cocone-sequential-diagram k)
++      ( is-retraction-unshift-cocone-sequential-diagram k)
++
++  equiv-shift-cocone-sequential-diagram :
++    (k : ℕ) →
++    cocone-sequential-diagram A X ≃
++    cocone-sequential-diagram (shift-sequential-diagram k A) X
++  pr1 (equiv-shift-cocone-sequential-diagram k) =
++    shift-cocone-sequential-diagram k
++  pr2 (equiv-shift-cocone-sequential-diagram k) =
++    is-equiv-shift-cocone-sequential-diagram k
++```
++
++### The sequential colimit of a sequential diagram is also the sequential colimit of its shift
++
++Given a sequential colimit
++
++```text
++     a₀      a₁      a₂
++ A₀ ---> A₁ ---> A₂ ---> ⋯ --> X,
++```
++
++there is a commuting triangle
++
++```text
++              cocone-map
++      X → Y ------------> cocone A Y
++            \           /
++  cocone-map  \       /
++                ∨   ∨
++             cocone A[1] Y.
++```
++
++Inductively, we compose this triangle in the following way
++
++```text
++              cocone-map
++      X → Y ------------> cocone A Y
++            \⟍             |
++             \ ⟍           |
++              \  ⟍         |
++               \   ⟍       ∨
++                \    > cocone A[k] Y
++     cocone-map  \       /
++                  \     /
++                   \   /
++                    ∨ ∨
++             cocone A[k + 1] Y,
++```
++
++where the top triangle is the inductive hypothesis, and the bottom triangle is
++the step instantiated at `A[k]`.
++
++This gives us the commuting triangle
++
++```text
++              cocone-map
++      X → Y ------------> cocone A Y
++            \     ≃     /
++  cocone-map  \       / ≃
++                ∨   ∨
++             cocone A[k] Y,
++```
++
++where the top map is an equivalence by the universal property of the cocone on
++`X`, and the right map is an equivalence by a theorem shown above, which implies
++that the left map is an equivalence, which exactly says that `X` is the
++sequential colimit of `A[k]`.
++
++```agda
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2} (c : cocone-sequential-diagram A X)
++  where
++
++  triangle-cocone-map-shift-once-cocone-sequential-diagram :
++    {l : Level} (Y : UU l) →
++    coherence-triangle-maps
++      ( cocone-map-sequential-diagram
++        ( shift-once-cocone-sequential-diagram c)
++        { Y = Y})
++      ( shift-once-cocone-sequential-diagram)
++      ( cocone-map-sequential-diagram c)
++  triangle-cocone-map-shift-once-cocone-sequential-diagram Y = refl-htpy
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2} (c : cocone-sequential-diagram A X)
++  where
++
++  triangle-cocone-map-shift-cocone-sequential-diagram :
++    (k : ℕ) →
++    {l : Level} (Y : UU l) →
++    coherence-triangle-maps
++      ( cocone-map-sequential-diagram
++        ( shift-cocone-sequential-diagram k c))
++      ( shift-cocone-sequential-diagram k)
++      ( cocone-map-sequential-diagram c)
++  triangle-cocone-map-shift-cocone-sequential-diagram zero-ℕ Y =
++    refl-htpy
++  triangle-cocone-map-shift-cocone-sequential-diagram (succ-ℕ k) Y =
++    ( triangle-cocone-map-shift-once-cocone-sequential-diagram
++      ( shift-cocone-sequential-diagram k c)
++      ( Y)) ∙h
++    ( ( shift-once-cocone-sequential-diagram) ·l
++      ( triangle-cocone-map-shift-cocone-sequential-diagram k Y))
++
++module _
++  {l1 l2 : Level} {A : sequential-diagram l1}
++  {X : UU l2} {c : cocone-sequential-diagram A X}
++  where
++
++  up-shift-cocone-sequential-diagram :
++    (k : ℕ) →
++    universal-property-sequential-colimit c →
++    universal-property-sequential-colimit (shift-cocone-sequential-diagram k c)
++  up-shift-cocone-sequential-diagram k up-c Y =
++    is-equiv-left-map-triangle
++      ( cocone-map-sequential-diagram
++        ( shift-cocone-sequential-diagram k c))
++      ( shift-cocone-sequential-diagram k)
++      ( cocone-map-sequential-diagram c)
++      ( triangle-cocone-map-shift-cocone-sequential-diagram c k Y)
++      ( up-c Y)
++      ( is-equiv-shift-cocone-sequential-diagram k)
++```
++
++We instantiate this theorem for the standard sequential colimits, giving us
++`A[k]∞ ≃ A∞`.
++
++```agda
++module _
++  {l1 : Level} (A : sequential-diagram l1)
++  where
++
++  compute-sequential-colimit-shift-sequential-diagram :
++    (k : ℕ) →
++    standard-sequential-colimit (shift-sequential-diagram k A) ≃
++    standard-sequential-colimit A
++  pr1 (compute-sequential-colimit-shift-sequential-diagram k) =
++    cogap-standard-sequential-colimit
++      ( shift-cocone-sequential-diagram
++        ( k)
++        ( cocone-standard-sequential-colimit A))
++  pr2 (compute-sequential-colimit-shift-sequential-diagram k) =
++    is-sequential-colimit-universal-property _
++      ( up-shift-cocone-sequential-diagram k up-standard-sequential-colimit)
++```
+diff --git a/src/synthetic-homotopy-theory/total-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/total-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..70bd318d5a
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/total-sequential-diagrams.lagda.md
+@@ -0,0 +1,117 @@
++# Total sequential diagrams of dependent sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.total-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.dependent-pair-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.dependent-sequential-diagrams
++open import synthetic-homotopy-theory.functoriality-sequential-colimits
++open import synthetic-homotopy-theory.morphisms-sequential-diagrams
++open import synthetic-homotopy-theory.sequential-colimits
++open import synthetic-homotopy-theory.sequential-diagrams
++open import synthetic-homotopy-theory.universal-property-sequential-colimits
++```
++
++</details>
++
++## Idea
++
++The
++{{#concept "total diagram" Disambiguation="dependent sequential diagrams" Agda=total-sequential-diagram}}
++of a
++[dependent sequential diagram](synthetic-homotopy-theory.dependent-sequential-diagrams.md)
++`B : (A, a) → 𝒰` is the
++[sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
++consisting of [total spaces](foundation.dependent-pair-types.md) `Σ Aₙ Bₙ` and
++total maps.
++
++## Definitions
++
++### The total sequential diagram of a dependent sequential diagram
++
++```agda
++module _
++  {l1 l2 : Level}
++  {A : sequential-diagram l1} (B : dependent-sequential-diagram A l2)
++  where
++
++  family-total-sequential-diagram : ℕ → UU (l1 ⊔ l2)
++  family-total-sequential-diagram n =
++    Σ (family-sequential-diagram A n)
++      (family-dependent-sequential-diagram A B n)
++
++  map-total-sequential-diagram :
++    (n : ℕ) → family-total-sequential-diagram n →
++    family-total-sequential-diagram (succ-ℕ n)
++  map-total-sequential-diagram n =
++    map-Σ
++      ( family-dependent-sequential-diagram A B (succ-ℕ n))
++      ( map-sequential-diagram A n)
++      ( map-dependent-sequential-diagram A B n)
++
++  total-sequential-diagram : sequential-diagram (l1 ⊔ l2)
++  pr1 total-sequential-diagram = family-total-sequential-diagram
++  pr2 total-sequential-diagram = map-total-sequential-diagram
++```
++
++### The projection morphism onto the base of the total sequential diagram
++
++```agda
++module _
++  {l1 l2 : Level}
++  {A : sequential-diagram l1} (B : dependent-sequential-diagram A l2)
++  where
++
++  pr1-total-sequential-diagram :
++    hom-sequential-diagram
++      ( total-sequential-diagram B)
++      ( A)
++  pr1 pr1-total-sequential-diagram n = pr1
++  pr2 pr1-total-sequential-diagram n = refl-htpy
++```
++
++### The induced projection map on sequential colimits
++
++```agda
++module _
++  {l1 l2 l3 l4 : Level}
++  {A : sequential-diagram l1} (B : dependent-sequential-diagram A l2)
++  {X : UU l3} {c : cocone-sequential-diagram (total-sequential-diagram B) X}
++  (up-c : universal-property-sequential-colimit c)
++  {Y : UU l4} (c' : cocone-sequential-diagram A Y)
++  where
++
++  pr1-sequential-colimit-total-sequential-diagram : X → Y
++  pr1-sequential-colimit-total-sequential-diagram =
++    map-sequential-colimit-hom-sequential-diagram
++      ( up-c)
++      ( c')
++      ( pr1-total-sequential-diagram B)
++```
++
++### The induced projection map on standard sequential colimits
++
++```agda
++module _
++  {l1 l2 : Level}
++  {A : sequential-diagram l1} (B : dependent-sequential-diagram A l2)
++  where
++
++  pr1-standard-sequential-colimit-total-sequential-diagram :
++    standard-sequential-colimit (total-sequential-diagram B) →
++    standard-sequential-colimit A
++  pr1-standard-sequential-colimit-total-sequential-diagram =
++    map-hom-standard-sequential-colimit A
++      ( pr1-total-sequential-diagram B)
++```

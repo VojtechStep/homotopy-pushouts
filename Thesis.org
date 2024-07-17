@@ -40,7 +40,7 @@
 #+MACRO: AU [[https://unimath.github.io/agda-unimath/][agda-unimath]]
 #+MACRO: AURepo [[https://github.com/UniMath/agda-unimath][repository]]
 
-#+MACRO: PR (eval (let* ((full-name (concat $1 "-" $2 ".patch")) (path (concat "attachments/" full-name))) (if (file-exists-p path) (concat "=" full-name "= ([[https://github.com/UniMath/agda-unimath/pull/" $1 "][PR]])") (error (concat "File does not exist: " path)))))
+#+MACRO: PR (eval (let* ((full-name (concat $1 "-" $2 ".diff")) (path (concat "attachments/" full-name))) (if (file-exists-p path) (concat "=" full-name "= ([[https://github.com/UniMath/agda-unimath/pull/" $1 "][PR]])") (error (concat "File does not exist: " path)))))
 
 #+LATEX_HEADER: \newcommand{\DeclareBinOperator}[2]{\newcommand{#1}{\mathbin{#2}}}
 
@@ -4049,7 +4049,7 @@ The thesis also does not attempt to formalize applications of the zigzag constru
 \appendix
 * List of attachments
 
-Attachments consist of Git patch files, most of which were submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
+Attachments consist of Git diff files, most of which were submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
 
 - {{{PR(535,refactor-descent-circle)}}}
   updates formalization of the descent property of the circle to be consistent with its description in [cite//b:@Rij22].
@@ -4091,13 +4091,15 @@ Attachments consist of Git patch files, most of which were submitted as pull req
   formalizes the fact that equivalences are closed under sequential composition.
 - {{{PR(1129,zigzags-sequential-diagrams)}}}
   formalizes zigzags of sequential diagrams, to the extent described in the thesis.
+- {{{PR(1144,sequential-colimits-overview)}}}
+  adds a summary page referencing formalization of sequential colimits following the outline of the paper by Sojakova, van Doorn and Rijke [cite//b:@SvDR20].
 - {{{PR(1145,descent-pushouts)}}}
   refactors, extends and documents the descent property of pushouts.
 - {{{PR(1148,characterization-families-pushouts)}}}
   characterizes families of functions and families of equivalences over pushouts, and the family of based identity types.
 - {{{PR(1150,identity-systems-descent-pushouts)}}}
   formalizes the induction principle of identity types of pushouts, using descent data.
-- =zigzag-construction-identity-types.patch=
+- =zigzag-construction-identity-types.diff=
   formalizes the zigzag construction and its partial proof of correctness, to the extent of the thesis. May be applied on top of latest =master= branch of agda-unimath as of writing, commit =98119d71307593f533f2539882430f157330c07e=.
 
 
@@ -4126,6 +4128,7 @@ Attachments consist of Git patch files, most of which were submitted as pull req
 - [ ] Check capitalization of autoref
 - [X] Cite Brunerie's thesis for the flattening lemma
 - [X] Cite Egbert's thesis for descent
+- [X] Replace patches with diffs
 - [ ] Try to move important ideas from remarks to section introductions
 - [ ] Make the first part of Pushouts a subsection, add section intro
 

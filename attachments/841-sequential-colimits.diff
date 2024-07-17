@@ -1,0 +1,2609 @@
+diff --git a/src/foundation/universal-property-sequential-limits.lagda.md b/src/foundation/universal-property-sequential-limits.lagda.md
+index a5d6617138..efd141e7fb 100644
+--- a/src/foundation/universal-property-sequential-limits.lagda.md
++++ b/src/foundation/universal-property-sequential-limits.lagda.md
+@@ -249,4 +249,4 @@ concept.
+ ## See also
+ 
+ - For sequential colimits, see
+-  [`synthetic-homotopy-theory.27-sequences`](synthetic-homotopy-theory.27-sequences.md)
++  [`synthetic-homotopy-theory.universal-property-sequential-colimits`](synthetic-homotopy-theory.universal-property-sequential-colimits.md)
+diff --git a/src/synthetic-homotopy-theory.lagda.md b/src/synthetic-homotopy-theory.lagda.md
+index 0905d11402..3d536c6c8f 100644
+--- a/src/synthetic-homotopy-theory.lagda.md
++++ b/src/synthetic-homotopy-theory.lagda.md
+@@ -7,12 +7,12 @@ module synthetic-homotopy-theory where
+ 
+ open import synthetic-homotopy-theory.26-descent public
+ open import synthetic-homotopy-theory.26-id-pushout public
+-open import synthetic-homotopy-theory.27-sequences public
+ open import synthetic-homotopy-theory.acyclic-maps public
+ open import synthetic-homotopy-theory.acyclic-types public
+ open import synthetic-homotopy-theory.category-of-connected-set-bundles-circle public
+ open import synthetic-homotopy-theory.cavallos-trick public
+ open import synthetic-homotopy-theory.circle public
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams public
+ open import synthetic-homotopy-theory.cocones-under-spans public
+ open import synthetic-homotopy-theory.cocones-under-spans-of-pointed-types public
+ open import synthetic-homotopy-theory.codiagonals-of-maps public
+@@ -21,13 +21,16 @@ open import synthetic-homotopy-theory.cofibers public
+ open import synthetic-homotopy-theory.coforks public
+ open import synthetic-homotopy-theory.conjugation-loops public
+ open import synthetic-homotopy-theory.connected-set-bundles-circle public
++open import synthetic-homotopy-theory.dependent-cocones-under-sequential-diagrams public
+ open import synthetic-homotopy-theory.dependent-cocones-under-spans public
+ open import synthetic-homotopy-theory.dependent-coforks public
+ open import synthetic-homotopy-theory.dependent-descent-circle public
+ open import synthetic-homotopy-theory.dependent-pullback-property-pushouts public
++open import synthetic-homotopy-theory.dependent-sequential-diagrams public
+ open import synthetic-homotopy-theory.dependent-suspension-structures public
+ open import synthetic-homotopy-theory.dependent-universal-property-coequalizers public
+ open import synthetic-homotopy-theory.dependent-universal-property-pushouts public
++open import synthetic-homotopy-theory.dependent-universal-property-sequential-colimits public
+ open import synthetic-homotopy-theory.dependent-universal-property-suspensions public
+ open import synthetic-homotopy-theory.descent-circle public
+ open import synthetic-homotopy-theory.descent-circle-constant-families public
+@@ -37,6 +40,7 @@ open import synthetic-homotopy-theory.descent-circle-function-types public
+ open import synthetic-homotopy-theory.descent-circle-subtypes public
+ open import synthetic-homotopy-theory.double-loop-spaces public
+ open import synthetic-homotopy-theory.eckmann-hilton-argument public
++open import synthetic-homotopy-theory.equivalences-sequential-diagrams public
+ open import synthetic-homotopy-theory.flattening-lemma-coequalizers public
+ open import synthetic-homotopy-theory.flattening-lemma-pushouts public
+ open import synthetic-homotopy-theory.free-loops public
+@@ -55,6 +59,7 @@ open import synthetic-homotopy-theory.loop-spaces public
+ open import synthetic-homotopy-theory.maps-of-prespectra public
+ open import synthetic-homotopy-theory.mere-spheres public
+ open import synthetic-homotopy-theory.morphisms-descent-data-circle public
++open import synthetic-homotopy-theory.morphisms-sequential-diagrams public
+ open import synthetic-homotopy-theory.multiplication-circle public
+ open import synthetic-homotopy-theory.plus-principle public
+ open import synthetic-homotopy-theory.powers-of-loops public
+@@ -64,6 +69,7 @@ open import synthetic-homotopy-theory.pullback-property-pushouts public
+ open import synthetic-homotopy-theory.pushouts public
+ open import synthetic-homotopy-theory.pushouts-of-pointed-types public
+ open import synthetic-homotopy-theory.sections-descent-circle public
++open import synthetic-homotopy-theory.sequential-diagrams public
+ open import synthetic-homotopy-theory.smash-products-of-pointed-types public
+ open import synthetic-homotopy-theory.spectra public
+ open import synthetic-homotopy-theory.sphere-prespectrum public
+@@ -78,6 +84,7 @@ open import synthetic-homotopy-theory.universal-cover-circle public
+ open import synthetic-homotopy-theory.universal-property-circle public
+ open import synthetic-homotopy-theory.universal-property-coequalizers public
+ open import synthetic-homotopy-theory.universal-property-pushouts public
++open import synthetic-homotopy-theory.universal-property-sequential-colimits public
+ open import synthetic-homotopy-theory.universal-property-suspensions public
+ open import synthetic-homotopy-theory.universal-property-suspensions-of-pointed-types public
+ open import synthetic-homotopy-theory.wedges-of-pointed-types public
+diff --git a/src/synthetic-homotopy-theory/27-sequences.lagda.md b/src/synthetic-homotopy-theory/27-sequences.lagda.md
+deleted file mode 100644
+index 09f60cf2ca..0000000000
+--- a/src/synthetic-homotopy-theory/27-sequences.lagda.md
++++ /dev/null
+@@ -1,202 +0,0 @@
+-# Formalization of the Symmetry book - 27 sequences
+-
+-```agda
+-module synthetic-homotopy-theory.27-sequences where
+-```
+-
+-<details><summary>Imports</summary>
+-
+-```agda
+-open import elementary-number-theory.natural-numbers
+-
+-open import foundation.contractible-types
+-open import foundation.dependent-pair-types
+-open import foundation.equality-dependent-function-types
+-open import foundation.equivalences
+-open import foundation.function-types
+-open import foundation.fundamental-theorem-of-identity-types
+-open import foundation.homotopies
+-open import foundation.homotopy-induction
+-open import foundation.identity-types
+-open import foundation.structure-identity-principle
+-open import foundation.torsorial-type-families
+-open import foundation.univalence
+-open import foundation.universe-levels
+-open import foundation.whiskering-homotopies
+-```
+-
+-</details>
+-
+-We introduce two types of sequences: one with the arrows going up and one with
+-the arrows going down.
+-
+-```agda
+-Sequence :
+-  ( l : Level) → UU (lsuc l)
+-Sequence l = Σ (ℕ → UU l) (λ A → (n : ℕ) → A n → A (succ-ℕ n))
+-
+-type-seq :
+-  { l : Level} (A : Sequence l) → (n : ℕ) → UU l
+-type-seq A = pr1 A
+-
+-map-seq :
+-  { l : Level} (A : Sequence l) →
+-  ( n : ℕ) → (type-seq A n) → (type-seq A (succ-ℕ n))
+-map-seq A = pr2 A
+-```
+-
+-### Characterizing the identity type of `Sequence`
+-
+-```agda
+-naturality-hom-Seq :
+-  { l1 l2 : Level} (A : Sequence l1) (B : Sequence l2)
+-  ( h : (n : ℕ) → type-seq A n → type-seq B n) (n : ℕ) → UU (l1 ⊔ l2)
+-naturality-hom-Seq A B h n =
+-  ((map-seq B n) ∘ (h n)) ~ ((h (succ-ℕ n)) ∘ (map-seq A n))
+-
+-equiv-Seq :
+-  { l1 l2 : Level} (A : Sequence l1) (B : Sequence l2) → UU (l1 ⊔ l2)
+-equiv-Seq A B =
+-  Σ ( (n : ℕ) → (type-seq A n) ≃ (type-seq B n))
+-    ( λ e → (n : ℕ) →
+-      naturality-hom-Seq A B (λ n → map-equiv (e n)) n)
+-
+-id-equiv-Seq :
+-  { l1 : Level} (A : Sequence l1) → equiv-Seq A A
+-id-equiv-Seq A =
+-  pair
+-    ( λ n → id-equiv)
+-    ( λ n → refl-htpy)
+-
+-equiv-eq-Seq :
+-  { l1 : Level} (A B : Sequence l1) → Id A B → equiv-Seq A B
+-equiv-eq-Seq A .A refl = id-equiv-Seq A
+-
+-is-torsorial-equiv-Seq :
+-  { l1 : Level} (A : Sequence l1) → is-torsorial (equiv-Seq A)
+-is-torsorial-equiv-Seq A =
+-  is-torsorial-Eq-structure
+-    ( λ B g (e : (n : ℕ) → (type-seq A n) ≃ B n) →
+-      (n : ℕ) → naturality-hom-Seq A (pair B g) (λ n → map-equiv (e n)) n)
+-    ( is-torsorial-Eq-Π
+-      ( λ n X → type-seq A n ≃ X)
+-      ( λ n → is-torsorial-equiv (type-seq A n)))
+-    ( pair (type-seq A) (λ n → id-equiv))
+-    ( is-torsorial-Eq-Π
+-      ( λ n h → h ~ (map-seq A n))
+-      ( λ n → is-torsorial-htpy' (map-seq A n)))
+-
+-is-equiv-equiv-eq-Seq :
+-  { l1 : Level} (A B : Sequence l1) → is-equiv (equiv-eq-Seq A B)
+-is-equiv-equiv-eq-Seq A =
+-  fundamental-theorem-id
+-    ( is-torsorial-equiv-Seq A)
+-    ( equiv-eq-Seq A)
+-
+-eq-equiv-Seq :
+-  { l1 : Level} {A B : Sequence l1} → equiv-Seq A B → Id A B
+-eq-equiv-Seq {A = A} {B} =
+-  map-inv-is-equiv (is-equiv-equiv-eq-Seq A B)
+-```
+-
+-### Cocones on a type sequence
+-
+-```agda
+-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1) (X : UU l2) → UU (l1 ⊔ l2)
+-cocone-sequence A X =
+-  Σ ( (n : ℕ) → type-seq A n → X) (λ i →
+-    (n : ℕ) → (i n) ~ ((i (succ-ℕ n)) ∘ (map-seq A n)))
+-
+-map-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2} (c : cocone-sequence A X) →
+-  ( n : ℕ) → type-seq A n → X
+-map-cocone-sequence A c = pr1 c
+-
+-triangle-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2} (c : cocone-sequence A X) →
+-  ( n : ℕ) →
+-  ( map-cocone-sequence A c n) ~
+-  ( (map-cocone-sequence A c (succ-ℕ n)) ∘ (map-seq A n))
+-triangle-cocone-sequence A c = pr2 c
+-```
+-
+-### We characterize the identity type of `cocone-sequence`
+-
+-```agda
+-naturality-htpy-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1)
+-  {X : UU l2} (c c' : cocone-sequence A X) →
+-  ( H : (n : ℕ) → (map-cocone-sequence A c n) ~ (map-cocone-sequence A c' n)) →
+-  ( n : ℕ) → UU (l1 ⊔ l2)
+-naturality-htpy-cocone-sequence A c c' H n =
+-  ( (H n) ∙h (triangle-cocone-sequence A c' n)) ~
+-      ( ( triangle-cocone-sequence A c n) ∙h
+-        ( (H (succ-ℕ n)) ·r (map-seq A n)))
+-
+-htpy-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2}
+-  ( c c' : cocone-sequence A X) → UU (l1 ⊔ l2)
+-htpy-cocone-sequence A c c' =
+-  Σ ( (n : ℕ) → (map-cocone-sequence A c n) ~ (map-cocone-sequence A c' n))
+-    ( λ H → (n : ℕ) → naturality-htpy-cocone-sequence A c c' H n)
+-
+-reflexive-htpy-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2} →
+-  ( c : cocone-sequence A X) → htpy-cocone-sequence A c c
+-reflexive-htpy-cocone-sequence A c =
+-  pair
+-    ( λ n → refl-htpy)
+-    ( λ n → inv-htpy-right-unit-htpy)
+-
+-htpy-cocone-sequence-eq :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2} →
+-  ( c c' : cocone-sequence A X) → Id c c' → htpy-cocone-sequence A c c'
+-htpy-cocone-sequence-eq A c .c refl =
+-  reflexive-htpy-cocone-sequence A c
+-
+-is-torsorial-htpy-cocone-sequence :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2} (c : cocone-sequence A X) →
+-  is-torsorial (htpy-cocone-sequence A c)
+-is-torsorial-htpy-cocone-sequence A c =
+-  is-torsorial-Eq-structure
+-    ( λ j t H →
+-      (n : ℕ) → naturality-htpy-cocone-sequence A c (pair j t) H n)
+-    ( is-torsorial-Eq-Π
+-      ( λ n j → map-cocone-sequence A c n ~ j)
+-      ( λ n → is-torsorial-htpy (map-cocone-sequence A c n)))
+-    ( pair
+-      ( map-cocone-sequence A c)
+-      ( λ n → refl-htpy))
+-    ( is-torsorial-Eq-Π
+-      ( λ n H → H ~ ((triangle-cocone-sequence A c n) ∙h refl-htpy))
+-      ( λ n → is-torsorial-htpy'
+-        ( (triangle-cocone-sequence A c n) ∙h refl-htpy)))
+-
+-is-equiv-htpy-cocone-sequence-eq :
+-  { l1 l2 : Level} (A : Sequence l1) {X : UU l2} (c c' : cocone-sequence A X) →
+-  is-equiv (htpy-cocone-sequence-eq A c c')
+-is-equiv-htpy-cocone-sequence-eq A c =
+-  fundamental-theorem-id
+-    ( is-torsorial-htpy-cocone-sequence A c)
+-    ( htpy-cocone-sequence-eq A c)
+-```
+-
+-### The universal property of sequential colimits
+-
+-```agda
+-cocone-sequence-map :
+-  { l1 l2 l3 : Level} (A : Sequence l1)
+-  {X : UU l2} → cocone-sequence A X →
+-  (Y : UU l3) → (X → Y) → cocone-sequence A Y
+-cocone-sequence-map A c Y h =
+-  pair
+-    ( λ n → h ∘ (map-cocone-sequence A c n))
+-    ( λ n → h ·l (triangle-cocone-sequence A c n))
+-
+-universal-property-sequential-colimit :
+-  ( l : Level) {l1 l2 : Level} (A : Sequence l1) {X : UU l2}
+-  ( c : cocone-sequence A X) → UU (lsuc l ⊔ l1 ⊔ l2)
+-universal-property-sequential-colimit l A c =
+-  (Y : UU l) → is-equiv (cocone-sequence-map A c Y)
+-```
+diff --git a/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..1c66c18e04
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/cocones-under-sequential-diagrams.lagda.md
+@@ -0,0 +1,443 @@
++# Cocones under sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.cocones-under-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.action-on-identifications-functions
++open import foundation.binary-homotopies
++open import foundation.commuting-squares-of-homotopies
++open import foundation.commuting-squares-of-maps
++open import foundation.commuting-triangles-of-maps
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.function-extensionality
++open import foundation.function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.structure-identity-principle
++open import foundation.torsorial-type-families
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies
++
++open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.sequential-diagrams
++```
++
++</details>
++
++## Idea
++
++A **cocone under a
++[sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
++`(A, a)`** with codomain `X : 𝓤` consists of a family of maps `iₙ : A n → C` and
++a family of [homotopies](foundation.homotopies.md) `Hₙ` asserting that the
++triangles
++
++```text
++       aₙ
++ Aₙ ------> Aₙ₊₁
++   \       /
++    \     /
++  iₙ \   / iₙ₊₁
++      V V
++       X
++```
++
++[commute](foundation.commuting-triangles-of-maps.md).
++
++## Definitions
++
++### Cocones under sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) (X : UU l2)
++  where
++
++  cocone-sequential-diagram : UU (l1 ⊔ l2)
++  cocone-sequential-diagram =
++    Σ ( ( n : ℕ) → family-sequential-diagram A n → X)
++      ( λ i →
++        ( n : ℕ) →
++        coherence-triangle-maps
++          ( i n)
++          ( i (succ-ℕ n))
++          ( map-sequential-diagram A n))
++```
++
++### Components of cocones under sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  map-cocone-sequential-diagram : (n : ℕ) → family-sequential-diagram A n → X
++  map-cocone-sequential-diagram = pr1 c
++
++  coherence-triangle-cocone-sequential-diagram :
++    ( n : ℕ) →
++    coherence-triangle-maps
++      ( map-cocone-sequential-diagram n)
++      ( map-cocone-sequential-diagram (succ-ℕ n))
++      ( map-sequential-diagram A n)
++  coherence-triangle-cocone-sequential-diagram = pr2 c
++```
++
++### Homotopies of cocones under a sequential diagram
++
++A **homotopy** between two cocones `(X, i, H)` and `(X, j, L)` with the same
++vertex consists of a [sequence](foundation.dependent-sequences.md) of
++[homotopies](foundation.homotopies.md) `Kₙ : iₙ ~ jₙ` and a coherence datum
++filling the "pinched cylinder" with the faces `Kₙ`, `Hₙ`, `Lₙ` and `Kₙ₊₁`.
++
++The coherence datum may be better understood by viewing a cocone as a
++[morphism](synthetic-homotopy-theory.morphisms-sequential-diagrams.md) from
++`(A, a)` to the constant cocone `(n ↦ X, n ↦ id)`. Then a homotopy of cocones is
++a regular homotopy of morphisms of sequential diagrams.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  where
++
++  coherence-htpy-cocone-sequential-diagram :
++    ( c c' : cocone-sequential-diagram A X) →
++    ( (n : ℕ) →
++      map-cocone-sequential-diagram A c n ~
++      map-cocone-sequential-diagram A c' n) →
++    UU (l1 ⊔ l2)
++  coherence-htpy-cocone-sequential-diagram c c' K =
++    ( n : ℕ) →
++    coherence-square-homotopies
++      ( coherence-triangle-cocone-sequential-diagram A c n)
++      ( K (succ-ℕ n) ·r map-sequential-diagram A n)
++      ( K n)
++      ( coherence-triangle-cocone-sequential-diagram A c' n)
++
++  htpy-cocone-sequential-diagram :
++    ( c c' : cocone-sequential-diagram A X) → UU (l1 ⊔ l2)
++  htpy-cocone-sequential-diagram c c' =
++    Σ ( ( n : ℕ) →
++        ( map-cocone-sequential-diagram A c n) ~
++        ( map-cocone-sequential-diagram A c' n))
++      ( coherence-htpy-cocone-sequential-diagram c c')
++```
++
++### Components of a homotopy of cocones under a sequential diagram
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c c' : cocone-sequential-diagram A X)
++  ( H : htpy-cocone-sequential-diagram A c c')
++  where
++
++  htpy-htpy-cocone-sequential-diagram :
++    ( n : ℕ) →
++    ( map-cocone-sequential-diagram A c n) ~
++    ( map-cocone-sequential-diagram A c' n)
++  htpy-htpy-cocone-sequential-diagram = pr1 H
++
++  coherence-htpy-htpy-cocone-sequential-diagram :
++    coherence-htpy-cocone-sequential-diagram A c c'
++      ( htpy-htpy-cocone-sequential-diagram)
++  coherence-htpy-htpy-cocone-sequential-diagram = pr2 H
++```
++
++### Postcomposing cocones under a sequential diagram with a map
++
++Given a cocone `c` with vertex `X` under `(A, a)` and a map `f : X → Y`, we may
++extend `c` to a cocone with vertex `Y`.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  cocone-map-sequential-diagram :
++    { l : Level} {Y : UU l} →
++    ( X → Y) → cocone-sequential-diagram A Y
++  pr1 (cocone-map-sequential-diagram f) n =
++    f ∘ map-cocone-sequential-diagram A c n
++  pr2 (cocone-map-sequential-diagram f) n =
++    f ·l (coherence-triangle-cocone-sequential-diagram A c n)
++```
++
++## Properties
++
++### Characterization of identity types of cocones under sequential diagrams
++
++[Equality](foundation.identity-types.md) of cocones with the same vertex is
++captured by a homotopy between them.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  where
++
++  reflexive-htpy-cocone-sequential-diagram :
++    ( c : cocone-sequential-diagram A X) → htpy-cocone-sequential-diagram A c c
++  pr1 (reflexive-htpy-cocone-sequential-diagram c) n = refl-htpy
++  pr2 (reflexive-htpy-cocone-sequential-diagram c) n = right-unit-htpy
++
++  htpy-eq-cocone-sequential-diagram :
++    ( c c' : cocone-sequential-diagram A X) → ( c ＝ c') →
++    htpy-cocone-sequential-diagram A c c'
++  htpy-eq-cocone-sequential-diagram c .c refl =
++    reflexive-htpy-cocone-sequential-diagram c
++
++  abstract
++    is-torsorial-htpy-cocone-sequential-diagram :
++      ( c : cocone-sequential-diagram A X) →
++      is-torsorial (htpy-cocone-sequential-diagram A c)
++    is-torsorial-htpy-cocone-sequential-diagram c =
++      is-torsorial-Eq-structure
++        ( ev-pair (coherence-htpy-cocone-sequential-diagram A c))
++        ( is-torsorial-binary-htpy (map-cocone-sequential-diagram A c))
++        ( ( map-cocone-sequential-diagram A c) ,
++          ( ev-pair refl-htpy))
++        ( is-torsorial-binary-htpy
++          ( λ n →
++            ( coherence-triangle-cocone-sequential-diagram A c n) ∙h
++            ( refl-htpy)))
++
++    is-equiv-htpy-eq-cocone-sequential-diagram :
++      ( c c' : cocone-sequential-diagram A X) →
++      is-equiv (htpy-eq-cocone-sequential-diagram c c')
++    is-equiv-htpy-eq-cocone-sequential-diagram c =
++      fundamental-theorem-id
++        ( is-torsorial-htpy-cocone-sequential-diagram c)
++        ( htpy-eq-cocone-sequential-diagram c)
++
++  extensionality-cocone-sequential-diagram :
++    ( c c' : cocone-sequential-diagram A X) →
++    (c ＝ c') ≃ htpy-cocone-sequential-diagram A c c'
++  pr1 (extensionality-cocone-sequential-diagram c c') =
++    htpy-eq-cocone-sequential-diagram c c'
++  pr2 (extensionality-cocone-sequential-diagram c c') =
++    is-equiv-htpy-eq-cocone-sequential-diagram c c'
++
++  eq-htpy-cocone-sequential-diagram :
++    ( c c' : cocone-sequential-diagram A X) →
++    htpy-cocone-sequential-diagram A c c' →
++    c ＝ c'
++  eq-htpy-cocone-sequential-diagram c c' =
++    map-inv-equiv (extensionality-cocone-sequential-diagram c c')
++```
++
++### Postcomposing a cocone under a sequential diagram by identity is the identity
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  cocone-map-id-sequential-diagram : cocone-map-sequential-diagram A c id ＝ c
++  cocone-map-id-sequential-diagram =
++    eq-htpy-cocone-sequential-diagram A
++      ( cocone-map-sequential-diagram A c id)
++      ( c)
++      ( ( ev-pair refl-htpy) ,
++        ( λ n →
++          ( right-unit-htpy) ∙h
++          ( ap-id ∘ coherence-triangle-cocone-sequential-diagram A c n)))
++```
++
++### Postcomposing cocones under a sequential colimit distributes over function composition
++
++In other words, extending a cocone `c` with vertex `X` by the map
++`k ∘ h : X → Z` results in the same cocone as first extending by `h` and then by
++`k`.
++
++```agda
++module _
++  { l1 l2 l3 l4 : Level} (A : sequential-diagram l1)
++  { X : UU l2} {Y : UU l3} {Z : UU l4}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  cocone-map-comp-sequential-diagram :
++    ( h : X → Y) (k : Y → Z) →
++    cocone-map-sequential-diagram A c (k ∘ h) ＝
++    cocone-map-sequential-diagram A (cocone-map-sequential-diagram A c h) k
++  cocone-map-comp-sequential-diagram h k =
++    eq-htpy-cocone-sequential-diagram A
++      ( cocone-map-sequential-diagram A c (k ∘ h))
++      ( cocone-map-sequential-diagram A (cocone-map-sequential-diagram A c h) k)
++      ( ( ev-pair refl-htpy) ,
++        ( λ n →
++          ( right-unit-htpy) ∙h
++          ( ap-comp k h ∘ coherence-triangle-cocone-sequential-diagram A c n)))
++```
++
++### Cocones under sequential diagrams are a special case of coequalizers
++
++The data of a cocone
++
++```text
++       aₙ
++ Aₙ ------> Aₙ₊₁
++   \  Hₙ   /
++    \ =>  /
++  iₙ \   / iₙ₊₁
++      V V
++       X
++```
++
++can be [uncurried](foundation.dependent-pair-types.md) to get the equivalent
++diagram comprising of the single triangle
++
++```text
++         tot₊₁ a
++ (Σ ℕ A) ------> (Σ ℕ A)
++        \       /
++         \     /
++       i  \   /  i
++           V V
++            X
++```
++
++which is exactly a cofork of the identity map and `tot₊₁ a`.
++
++Under this mapping
++[sequential colimits](synthetic-homotopy-theory.universal-property-sequential-colimits.md)
++correspond to
++[coequalizers](synthetic-homotopy-theory.universal-property-coequalizers.md),
++which is formalized in
++[universal-property-sequential-colimits](synthetic-homotopy-theory.universal-property-sequential-colimits.md).
++
++```agda
++module _
++  { l1 : Level} (A : sequential-diagram l1)
++  where
++
++  bottom-map-cofork-cocone-sequential-diagram :
++    Σ ℕ (family-sequential-diagram A) → Σ ℕ (family-sequential-diagram A)
++  bottom-map-cofork-cocone-sequential-diagram = id
++
++  top-map-cofork-cocone-sequential-diagram :
++    Σ ℕ (family-sequential-diagram A) → Σ ℕ (family-sequential-diagram A)
++  top-map-cofork-cocone-sequential-diagram =
++    map-Σ
++      ( family-sequential-diagram A)
++      ( succ-ℕ)
++      ( map-sequential-diagram A)
++
++  module _
++    { l2 : Level} {X : UU l2}
++    where
++
++    cocone-sequential-diagram-cofork :
++      cofork
++        ( bottom-map-cofork-cocone-sequential-diagram)
++        ( top-map-cofork-cocone-sequential-diagram)
++        ( X) →
++      cocone-sequential-diagram A X
++    pr1 (cocone-sequential-diagram-cofork e) =
++      ev-pair
++        ( map-cofork
++          ( bottom-map-cofork-cocone-sequential-diagram)
++          ( top-map-cofork-cocone-sequential-diagram)
++          ( e))
++    pr2 (cocone-sequential-diagram-cofork e) =
++      ev-pair
++        ( coherence-cofork
++          ( bottom-map-cofork-cocone-sequential-diagram)
++          ( top-map-cofork-cocone-sequential-diagram)
++          ( e))
++
++    cofork-cocone-sequential-diagram :
++      cocone-sequential-diagram A X →
++      cofork
++        ( bottom-map-cofork-cocone-sequential-diagram)
++        ( top-map-cofork-cocone-sequential-diagram)
++        ( X)
++    pr1 (cofork-cocone-sequential-diagram c) =
++      ind-Σ (map-cocone-sequential-diagram A c)
++    pr2 (cofork-cocone-sequential-diagram c) =
++      ind-Σ (coherence-triangle-cocone-sequential-diagram A c)
++
++    abstract
++      is-section-cocone-sequential-diagram-cofork :
++        cofork-cocone-sequential-diagram ∘ cocone-sequential-diagram-cofork ~ id
++      is-section-cocone-sequential-diagram-cofork e =
++        eq-htpy-cofork
++          ( bottom-map-cofork-cocone-sequential-diagram)
++          ( top-map-cofork-cocone-sequential-diagram)
++          ( cofork-cocone-sequential-diagram
++            ( cocone-sequential-diagram-cofork e))
++          ( e)
++          ( refl-htpy , right-unit-htpy)
++
++      is-retraction-cocone-sequential-diagram-cofork :
++        cocone-sequential-diagram-cofork ∘ cofork-cocone-sequential-diagram ~ id
++      is-retraction-cocone-sequential-diagram-cofork c =
++        eq-htpy-cocone-sequential-diagram A
++          ( cocone-sequential-diagram-cofork
++            ( cofork-cocone-sequential-diagram c))
++          ( c)
++          ( ev-pair refl-htpy ,
++            ev-pair right-unit-htpy)
++
++    is-equiv-cocone-sequential-diagram-cofork :
++      is-equiv cocone-sequential-diagram-cofork
++    is-equiv-cocone-sequential-diagram-cofork =
++      is-equiv-is-invertible
++        ( cofork-cocone-sequential-diagram)
++        ( is-retraction-cocone-sequential-diagram-cofork)
++        ( is-section-cocone-sequential-diagram-cofork)
++
++    equiv-cocone-sequential-diagram-cofork :
++      cofork
++        ( bottom-map-cofork-cocone-sequential-diagram)
++        ( top-map-cofork-cocone-sequential-diagram)
++        ( X) ≃
++      cocone-sequential-diagram A X
++    pr1 equiv-cocone-sequential-diagram-cofork =
++      cocone-sequential-diagram-cofork
++    pr2 equiv-cocone-sequential-diagram-cofork =
++      is-equiv-cocone-sequential-diagram-cofork
++
++  triangle-cocone-sequential-diagram-cofork :
++    { l2 l3 : Level} {X : UU l2} {Y : UU l3} →
++    ( c : cocone-sequential-diagram A X) →
++    coherence-triangle-maps
++      ( cocone-map-sequential-diagram A c {Y = Y})
++      ( cocone-sequential-diagram-cofork)
++      ( cofork-map
++        ( bottom-map-cofork-cocone-sequential-diagram)
++        ( top-map-cofork-cocone-sequential-diagram)
++        ( cofork-cocone-sequential-diagram c))
++  triangle-cocone-sequential-diagram-cofork c h =
++    eq-htpy-cocone-sequential-diagram A
++      ( cocone-map-sequential-diagram A c h)
++      ( cocone-sequential-diagram-cofork
++        ( cofork-map
++          ( bottom-map-cofork-cocone-sequential-diagram)
++          ( top-map-cofork-cocone-sequential-diagram)
++          ( cofork-cocone-sequential-diagram c)
++          ( h)))
++      ( ev-pair refl-htpy ,
++        ev-pair right-unit-htpy)
++```
++
++## References
++
++1. Kristina Sojakova, Floris van Doorn, and Egbert Rijke. 2020. Sequential
++   Colimits in Homotopy Type Theory. In Proceedings of the 35th Annual ACM/IEEE
++   Symposium on Logic in Computer Science (LICS '20). Association for Computing
++   Machinery, New York, NY, USA, 845–858,
++   [DOI:10.1145](https://doi.org/10.1145/3373718.3394801)
+diff --git a/src/synthetic-homotopy-theory/coforks.lagda.md b/src/synthetic-homotopy-theory/coforks.lagda.md
+index 47a9930c6c..afb115fd7a 100644
+--- a/src/synthetic-homotopy-theory/coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/coforks.lagda.md
+@@ -179,7 +179,7 @@ module _
+     eq-htpy-cofork f g
+       ( cofork-map f g e id)
+       ( e)
+-      (refl-htpy , (right-unit-htpy ∙h (ap-id ∘ coherence-cofork f g e)))
++      ( refl-htpy , (right-unit-htpy ∙h (ap-id ∘ coherence-cofork f g e)))
+ ```
+ 
+ ### Postcomposing coforks distributes over function composition
+diff --git a/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..52d7ae7d06
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/dependent-cocones-under-sequential-diagrams.lagda.md
+@@ -0,0 +1,413 @@
++# Dependent cocones under sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.dependent-cocones-under-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.action-on-identifications-dependent-functions
++open import foundation.action-on-identifications-functions
++open import foundation.binary-homotopies
++open import foundation.commuting-triangles-of-maps
++open import foundation.constant-type-families
++open import foundation.dependent-homotopies
++open import foundation.dependent-identifications
++open import foundation.dependent-pair-types
++open import foundation.equality-dependent-function-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.functoriality-dependent-function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.structure-identity-principle
++open import foundation.torsorial-type-families
++open import foundation.transport-along-identifications
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.dependent-coforks
++open import synthetic-homotopy-theory.sequential-diagrams
++```
++
++</details>
++
++## Idea
++
++Given a [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
++`(A, a)`, a
++[cocone](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md) `c`
++with vertex `X` under it, and a type family `P : X → 𝓤`, we may construct
++_dependent_ cocones on `P` over `c`.
++
++A **dependent cocone under a
++[sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)** on `P`
++over `c ≐ (X, i, H)` consists of a [sequence](foundation.dependent-sequences.md)
++of dependent maps `i'ₙ : (x : Aₙ) → P (iₙ x)` and a sequence of
++[dependent homotopies](foundation.dependent-homotopies.md)
++`H'ₙ : i'ₙ ~ i'ₙ₊₁ ∘ aₙ` over `H`.
++
++## Definitions
++
++### Dependent cocones under sequential diagrams
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X) (P : X → UU l3)
++  where
++
++  dependent-cocone-sequential-diagram : UU (l1 ⊔ l3)
++  dependent-cocone-sequential-diagram =
++    Σ ( ( n : ℕ) (a : family-sequential-diagram A n) →
++        P (map-cocone-sequential-diagram A c n a))
++      ( λ i →
++        ( n : ℕ) →
++        dependent-homotopy (λ _ → P)
++          ( coherence-triangle-cocone-sequential-diagram A c n)
++          ( i n)
++          ( i (succ-ℕ n) ∘ map-sequential-diagram A n))
++```
++
++### Components of dependent cocones under sequential diagrams
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  { c : cocone-sequential-diagram A X} (P : X → UU l3)
++  ( d : dependent-cocone-sequential-diagram A c P)
++  where
++
++  map-dependent-cocone-sequential-diagram :
++    ( n : ℕ) (a : family-sequential-diagram A n) →
++    P (map-cocone-sequential-diagram A c n a)
++  map-dependent-cocone-sequential-diagram = pr1 d
++
++  coherence-triangle-dependent-cocone-sequential-diagram :
++    ( n : ℕ) → (a : family-sequential-diagram A n) →
++    dependent-identification P
++      ( coherence-triangle-cocone-sequential-diagram A c n a)
++      ( map-dependent-cocone-sequential-diagram n a)
++      ( map-dependent-cocone-sequential-diagram
++        ( succ-ℕ n)
++        ( map-sequential-diagram A n a))
++  coherence-triangle-dependent-cocone-sequential-diagram = pr2 d
++```
++
++### Homotopies of dependent cocones under sequential diagrams
++
++A **homotopy** of dependent cocones `(P, i', H')` and `(P, j', L')` consists of
++a sequence of [homotopies](foundation.homotopies.md) `Kₙ : i'ₙ ~ j'ₙ` and a
++coherence datum.
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  { c : cocone-sequential-diagram A X} (P : X → UU l3)
++  where
++
++  coherence-htpy-dependent-cocone-sequential-diagram :
++    ( d d' : dependent-cocone-sequential-diagram A c P) →
++    ( K :
++      ( n : ℕ) →
++      ( map-dependent-cocone-sequential-diagram A P d n) ~
++      ( map-dependent-cocone-sequential-diagram A P d' n)) →
++    UU (l1 ⊔ l3)
++  coherence-htpy-dependent-cocone-sequential-diagram d d' K =
++    ( n : ℕ) (a : family-sequential-diagram A n) →
++    ( ( coherence-triangle-dependent-cocone-sequential-diagram A P d n a) ∙
++      ( K (succ-ℕ n) (map-sequential-diagram A n a))) ＝
++    ( ( ap
++        ( tr P (coherence-triangle-cocone-sequential-diagram A c n a))
++        ( K n a)) ∙
++      ( coherence-triangle-dependent-cocone-sequential-diagram A P d' n a))
++
++  htpy-dependent-cocone-sequential-diagram :
++    ( d d' : dependent-cocone-sequential-diagram A c P) →
++    UU (l1 ⊔ l3)
++  htpy-dependent-cocone-sequential-diagram d d' =
++    Σ ( ( n : ℕ) →
++        ( map-dependent-cocone-sequential-diagram A P d n) ~
++        ( map-dependent-cocone-sequential-diagram A P d' n))
++      ( coherence-htpy-dependent-cocone-sequential-diagram d d')
++```
++
++### Components of homotopies of dependent cocones under sequential diagrams
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  { c : cocone-sequential-diagram A X} (P : X → UU l3)
++  ( d d' : dependent-cocone-sequential-diagram A c P)
++  ( H : htpy-dependent-cocone-sequential-diagram A P d d')
++  where
++
++  htpy-htpy-dependent-cocone-sequential-diagram :
++    ( n : ℕ) →
++    ( map-dependent-cocone-sequential-diagram A P d n) ~
++    ( map-dependent-cocone-sequential-diagram A P d' n)
++  htpy-htpy-dependent-cocone-sequential-diagram = pr1 H
++
++  coherence-htpy-htpy-dependent-cocone-sequential-diagram :
++    coherence-htpy-dependent-cocone-sequential-diagram A P d d'
++      ( htpy-htpy-dependent-cocone-sequential-diagram)
++  coherence-htpy-htpy-dependent-cocone-sequential-diagram = pr2 H
++```
++
++### Obtaining dependent cocones under sequential diagrams by postcomposing cocones under sequential diagrams with dependent maps
++
++Given a cocone `c` with vertex `X`, and a dependent map `h : (x : X) → P x`, we
++may extend `c` to a dependent cocone on `P` over `c`.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  dependent-cocone-map-sequential-diagram :
++    { l : Level} (P : X → UU l) →
++    ( (x : X) → P x) → dependent-cocone-sequential-diagram A c P
++  pr1 (dependent-cocone-map-sequential-diagram P h) n =
++    h ∘ map-cocone-sequential-diagram A c n
++  pr2 (dependent-cocone-map-sequential-diagram P h) n =
++    apd h ∘ coherence-triangle-cocone-sequential-diagram A c n
++```
++
++## Properties
++
++### Characterization of identity types of dependent cocones under sequential diagrams
++
++[Equality](foundation.identity-types.md) of dependent cocones is captured by a
++homotopy between them.
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  { c : cocone-sequential-diagram A X} (P : X → UU l3)
++  where
++
++  reflexive-htpy-dependent-cocone-sequential-diagram :
++    ( d : dependent-cocone-sequential-diagram A c P) →
++    htpy-dependent-cocone-sequential-diagram A P d d
++  pr1 (reflexive-htpy-dependent-cocone-sequential-diagram d) n = refl-htpy
++  pr2 (reflexive-htpy-dependent-cocone-sequential-diagram d) n = right-unit-htpy
++
++  htpy-eq-dependent-cocone-sequential-diagram :
++    ( d d' : dependent-cocone-sequential-diagram A c P) →
++    ( d ＝ d') → htpy-dependent-cocone-sequential-diagram A P d d'
++  htpy-eq-dependent-cocone-sequential-diagram d .d refl =
++    reflexive-htpy-dependent-cocone-sequential-diagram d
++
++  abstract
++    is-torsorial-htpy-dependent-cocone-sequential-diagram :
++      ( d : dependent-cocone-sequential-diagram A c P) →
++      is-torsorial (htpy-dependent-cocone-sequential-diagram A P d)
++    is-torsorial-htpy-dependent-cocone-sequential-diagram d =
++      is-torsorial-Eq-structure
++        ( ev-pair (coherence-htpy-dependent-cocone-sequential-diagram A P d))
++        ( is-torsorial-binary-htpy
++          ( map-dependent-cocone-sequential-diagram A P d))
++        ( map-dependent-cocone-sequential-diagram A P d ,
++          ev-pair refl-htpy)
++        ( is-torsorial-binary-htpy
++          ( λ n →
++            ( coherence-triangle-dependent-cocone-sequential-diagram A P d n) ∙h
++            ( refl-htpy)))
++
++    is-equiv-htpy-eq-dependent-cocone-sequential-diagram :
++      ( d d' : dependent-cocone-sequential-diagram A c P) →
++      is-equiv (htpy-eq-dependent-cocone-sequential-diagram d d')
++    is-equiv-htpy-eq-dependent-cocone-sequential-diagram d =
++      fundamental-theorem-id
++        ( is-torsorial-htpy-dependent-cocone-sequential-diagram d)
++        ( htpy-eq-dependent-cocone-sequential-diagram d)
++
++  extensionality-dependent-cocone-sequential-diagram :
++    ( d d' : dependent-cocone-sequential-diagram A c P) →
++    ( d ＝ d') ≃ htpy-dependent-cocone-sequential-diagram A P d d'
++  pr1 (extensionality-dependent-cocone-sequential-diagram d d') =
++    htpy-eq-dependent-cocone-sequential-diagram d d'
++  pr2 (extensionality-dependent-cocone-sequential-diagram d d') =
++    is-equiv-htpy-eq-dependent-cocone-sequential-diagram d d'
++
++  eq-htpy-dependent-cocone-sequential-diagram :
++    ( d d' : dependent-cocone-sequential-diagram A c P) →
++    htpy-dependent-cocone-sequential-diagram A P d d' → (d ＝ d')
++  eq-htpy-dependent-cocone-sequential-diagram d d' =
++    map-inv-equiv (extensionality-dependent-cocone-sequential-diagram d d')
++```
++
++### Dependent cocones under sequential diagrams on fiberwise constant type families are equivalent to regular cocones under sequential diagrams
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X) (Y : UU l3)
++  where
++
++  compute-dependent-cocone-sequential-diagram-constant-family :
++    ( dependent-cocone-sequential-diagram A c (λ _ → Y)) ≃
++    ( cocone-sequential-diagram A Y)
++  compute-dependent-cocone-sequential-diagram-constant-family =
++    equiv-tot
++      ( λ i →
++        equiv-Π-equiv-family
++          ( λ n →
++            equiv-Π-equiv-family
++              ( λ a →
++                equiv-concat
++                  ( inv
++                    ( tr-constant-type-family
++                      ( coherence-triangle-cocone-sequential-diagram A c n a)
++                      ( i n a)))
++                  ( i (succ-ℕ n) (map-sequential-diagram A n a)))))
++
++  map-compute-dependent-cocone-sequential-diagram-constant-family :
++    dependent-cocone-sequential-diagram A c (λ _ → Y) →
++    cocone-sequential-diagram A Y
++  map-compute-dependent-cocone-sequential-diagram-constant-family =
++    map-equiv compute-dependent-cocone-sequential-diagram-constant-family
++
++  triangle-compute-dependent-cocone-sequential-diagram-constant-family :
++    coherence-triangle-maps
++      ( cocone-map-sequential-diagram A c)
++      ( map-compute-dependent-cocone-sequential-diagram-constant-family)
++      ( dependent-cocone-map-sequential-diagram A c (λ _ → Y))
++  triangle-compute-dependent-cocone-sequential-diagram-constant-family h =
++    eq-htpy-cocone-sequential-diagram A
++      ( cocone-map-sequential-diagram A c h)
++      ( map-compute-dependent-cocone-sequential-diagram-constant-family
++        ( dependent-cocone-map-sequential-diagram A c (λ _ → Y) h))
++      ( ( ev-pair refl-htpy) ,
++        ( λ n a →
++          right-unit ∙
++          left-transpose-eq-concat _ _ _
++            ( inv
++              ( apd-constant-type-family h
++                ( coherence-triangle-cocone-sequential-diagram A c n a)))))
++```
++
++### Dependent cocones under sequential diagrams are special cases of dependent coforks
++
++Just like with the regular
++[cocones under sequential diagrams](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md),
++we have an analogous correspondence between dependent cocones over a cocone `c`
++and dependent coforks over the cofork corresponding to `c`.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  module _
++    { l3 : Level} (P : X → UU l3)
++    where
++
++    dependent-cocone-sequential-diagram-dependent-cofork :
++      dependent-cofork
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c)
++        ( P) →
++      dependent-cocone-sequential-diagram A c P
++    pr1 (dependent-cocone-sequential-diagram-dependent-cofork e) =
++      ev-pair
++        ( map-dependent-cofork
++          ( bottom-map-cofork-cocone-sequential-diagram A)
++          ( top-map-cofork-cocone-sequential-diagram A)
++          ( P)
++          ( e))
++    pr2 (dependent-cocone-sequential-diagram-dependent-cofork e) =
++      ev-pair
++        ( coherence-dependent-cofork
++          ( bottom-map-cofork-cocone-sequential-diagram A)
++          ( top-map-cofork-cocone-sequential-diagram A)
++          ( P)
++          ( e))
++
++    dependent-cofork-dependent-cocone-sequential-diagram :
++      dependent-cocone-sequential-diagram A c P →
++      dependent-cofork
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c)
++        ( P)
++    pr1 (dependent-cofork-dependent-cocone-sequential-diagram d) =
++      ind-Σ (map-dependent-cocone-sequential-diagram A P d)
++    pr2 (dependent-cofork-dependent-cocone-sequential-diagram d) =
++      ind-Σ (coherence-triangle-dependent-cocone-sequential-diagram A P d)
++
++    abstract
++      is-section-dependent-cocone-sequential-diagram-dependent-cofork :
++        ( dependent-cofork-dependent-cocone-sequential-diagram ∘
++          dependent-cocone-sequential-diagram-dependent-cofork) ~
++        ( id)
++      is-section-dependent-cocone-sequential-diagram-dependent-cofork e =
++        eq-htpy-dependent-cofork
++          ( bottom-map-cofork-cocone-sequential-diagram A)
++          ( top-map-cofork-cocone-sequential-diagram A)
++          ( P)
++          ( dependent-cofork-dependent-cocone-sequential-diagram
++            ( dependent-cocone-sequential-diagram-dependent-cofork e))
++          ( e)
++          ( refl-htpy , right-unit-htpy)
++
++      is-retraction-dependent-cocone-sequential-diagram-dependent-cofork :
++        ( dependent-cocone-sequential-diagram-dependent-cofork ∘
++          dependent-cofork-dependent-cocone-sequential-diagram) ~
++        ( id)
++      is-retraction-dependent-cocone-sequential-diagram-dependent-cofork d =
++        eq-htpy-dependent-cocone-sequential-diagram A P
++          ( dependent-cocone-sequential-diagram-dependent-cofork
++            ( dependent-cofork-dependent-cocone-sequential-diagram d))
++          ( d)
++          ( ev-pair refl-htpy , ev-pair right-unit-htpy)
++
++    is-equiv-dependent-cocone-sequential-diagram-dependent-cofork :
++      is-equiv dependent-cocone-sequential-diagram-dependent-cofork
++    is-equiv-dependent-cocone-sequential-diagram-dependent-cofork =
++      is-equiv-is-invertible
++        ( dependent-cofork-dependent-cocone-sequential-diagram)
++        ( is-retraction-dependent-cocone-sequential-diagram-dependent-cofork)
++        ( is-section-dependent-cocone-sequential-diagram-dependent-cofork)
++
++    equiv-dependent-cocone-sequential-diagram-dependent-cofork :
++      dependent-cofork
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c)
++        ( P) ≃
++      dependent-cocone-sequential-diagram A c P
++    pr1 equiv-dependent-cocone-sequential-diagram-dependent-cofork =
++      dependent-cocone-sequential-diagram-dependent-cofork
++    pr2 equiv-dependent-cocone-sequential-diagram-dependent-cofork =
++      is-equiv-dependent-cocone-sequential-diagram-dependent-cofork
++
++  triangle-dependent-cocone-sequential-diagram-dependent-cofork :
++    { l3 : Level} (P : X → UU l3) →
++    coherence-triangle-maps
++      ( dependent-cocone-map-sequential-diagram A c P)
++      ( dependent-cocone-sequential-diagram-dependent-cofork P)
++      ( dependent-cofork-map
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++  triangle-dependent-cocone-sequential-diagram-dependent-cofork P h =
++    eq-htpy-dependent-cocone-sequential-diagram A P
++      ( dependent-cocone-map-sequential-diagram A c P h)
++      ( dependent-cocone-sequential-diagram-dependent-cofork P
++        ( dependent-cofork-map
++          ( bottom-map-cofork-cocone-sequential-diagram A)
++          ( top-map-cofork-cocone-sequential-diagram A)
++          ( cofork-cocone-sequential-diagram A c)
++          ( h)))
++      ( ev-pair refl-htpy , ev-pair right-unit-htpy)
++```
+diff --git a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+index 6377941447..1a92323c63 100644
+--- a/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-coforks.lagda.md
+@@ -76,10 +76,10 @@ module _
+     Σ ( (b : B) → P (map-cofork f g e b))
+       ( λ k →
+         ( a : A) →
+-          dependent-identification P
+-            ( coherence-cofork f g e a)
+-            ( k (f a))
+-            ( k (g a)))
++        dependent-identification P
++          ( coherence-cofork f g e a)
++          ( k (f a))
++          ( k (g a)))
+ 
+ module _
+   { l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
+@@ -182,17 +182,8 @@ module _
+         ( ev-pair (coherence-htpy-dependent-cofork f g P k))
+         ( is-torsorial-htpy (map-dependent-cofork f g P k))
+         ( map-dependent-cofork f g P k , refl-htpy)
+-        ( is-contr-is-equiv'
+-          ( Σ ( (a : A) →
+-                dependent-identification P
+-                  ( coherence-cofork f g e a)
+-                  ( map-dependent-cofork f g P k (f a))
+-                  ( map-dependent-cofork f g P k (g a)))
+-              ( λ K → coherence-dependent-cofork f g P k ~ K))
+-          ( tot (λ K M → right-unit-htpy ∙h M))
+-          ( is-equiv-tot-is-fiberwise-equiv
+-            ( is-equiv-concat-htpy right-unit-htpy))
+-          ( is-torsorial-htpy (coherence-dependent-cofork f g P k)))
++        ( is-torsorial-htpy
++          ( coherence-dependent-cofork f g P k ∙h refl-htpy))
+ 
+     is-equiv-htpy-dependent-cofork-eq :
+       ( k k' : dependent-cofork f g e P) →
+diff --git a/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..f9683868c3
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/dependent-sequential-diagrams.lagda.md
+@@ -0,0 +1,172 @@
++# Dependent sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.dependent-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.dependent-pair-types
++open import foundation.function-types
++open import foundation.homotopies
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.sequential-diagrams
++```
++
++</details>
++
++## Idea
++
++A **dependent sequential diagram** over a
++[sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md) `(A, a)`
++is a [sequence](foundation.dependent-sequences.md) of families of types
++`B : (n : ℕ) → Aₙ → 𝓤` over the types in the base sequential diagram, equipped
++with fiberwise maps
++
++```text
++bₙ : (x : Aₙ) → Bₙ x → Bₙ₊₁ (aₙ x).
++```
++
++They can be thought of as a family of sequential diagrams
++
++```text
++       bₙ(x)           bₙ₊₁(aₙ(x))
++ Bₙ(x) ----> Bₙ₊₁(aₙ(x)) -------> Bₙ₊₂(aₙ₊₁(aₙ(x))) ----> ⋯,
++```
++
++one for each `x : Aₙ`, or as a sequence fibered over `(A, a)`, visualised as
++
++```text
++     b₀      b₁      b₂
++ B₀ ---> B₁ ---> B₂ ---> ⋯
++ |       |       |
++ V       V       V
++ V       V       V
++ A₀ ---> A₁ ---> A₂ ---> ⋯.
++     a₀      a₁      a₂
++```
++
++## Definitions
++
++### Dependent sequential diagrams
++
++```agda
++dependent-sequential-diagram :
++  { l1 : Level} → (A : sequential-diagram l1) →
++  ( l2 : Level) → UU (l1 ⊔ lsuc l2)
++dependent-sequential-diagram A l2 =
++  Σ ( ( n : ℕ) → family-sequential-diagram A n → UU l2)
++    ( λ B →
++      ( n : ℕ) (x : family-sequential-diagram A n) →
++      B n x → B (succ-ℕ n) (map-sequential-diagram A n x))
++```
++
++### Components of a dependent sequential diagram
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1)
++  ( B : dependent-sequential-diagram A l2)
++  where
++
++  family-dependent-sequential-diagram :
++    ( n : ℕ) → family-sequential-diagram A n → UU l2
++  family-dependent-sequential-diagram = pr1 B
++
++  map-dependent-sequential-diagram :
++    ( n : ℕ) (x : family-sequential-diagram A n) →
++    family-dependent-sequential-diagram n x →
++    family-dependent-sequential-diagram
++      ( succ-ℕ n)
++      ( map-sequential-diagram A n x)
++  map-dependent-sequential-diagram = pr2 B
++```
++
++### Constant dependent sequential diagrams
++
++Constant dependent sequential diagrams are dependent sequential diagrams where
++the dependent type family `B` is [constant](foundation.constant-maps.md).
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) (B : sequential-diagram l2)
++  where
++
++  constant-dependent-sequential-diagram : dependent-sequential-diagram A l2
++  pr1 constant-dependent-sequential-diagram n _ = family-sequential-diagram B n
++  pr2 constant-dependent-sequential-diagram n _ = map-sequential-diagram B n
++```
++
++### Sections of dependent sequential diagrams
++
++A **section of a dependent sequential diagram** `(B, b)` is a
++[sequence](foundation.dependent-sequences.md) of sections
++`sₙ : (x : Aₙ) → Bₙ(x)` satisfying the naturality condition that all squares of
++the form
++
++```text
++          bₙ(x)
++  Bₙ(x) -------> Bₙ₊₁(aₙ(x))
++    ^                ^
++ sₙ |                | sₙ₊₁
++    |                |
++ (x : Aₙ) ---> (aₙ(x) : Aₙ₊₁)
++           aₙ
++```
++
++[commute](foundation.commuting-squares-of-maps.md).
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1)
++  ( B : dependent-sequential-diagram A l2)
++  where
++
++  naturality-section-dependent-sequential-diagram :
++    ( s :
++      ( n : ℕ) (x : family-sequential-diagram A n) →
++      family-dependent-sequential-diagram A B n x) →
++    UU (l1 ⊔ l2)
++  naturality-section-dependent-sequential-diagram s =
++    ( n : ℕ) →
++    ( map-dependent-sequential-diagram A B n _ ∘ s n) ~
++    ( s (succ-ℕ n) ∘ map-sequential-diagram A n)
++
++  section-dependent-sequential-diagram : UU (l1 ⊔ l2)
++  section-dependent-sequential-diagram =
++    Σ ( ( n : ℕ) (x : family-sequential-diagram A n) →
++        family-dependent-sequential-diagram A B n x)
++      ( λ s → naturality-section-dependent-sequential-diagram s)
++```
++
++### Components of sections of dependent sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1)
++  ( B : dependent-sequential-diagram A l2)
++  ( s : section-dependent-sequential-diagram A B)
++  where
++
++  map-section-dependent-sequential-diagram :
++    ( n : ℕ) (x : family-sequential-diagram A n) →
++    family-dependent-sequential-diagram A B n x
++  map-section-dependent-sequential-diagram = pr1 s
++
++  naturality-map-section-dependent-sequential-diagram :
++    naturality-section-dependent-sequential-diagram A B
++      map-section-dependent-sequential-diagram
++  naturality-map-section-dependent-sequential-diagram = pr2 s
++```
++
++## References
++
++1. Kristina Sojakova, Floris van Doorn, and Egbert Rijke. 2020. Sequential
++   Colimits in Homotopy Type Theory. In Proceedings of the 35th Annual ACM/IEEE
++   Symposium on Logic in Computer Science (LICS '20). Association for Computing
++   Machinery, New York, NY, USA, 845–858,
++   [DOI:10.1145](https://doi.org/10.1145/3373718.3394801)
+diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+index 00583ad9ed..8b451c0ef2 100644
+--- a/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
++++ b/src/synthetic-homotopy-theory/dependent-universal-property-coequalizers.lagda.md
+@@ -15,6 +15,7 @@ open import foundation.fibers-of-maps
+ open import foundation.functoriality-dependent-pair-types
+ open import foundation.universe-levels
+ 
++open import synthetic-homotopy-theory.26-descent
+ open import synthetic-homotopy-theory.coforks
+ open import synthetic-homotopy-theory.dependent-cocones-under-spans
+ open import synthetic-homotopy-theory.dependent-coforks
+@@ -56,10 +57,10 @@ module _
+   ( dup-coequalizer : dependent-universal-property-coequalizer l4 f g e)
+   where
+ 
+-  map-dependent-universal-property-coequalizers :
++  map-dependent-universal-property-coequalizer :
+     dependent-cofork f g e P →
+     (x : X) → P x
+-  map-dependent-universal-property-coequalizers =
++  map-dependent-universal-property-coequalizer =
+     map-inv-is-equiv (dup-coequalizer P)
+ ```
+ 
+@@ -75,28 +76,28 @@ module _
+   ( k : dependent-cofork f g e P)
+   where
+ 
+-  htpy-dependent-cofork-map-dependent-universal-property-coequalizer :
++  htpy-dependent-cofork-dependent-universal-property-coequalizer :
+     htpy-dependent-cofork f g P
+       ( dependent-cofork-map f g e
+-        ( map-dependent-universal-property-coequalizers f g e
++        ( map-dependent-universal-property-coequalizer f g e
+           ( dup-coequalizer)
+           ( k)))
+       ( k)
+-  htpy-dependent-cofork-map-dependent-universal-property-coequalizer =
++  htpy-dependent-cofork-dependent-universal-property-coequalizer =
+     htpy-dependent-cofork-eq f g P
+       ( dependent-cofork-map f g e
+-        ( map-dependent-universal-property-coequalizers f g e
++        ( map-dependent-universal-property-coequalizer f g e
+           ( dup-coequalizer)
+           ( k)))
+       ( k)
+       ( is-section-map-inv-is-equiv (dup-coequalizer P) k)
+ 
+   abstract
+-    uniqueness-dependent-universal-property-coequalizers :
++    uniqueness-dependent-universal-property-coequalizer :
+       is-contr
+         ( Σ ((x : X) → P x)
+           ( λ h → htpy-dependent-cofork f g P (dependent-cofork-map f g e h) k))
+-    uniqueness-dependent-universal-property-coequalizers =
++    uniqueness-dependent-universal-property-coequalizer =
+       is-contr-is-equiv'
+         ( fiber (dependent-cofork-map f g e) k)
+         ( tot
+@@ -110,30 +111,6 @@ module _
+         ( is-contr-map-is-equiv (dup-coequalizer P) k)
+ ```
+ 
+-### The dependent universal property of coequializers implies the universal property of coequalizers
+-
+-```agda
+-module _
+-  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
+-  ( e : cofork f g X)
+-  where
+-
+-  universal-property-dependent-universal-property-coequalizer :
+-    ( {l : Level} → dependent-universal-property-coequalizer l f g e) →
+-    ( {l : Level} → universal-property-coequalizer l f g e)
+-  universal-property-dependent-universal-property-coequalizer
+-    ( dup-coequalizer)
+-    ( Y) =
+-      is-equiv-comp-htpy
+-        ( cofork-map f g e)
+-        ( map-compute-dependent-cofork-constant-family f g e Y)
+-        ( dependent-cofork-map f g e)
+-        ( triangle-compute-dependent-cofork-constant-family f g e Y)
+-        ( dup-coequalizer (λ _ → Y))
+-        ( is-equiv-map-equiv
+-          ( compute-dependent-cofork-constant-family f g e Y))
+-```
+-
+ ### A cofork has the dependent universal property of coequalizers if and only if the corresponding cocone has the dependent universal property of pushouts
+ 
+ As mentioned in [coforks](synthetic-homotopy-theory.coforks.md), coforks can be
+@@ -194,3 +171,45 @@ module _
+       ( is-equiv-dependent-cofork-dependent-cocone-codiagonal f g e P)
+       ( dup-coequalizer P)
+ ```
++
++### The universal property of coequalizers is equivalent to the dependent universal property of coequalizers
++
++```agda
++module _
++  { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f g : A → B) {X : UU l3}
++  ( e : cofork f g X)
++  where
++
++  universal-property-dependent-universal-property-coequalizer :
++    ( {l : Level} → dependent-universal-property-coequalizer l f g e) →
++    ( {l : Level} → universal-property-coequalizer l f g e)
++  universal-property-dependent-universal-property-coequalizer
++    ( dup-coequalizer)
++    ( Y) =
++    is-equiv-comp-htpy
++      ( cofork-map f g e)
++      ( map-compute-dependent-cofork-constant-family f g e Y)
++      ( dependent-cofork-map f g e)
++      ( triangle-compute-dependent-cofork-constant-family f g e Y)
++      ( dup-coequalizer (λ _ → Y))
++      ( is-equiv-map-equiv
++        ( compute-dependent-cofork-constant-family f g e Y))
++
++  dependent-universal-property-universal-property-coequalizer :
++    ( {l : Level} → universal-property-coequalizer l f g e) →
++    ( {l : Level} → dependent-universal-property-coequalizer l f g e)
++  dependent-universal-property-universal-property-coequalizer up-coequalizer =
++    dependent-universal-property-coequalizer-dependent-universal-property-pushout
++      ( f)
++      ( g)
++      ( e)
++      ( λ {l : Level} →
++        dependent-universal-property-universal-property-pushout
++          ( vertical-map-span-cocone-cofork f g)
++          ( horizontal-map-span-cocone-cofork f g)
++          ( cocone-codiagonal-cofork f g e)
++          ( λ l →
++            universal-property-pushout-universal-property-coequalizer f g e
++              ( up-coequalizer))
++          ( l))
++```
+diff --git a/src/synthetic-homotopy-theory/dependent-universal-property-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/dependent-universal-property-sequential-colimits.lagda.md
+new file mode 100644
+index 0000000000..ae1634c6cb
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/dependent-universal-property-sequential-colimits.lagda.md
+@@ -0,0 +1,222 @@
++# The dependent universal property of sequential colimits
++
++```agda
++module synthetic-homotopy-theory.dependent-universal-property-sequential-colimits where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.homotopies
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.dependent-cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.dependent-coforks
++open import synthetic-homotopy-theory.dependent-universal-property-coequalizers
++open import synthetic-homotopy-theory.sequential-diagrams
++open import synthetic-homotopy-theory.universal-property-sequential-colimits
++```
++
++</details>
++
++## Idea
++
++Given a [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
++`(A, a)`, consider a
++[cocone under it](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md)
++`c` with vertex `X`. The **dependent universal property of sequential colimits**
++is the statement that the dependent cocone postcomposition map
++
++```text
++dependent-cocone-map-sequential-diagram :
++  ((x : X) → P x) → dependent-cocone-sequential-diagram P
++```
++
++is an [equivalence](foundation.equivalences.md).
++
++## Definitions
++
++### The dependent universal property of sequential colimits
++
++```agda
++module _
++  { l1 l2 : Level} (l : Level) (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  dependent-universal-property-sequential-colimit : UU (l1 ⊔ l2 ⊔ lsuc l)
++  dependent-universal-property-sequential-colimit =
++    ( P : X → UU l) → is-equiv (dependent-cocone-map-sequential-diagram A c P)
++```
++
++### The map induced by the dependent universal property of sequential colimits
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X) {P : X → UU l3}
++  ( dup-sequential-colimit :
++    dependent-universal-property-sequential-colimit l3 A c)
++  where
++
++  map-dependent-universal-property-sequential-colimit :
++    dependent-cocone-sequential-diagram A c P →
++    ( x : X) → P x
++  map-dependent-universal-property-sequential-colimit =
++    map-inv-is-equiv (dup-sequential-colimit P)
++```
++
++## Properties
++
++### The mediating map obtained by the dependent universal property is unique
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X) {P : X → UU l3}
++  ( dup-sequential-colimit :
++    dependent-universal-property-sequential-colimit l3 A c)
++  ( d : dependent-cocone-sequential-diagram A c P)
++  where
++
++  htpy-dependent-cocone-dependent-universal-property-sequential-colimit :
++    htpy-dependent-cocone-sequential-diagram A P
++      ( dependent-cocone-map-sequential-diagram A c P
++        ( map-dependent-universal-property-sequential-colimit A c
++          ( dup-sequential-colimit)
++          ( d)))
++      ( d)
++  htpy-dependent-cocone-dependent-universal-property-sequential-colimit =
++    htpy-eq-dependent-cocone-sequential-diagram A P
++      ( dependent-cocone-map-sequential-diagram A c P
++        ( map-dependent-universal-property-sequential-colimit A c
++          ( dup-sequential-colimit)
++          ( d)))
++      ( d)
++      ( is-section-map-inv-is-equiv (dup-sequential-colimit P) d)
++
++  abstract
++    uniqueness-dependent-universal-property-sequential-colimit :
++      is-contr
++        ( Σ ( ( x : X) → P x)
++            ( λ h →
++              htpy-dependent-cocone-sequential-diagram A P
++                ( dependent-cocone-map-sequential-diagram A c P h)
++                ( d)))
++    uniqueness-dependent-universal-property-sequential-colimit =
++      is-contr-equiv'
++        ( fiber (dependent-cocone-map-sequential-diagram A c P) d)
++        ( equiv-tot
++          ( λ h →
++            extensionality-dependent-cocone-sequential-diagram A P
++              ( dependent-cocone-map-sequential-diagram A c P h)
++              ( d)))
++        ( is-contr-map-is-equiv (dup-sequential-colimit P) d)
++```
++
++### Correspondence between dependent universal properties of sequential colimits and coequalizers
++
++A cocone under a sequential diagram has the dependent universal property of
++sequential colimits if and only if the corresponding cofork has the dependent
++universal property of coequalizers.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  dependent-universal-property-sequential-colimit-dependent-universal-property-coequalizer :
++    ( {l : Level} →
++      dependent-universal-property-coequalizer l
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c)) →
++    ( {l : Level} →
++      dependent-universal-property-sequential-colimit l A c)
++  dependent-universal-property-sequential-colimit-dependent-universal-property-coequalizer
++    ( dup-coequalizer)
++    ( P) =
++    is-equiv-comp-htpy
++      ( dependent-cocone-map-sequential-diagram A c P)
++      ( dependent-cocone-sequential-diagram-dependent-cofork A c P)
++      ( dependent-cofork-map
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++      ( triangle-dependent-cocone-sequential-diagram-dependent-cofork A c P)
++      ( dup-coequalizer P)
++      ( is-equiv-dependent-cocone-sequential-diagram-dependent-cofork A c P)
++
++  dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit :
++    ( {l : Level} →
++      dependent-universal-property-sequential-colimit l A c) →
++    ( {l : Level} →
++      dependent-universal-property-coequalizer l
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++  dependent-universal-property-coequalizer-dependent-universal-property-sequential-colimit
++    ( dup-sequential-colimit)
++    ( P) =
++    is-equiv-right-factor-htpy
++      ( dependent-cocone-map-sequential-diagram A c P)
++      ( dependent-cocone-sequential-diagram-dependent-cofork A c P)
++      ( dependent-cofork-map
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++      ( triangle-dependent-cocone-sequential-diagram-dependent-cofork A c P)
++      ( is-equiv-dependent-cocone-sequential-diagram-dependent-cofork A c P)
++      ( dup-sequential-colimit P)
++```
++
++### The non-dependent and dependent universal properties of sequential colimits are logically equivalent
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  universal-property-dependent-universal-property-sequential-colimit :
++    ( {l : Level} → dependent-universal-property-sequential-colimit l A c) →
++    ( {l : Level} → universal-property-sequential-colimit l A c)
++  universal-property-dependent-universal-property-sequential-colimit
++    ( dup-sequential-colimit)
++    ( Y) =
++    is-equiv-comp-htpy
++      ( cocone-map-sequential-diagram A c)
++      ( map-compute-dependent-cocone-sequential-diagram-constant-family A c Y)
++      ( dependent-cocone-map-sequential-diagram A c (λ _ → Y))
++      ( triangle-compute-dependent-cocone-sequential-diagram-constant-family A c
++        ( Y))
++      ( dup-sequential-colimit (λ _ → Y))
++      ( is-equiv-map-equiv
++        ( compute-dependent-cocone-sequential-diagram-constant-family A c Y))
++
++  dependent-universal-property-universal-property-sequential-colimit :
++    ( {l : Level} → universal-property-sequential-colimit l A c) →
++    ( {l : Level} → dependent-universal-property-sequential-colimit l A c)
++  dependent-universal-property-universal-property-sequential-colimit
++    ( up-sequential-diagram) =
++    dependent-universal-property-sequential-colimit-dependent-universal-property-coequalizer
++      ( A)
++      ( c)
++      ( dependent-universal-property-universal-property-coequalizer
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c)
++        ( universal-property-coequalizer-universal-property-sequential-colimit
++          ( A)
++          ( c)
++          ( up-sequential-diagram)))
++```
+diff --git a/src/synthetic-homotopy-theory/equivalences-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/equivalences-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..0ef1c1a4a2
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/equivalences-sequential-diagrams.lagda.md
+@@ -0,0 +1,168 @@
++# Equivalences of sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.equivalences-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.dependent-pair-types
++open import foundation.equality-dependent-function-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.structure-identity-principle
++open import foundation.torsorial-type-families
++open import foundation.univalence
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.morphisms-sequential-diagrams
++open import synthetic-homotopy-theory.sequential-diagrams
++```
++
++</details>
++
++## Idea
++
++An **equivalence of sequential diagrams** `(A, a)` and `(B, b)` is a
++[sequence](foundation.dependent-sequences.md) of
++[equivalences](foundation.equivalences.md) `eₙ : Aₙ ≃ Bₙ` such that their
++underlying maps form a
++[morphism of sequential diagrams](synthetic-homotopy-theory.morphisms-sequential-diagrams.md).
++
++Specifically, the underlying maps need to satisfy the same naturality condition.
++
++## Definitions
++
++### Equivalences of sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) (B : sequential-diagram l2)
++  where
++
++  equiv-sequential-diagram : UU (l1 ⊔ l2)
++  equiv-sequential-diagram =
++    Σ ( ( n : ℕ) →
++        family-sequential-diagram A n ≃ family-sequential-diagram B n)
++      ( λ e → naturality-hom-sequential-diagram A B (map-equiv ∘ e))
++```
++
++### Components of equivalences of sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} {A : sequential-diagram l1} (B : sequential-diagram l2)
++  ( e : equiv-sequential-diagram A B)
++  where
++
++  equiv-equiv-sequential-diagram :
++    ( n : ℕ) →
++    family-sequential-diagram A n ≃ family-sequential-diagram B n
++  equiv-equiv-sequential-diagram = pr1 e
++
++  hom-equiv-sequential-diagram : hom-sequential-diagram A B
++  pr1 hom-equiv-sequential-diagram n =
++    map-equiv (equiv-equiv-sequential-diagram n)
++  pr2 hom-equiv-sequential-diagram = pr2 e
++
++  map-equiv-sequential-diagram :
++    ( n : ℕ) →
++    family-sequential-diagram A n → family-sequential-diagram B n
++  map-equiv-sequential-diagram n = map-equiv (equiv-equiv-sequential-diagram n)
++
++  is-equiv-map-equiv-sequential-diagram :
++    ( n : ℕ) →
++    is-equiv (map-equiv-sequential-diagram n)
++  is-equiv-map-equiv-sequential-diagram n =
++    is-equiv-map-equiv (equiv-equiv-sequential-diagram n)
++```
++
++### The identity equivalence of sequential diagrams
++
++```agda
++module _
++  { l1 : Level} (A : sequential-diagram l1)
++  where
++
++  id-equiv-sequential-diagram : equiv-sequential-diagram A A
++  pr1 id-equiv-sequential-diagram n = id-equiv
++  pr2 id-equiv-sequential-diagram n = refl-htpy
++```
++
++### Composition of equivalences of sequential diagrams
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) (B : sequential-diagram l2)
++  ( C : sequential-diagram l3)
++  where
++
++  comp-equiv-sequential-diagram :
++    equiv-sequential-diagram B C →
++    equiv-sequential-diagram A B →
++    equiv-sequential-diagram A C
++  pr1 (comp-equiv-sequential-diagram e e') n =
++    ( equiv-equiv-sequential-diagram C e n) ∘e
++    ( equiv-equiv-sequential-diagram B e' n)
++  pr2 (comp-equiv-sequential-diagram e e') =
++    naturality-map-hom-sequential-diagram C
++      ( comp-hom-sequential-diagram A B C
++        ( hom-equiv-sequential-diagram C e)
++        ( hom-equiv-sequential-diagram B e'))
++```
++
++## Properties
++
++### Characterization of equality of sequential diagrams
++
++[Equality](foundation.identity-types.md) of sequential diagrams is captured by
++an equivalence between them.
++
++```agda
++equiv-eq-sequential-diagram :
++  { l1 : Level} (A B : sequential-diagram l1) →
++  A ＝ B → equiv-sequential-diagram A B
++equiv-eq-sequential-diagram A .A refl = id-equiv-sequential-diagram A
++
++abstract
++  is-torsorial-equiv-sequential-diagram :
++    { l1 : Level} (A : sequential-diagram l1) →
++    is-torsorial (equiv-sequential-diagram {l2 = l1} A)
++  is-torsorial-equiv-sequential-diagram A =
++    is-torsorial-Eq-structure _
++      ( is-torsorial-Eq-Π
++        ( λ n → family-sequential-diagram A n ≃_)
++        ( λ n → is-torsorial-equiv (family-sequential-diagram A n)))
++      ( family-sequential-diagram A , λ n → id-equiv)
++      ( is-torsorial-Eq-Π
++        ( λ n → _~ map-sequential-diagram A n)
++        ( λ n → is-torsorial-htpy' (map-sequential-diagram A n)))
++
++  is-equiv-equiv-eq-sequential-diagram :
++    { l1 : Level} (A B : sequential-diagram l1) →
++    is-equiv (equiv-eq-sequential-diagram A B)
++  is-equiv-equiv-eq-sequential-diagram A =
++    fundamental-theorem-id
++      ( is-torsorial-equiv-sequential-diagram A)
++      ( equiv-eq-sequential-diagram A)
++
++extensionality-sequential-diagram :
++  { l1 : Level} (A B : sequential-diagram l1) →
++  ( A ＝ B) ≃ equiv-sequential-diagram A B
++pr1 (extensionality-sequential-diagram A B) = equiv-eq-sequential-diagram A B
++pr2 (extensionality-sequential-diagram A B) =
++  is-equiv-equiv-eq-sequential-diagram A B
++
++eq-equiv-sequential-diagram :
++  { l1 : Level} (A B : sequential-diagram l1) →
++  equiv-sequential-diagram A B → (A ＝ B)
++eq-equiv-sequential-diagram A B =
++  map-inv-equiv (extensionality-sequential-diagram A B)
++```
+diff --git a/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..7adbaf5f53
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/morphisms-sequential-diagrams.lagda.md
+@@ -0,0 +1,270 @@
++# Morphisms of sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.morphisms-sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.binary-homotopies
++open import foundation.commuting-squares-of-homotopies
++open import foundation.commuting-squares-of-maps
++open import foundation.dependent-pair-types
++open import foundation.equality-dependent-function-types
++open import foundation.equivalences
++open import foundation.function-types
++open import foundation.fundamental-theorem-of-identity-types
++open import foundation.homotopies
++open import foundation.homotopy-induction
++open import foundation.identity-types
++open import foundation.structure-identity-principle
++open import foundation.torsorial-type-families
++open import foundation.universe-levels
++open import foundation.whiskering-homotopies
++
++open import synthetic-homotopy-theory.dependent-sequential-diagrams
++open import synthetic-homotopy-theory.sequential-diagrams
++```
++
++</details>
++
++## Idea
++
++A **morphism between
++[sequential diagrams](synthetic-homotopy-theory.sequential-diagrams.md)**
++`f : (A, a) → (B, b)` is a [sequence](foundation.dependent-sequences.md) of maps
++`fₙ : Aₙ → Bₙ` satisfying the naturality condition that all squares of the form
++
++```text
++        aₙ
++    Aₙ ---> Aₙ₊₁
++    |       |
++ fₙ |       | fₙ₊₁
++    v       v
++    Bₙ ---> Bₙ₊₁
++        bₙ
++```
++
++[commute](foundation.commuting-squares-of-maps.md).
++
++## Definitions
++
++### Morphisms of sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) (B : sequential-diagram l2)
++  where
++
++  naturality-hom-sequential-diagram :
++    ( h :
++      ( n : ℕ) →
++      family-sequential-diagram A n → family-sequential-diagram B n) →
++    UU (l1 ⊔ l2)
++  naturality-hom-sequential-diagram h =
++    ( n : ℕ) →
++    ( map-sequential-diagram B n ∘ h n) ~
++    ( h (succ-ℕ n) ∘ map-sequential-diagram A n)
++
++  hom-sequential-diagram : UU (l1 ⊔ l2)
++  hom-sequential-diagram =
++    section-dependent-sequential-diagram A
++      ( constant-dependent-sequential-diagram A B)
++```
++
++### Components of morphisms of sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} {A : sequential-diagram l1} (B : sequential-diagram l2)
++  ( h : hom-sequential-diagram A B)
++  where
++
++  map-hom-sequential-diagram :
++    ( n : ℕ) → family-sequential-diagram A n → family-sequential-diagram B n
++  map-hom-sequential-diagram =
++    map-section-dependent-sequential-diagram A
++      ( constant-dependent-sequential-diagram A B)
++      ( h)
++
++  naturality-map-hom-sequential-diagram :
++    naturality-hom-sequential-diagram A B map-hom-sequential-diagram
++  naturality-map-hom-sequential-diagram =
++    naturality-map-section-dependent-sequential-diagram A
++      ( constant-dependent-sequential-diagram A B)
++      ( h)
++```
++
++### The identity morphism of sequential diagrams
++
++All sequential diagrams have an **identity morphism** constructed from the
++identity function on the underlying types.
++
++```agda
++module _
++  { l1 : Level} (A : sequential-diagram l1)
++  where
++
++  id-hom-sequential-diagram : hom-sequential-diagram A A
++  pr1 id-hom-sequential-diagram n = id
++  pr2 id-hom-sequential-diagram n = refl-htpy
++```
++
++### Composition of morphisms of sequential diagrams
++
++**Composition of morphisms** is induced by composition of the underlying maps
++and by pasting diagrams.
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) (B : sequential-diagram l2)
++  ( C : sequential-diagram l3)
++  where
++
++  comp-hom-sequential-diagram :
++    hom-sequential-diagram B C →
++    hom-sequential-diagram A B →
++    hom-sequential-diagram A C
++  pr1 (comp-hom-sequential-diagram g f) n =
++    map-hom-sequential-diagram C g n ∘ map-hom-sequential-diagram B f n
++  pr2 (comp-hom-sequential-diagram g f) n =
++    pasting-vertical-coherence-square-maps
++      ( map-sequential-diagram A n)
++      ( map-hom-sequential-diagram B f n)
++      ( map-hom-sequential-diagram B f (succ-ℕ n))
++      ( map-sequential-diagram B n)
++      ( map-hom-sequential-diagram C g n)
++      ( map-hom-sequential-diagram C g (succ-ℕ n))
++      ( map-sequential-diagram C n)
++      ( naturality-map-hom-sequential-diagram B f n)
++      ( naturality-map-hom-sequential-diagram C g n)
++```
++
++### Homotopies between morphisms of sequential diagrams
++
++A **homotopy** between morphisms `f, g : (A, a) → (B, b)` consists of a
++[sequence](foundation.dependent-sequences.md) of
++[homotopies](foundation.homotopies.md) `Hₙ : fₙ ~ gₙ` and a coherence datum
++filling the cylinders
++
++```text
++              aₙ
++      Aₙ ----------> Aₙ₊₁
++      / \            / \
++     / Hₙ\          /Hₙ₊₁\
++ fₙ |  => | gₙ fₙ₊₁ |  => | gₙ₊₁
++     \   /          \   /
++      \ /            \ /
++      Bₙ ----------> Bₙ₊₁.
++              bₙ
++```
++
++```agda
++module _
++  { l1 l2 : Level} {A : sequential-diagram l1} (B : sequential-diagram l2)
++  ( f g : hom-sequential-diagram A B)
++  where
++
++  coherence-htpy-sequential-diagram :
++    ( H :
++      ( n : ℕ) →
++      ( map-hom-sequential-diagram B f n) ~
++      ( map-hom-sequential-diagram B g n)) →
++    UU (l1 ⊔ l2)
++  coherence-htpy-sequential-diagram H =
++    ( n : ℕ) →
++    coherence-square-homotopies
++      ( naturality-map-hom-sequential-diagram B f n)
++      ( H (succ-ℕ n) ·r map-sequential-diagram A n)
++      ( map-sequential-diagram B n ·l H n)
++      ( naturality-map-hom-sequential-diagram B g n)
++
++  htpy-hom-sequential-diagram : UU (l1 ⊔ l2)
++  htpy-hom-sequential-diagram =
++    Σ ( ( n : ℕ) →
++        ( map-hom-sequential-diagram B f n) ~
++        ( map-hom-sequential-diagram B g n))
++      ( coherence-htpy-sequential-diagram)
++```
++
++### Components of homotopies between morphisms of sequential diagrams
++
++```agda
++module _
++  { l1 l2 : Level} {A : sequential-diagram l1} (B : sequential-diagram l2)
++  { f g : hom-sequential-diagram A B}
++  ( H : htpy-hom-sequential-diagram B f g)
++  where
++
++  htpy-htpy-hom-sequential-diagram :
++    ( n : ℕ) →
++    ( map-hom-sequential-diagram B f n) ~
++    ( map-hom-sequential-diagram B g n)
++  htpy-htpy-hom-sequential-diagram = pr1 H
++
++  coherence-htpy-htpy-hom-sequential-diagram :
++    coherence-htpy-sequential-diagram B f g htpy-htpy-hom-sequential-diagram
++  coherence-htpy-htpy-hom-sequential-diagram = pr2 H
++```
++
++## Properties
++
++### Characterization of equality of morphisms of sequential diagrams
++
++[Equality](foundation.identity-types.md) of morphisms of sequential diagrams is
++captured by a homotopy between them.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) (B : sequential-diagram l2)
++  where
++
++  reflexive-htpy-hom-sequential-diagram :
++    ( f : hom-sequential-diagram A B) → htpy-hom-sequential-diagram B f f
++  pr1 (reflexive-htpy-hom-sequential-diagram f) = ev-pair refl-htpy
++  pr2 (reflexive-htpy-hom-sequential-diagram f) = ev-pair right-unit-htpy
++
++  htpy-eq-sequential-diagram :
++    ( f f' : hom-sequential-diagram A B) →
++    ( f ＝ f') → htpy-hom-sequential-diagram B f f'
++  htpy-eq-sequential-diagram f .f refl = reflexive-htpy-hom-sequential-diagram f
++
++  abstract
++    is-torsorial-htpy-sequential-diagram :
++      ( f : hom-sequential-diagram A B) →
++      is-torsorial (htpy-hom-sequential-diagram B f)
++    is-torsorial-htpy-sequential-diagram f =
++      is-torsorial-Eq-structure
++        ( ev-pair (coherence-htpy-sequential-diagram B f))
++        ( is-torsorial-binary-htpy (map-hom-sequential-diagram B f))
++        ( map-hom-sequential-diagram B f , ev-pair refl-htpy)
++        ( is-torsorial-Eq-Π _
++          ( λ n →
++            is-torsorial-htpy
++              ( naturality-map-hom-sequential-diagram B f n ∙h refl-htpy)))
++
++    is-equiv-htpy-eq-sequential-diagram :
++      ( f f' : hom-sequential-diagram A B) →
++      is-equiv (htpy-eq-sequential-diagram f f')
++    is-equiv-htpy-eq-sequential-diagram f =
++      fundamental-theorem-id
++        ( is-torsorial-htpy-sequential-diagram f)
++        ( htpy-eq-sequential-diagram f)
++
++  extensionality-hom-sequential-diagram :
++    ( f f' : hom-sequential-diagram A B) →
++    ( f ＝ f') ≃ htpy-hom-sequential-diagram B f f'
++  pr1 (extensionality-hom-sequential-diagram f f') =
++    htpy-eq-sequential-diagram f f'
++  pr2 (extensionality-hom-sequential-diagram f f') =
++    is-equiv-htpy-eq-sequential-diagram f f'
++
++  eq-htpy-sequential-diagram :
++    ( f f' : hom-sequential-diagram A B) →
++    htpy-hom-sequential-diagram B f f' → (f ＝ f')
++  eq-htpy-sequential-diagram f f' =
++    map-inv-equiv (extensionality-hom-sequential-diagram f f')
++```
+diff --git a/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md b/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
+new file mode 100644
+index 0000000000..a752d2495b
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/sequential-diagrams.lagda.md
+@@ -0,0 +1,68 @@
++# Sequential diagrams
++
++```agda
++module synthetic-homotopy-theory.sequential-diagrams where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import elementary-number-theory.natural-numbers
++
++open import foundation.commuting-squares-of-maps
++open import foundation.dependent-pair-types
++open import foundation.universe-levels
++```
++
++</details>
++
++## Idea
++
++A **sequential diagram** `(A, a)` is a [sequence](foundation.sequences.md) of
++types `A : ℕ → 𝓤` over the natural numbers, equipped with a family of maps
++`aₙ : Aₙ → Aₙ₊₁` for all `n`.
++
++They can be represented by diagrams
++
++```text
++     a₀      a₁      a₂
++ A₀ ---> A₁ ---> A₂ ---> ⋯
++```
++
++extending infinitely to the right.
++
++Sequential diagrams are dual to [towers](foundation.towers.md), and are also
++sometimes called **cotowers**.
++
++## Definition
++
++```agda
++sequential-diagram : (l : Level) → UU (lsuc l)
++sequential-diagram l = Σ (ℕ → UU l) (λ A → (n : ℕ) → A n → A (succ-ℕ n))
++
++module _
++  { l : Level} (A : sequential-diagram l)
++  where
++
++  family-sequential-diagram : ℕ → UU l
++  family-sequential-diagram = pr1 A
++
++  map-sequential-diagram :
++    ( n : ℕ) →
++    family-sequential-diagram n → family-sequential-diagram (succ-ℕ n)
++  map-sequential-diagram = pr2 A
++```
++
++## Properties
++
++The [identity type](foundation.identity-types.md) of sequential colimits is
++characterized in the file about
++[equivalences of sequential diagrams](synthetic-homotopy-theory.equivalences-sequential-diagrams.md).
++
++## References
++
++1. Kristina Sojakova, Floris van Doorn, and Egbert Rijke. 2020. Sequential
++   Colimits in Homotopy Type Theory. In Proceedings of the 35th Annual ACM/IEEE
++   Symposium on Logic in Computer Science (LICS '20). Association for Computing
++   Machinery, New York, NY, USA, 845–858,
++   [DOI:10.1145](https://doi.org/10.1145/3373718.3394801)
+diff --git a/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
+new file mode 100644
+index 0000000000..d1b57edf56
+--- /dev/null
++++ b/src/synthetic-homotopy-theory/universal-property-sequential-colimits.lagda.md
+@@ -0,0 +1,331 @@
++# The universal property of sequential colimits
++
++```agda
++module synthetic-homotopy-theory.universal-property-sequential-colimits where
++```
++
++<details><summary>Imports</summary>
++
++```agda
++open import foundation.action-on-identifications-functions
++open import foundation.commuting-triangles-of-maps
++open import foundation.contractible-maps
++open import foundation.contractible-types
++open import foundation.dependent-pair-types
++open import foundation.equivalences
++open import foundation.fibers-of-maps
++open import foundation.function-types
++open import foundation.functoriality-dependent-pair-types
++open import foundation.functoriality-function-types
++open import foundation.homotopies
++open import foundation.identity-types
++open import foundation.propositions
++open import foundation.subtype-identity-principle
++open import foundation.universe-levels
++
++open import synthetic-homotopy-theory.cocones-under-sequential-diagrams
++open import synthetic-homotopy-theory.coforks
++open import synthetic-homotopy-theory.sequential-diagrams
++open import synthetic-homotopy-theory.universal-property-coequalizers
++```
++
++</details>
++
++## Idea
++
++Given a [sequential diagram](synthetic-homotopy-theory.sequential-diagrams.md)
++`(A, a)`, consider a
++[cocone under it](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md)
++`c` with vertex `X`. The **universal property of sequential colimits** is the
++statement that the cocone postcomposition map
++
++```text
++cocone-map-sequential-diagram : (X → Y) → cocone-sequential-diagram Y
++```
++
++is an [equivalence](foundation.equivalences.md).
++
++A sequential colimit `X` may be visualized as a "point in infinity" in the
++diagram
++
++```text
++     a₀      a₁      a₂     i
++ A₀ ---> A₁ ---> A₂ ---> ⋯ --> X.
++```
++
++## Definitions
++
++### The universal property of sequential colimits
++
++```agda
++module _
++  { l1 l2 : Level} (l : Level) (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  universal-property-sequential-colimit : UU (l1 ⊔ l2 ⊔ lsuc l)
++  universal-property-sequential-colimit =
++    ( Y : UU l) → is-equiv (cocone-map-sequential-diagram A c {Y = Y})
++```
++
++### The map induced by the universal property of sequential colimits
++
++The universal property allows us to construct a map from the colimit by
++providing a cocone under the sequential diagram.
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X) {Y : UU l3}
++  ( up-sequential-colimit : universal-property-sequential-colimit l3 A c)
++  where
++
++  map-universal-property-sequential-colimit :
++    cocone-sequential-diagram A Y → (X → Y)
++  map-universal-property-sequential-colimit =
++    map-inv-is-equiv (up-sequential-colimit Y)
++```
++
++## Properties
++
++### The mediating map obtained by the universal property is unique
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X) {Y : UU l3}
++  ( up-sequential-colimit : universal-property-sequential-colimit l3 A c)
++  ( c' : cocone-sequential-diagram A Y)
++  where
++
++  htpy-cocone-universal-property-sequential-colimit :
++    htpy-cocone-sequential-diagram A
++      ( cocone-map-sequential-diagram A c
++        ( map-universal-property-sequential-colimit A c
++          ( up-sequential-colimit)
++          ( c')))
++      ( c')
++  htpy-cocone-universal-property-sequential-colimit =
++    htpy-eq-cocone-sequential-diagram A
++      ( cocone-map-sequential-diagram A c
++        ( map-universal-property-sequential-colimit A c
++          ( up-sequential-colimit)
++          ( c')))
++      ( c')
++      ( is-section-map-inv-is-equiv (up-sequential-colimit Y) c')
++
++  abstract
++    uniqueness-map-universal-property-sequential-colimit :
++      is-contr
++        ( Σ ( X → Y)
++            ( λ h →
++              htpy-cocone-sequential-diagram A
++                ( cocone-map-sequential-diagram A c h)
++                ( c')))
++    uniqueness-map-universal-property-sequential-colimit =
++      is-contr-equiv'
++        ( fiber (cocone-map-sequential-diagram A c) c')
++        ( equiv-tot
++          ( λ h →
++            extensionality-cocone-sequential-diagram A
++              ( cocone-map-sequential-diagram A c h)
++              ( c')))
++        ( is-contr-map-is-equiv (up-sequential-colimit Y) c')
++```
++
++### Correspondence between universal properties of sequential colimits and coequalizers
++
++A cocone under a sequential diagram has the universal property of sequential
++colimits if and only if the
++[corresponding cofork](synthetic-homotopy-theory.cocones-under-sequential-diagrams.md)
++has the universal property of coequalizers.
++
++```agda
++module _
++  { l1 l2 : Level} (A : sequential-diagram l1) {X : UU l2}
++  ( c : cocone-sequential-diagram A X)
++  where
++
++  universal-property-sequential-colimit-universal-property-coequalizer :
++    ( {l : Level} →
++      universal-property-coequalizer l
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c)) →
++    ( {l : Level} →
++      universal-property-sequential-colimit l A c)
++  universal-property-sequential-colimit-universal-property-coequalizer
++    ( up-cofork)
++    ( Y) =
++    is-equiv-comp-htpy
++      ( cocone-map-sequential-diagram A c)
++      ( cocone-sequential-diagram-cofork A)
++      ( cofork-map
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++      ( triangle-cocone-sequential-diagram-cofork A c)
++      ( up-cofork Y)
++      ( is-equiv-cocone-sequential-diagram-cofork A)
++
++  universal-property-coequalizer-universal-property-sequential-colimit :
++    ( {l : Level} →
++      universal-property-sequential-colimit l A c) →
++    ( {l : Level} →
++      universal-property-coequalizer l
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++  universal-property-coequalizer-universal-property-sequential-colimit
++    ( up-sequential-colimit)
++    ( Y) =
++    is-equiv-right-factor-htpy
++      ( cocone-map-sequential-diagram A c)
++      ( cocone-sequential-diagram-cofork A)
++      ( cofork-map
++        ( bottom-map-cofork-cocone-sequential-diagram A)
++        ( top-map-cofork-cocone-sequential-diagram A)
++        ( cofork-cocone-sequential-diagram A c))
++      ( triangle-cocone-sequential-diagram-cofork A c)
++      ( is-equiv-cocone-sequential-diagram-cofork A)
++      ( up-sequential-colimit Y)
++```
++
++### 3-for-2 property of sequential colimits
++
++Given two cocones under a sequential diagram, one of which has the universal
++property of sequential colimits, and a map between their vertices, we prove that
++the other has the universal property if and only if the map is an
++[equivalence](foundation.equivalences.md).
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2} {Y : UU l3}
++  ( c : cocone-sequential-diagram A X)
++  ( c' : cocone-sequential-diagram A Y)
++  ( h : X → Y)
++  ( H :
++    htpy-cocone-sequential-diagram A (cocone-map-sequential-diagram A c h) c')
++  where
++
++  inv-triangle-cocone-map-precomp-sequential-diagram :
++    { l4 : Level} (Z : UU l4) →
++    coherence-triangle-maps'
++      ( cocone-map-sequential-diagram A c')
++      ( cocone-map-sequential-diagram A c)
++      ( precomp h Z)
++  inv-triangle-cocone-map-precomp-sequential-diagram Z k =
++    ( cocone-map-comp-sequential-diagram A c h k) ∙
++    ( ap
++      ( λ d → cocone-map-sequential-diagram A d k)
++      ( eq-htpy-cocone-sequential-diagram A
++        ( cocone-map-sequential-diagram A c h)
++        ( c')
++        ( H)))
++
++  triangle-cocone-map-precomp-sequential-diagram :
++    { l4 : Level} (Z : UU l4) →
++    coherence-triangle-maps
++      ( cocone-map-sequential-diagram A c')
++      ( cocone-map-sequential-diagram A c)
++      ( precomp h Z)
++  triangle-cocone-map-precomp-sequential-diagram Z =
++    inv-htpy (inv-triangle-cocone-map-precomp-sequential-diagram Z)
++
++  abstract
++    is-equiv-universal-property-sequential-colimit-universal-property-sequential-colimit :
++      ( {l : Level} → universal-property-sequential-colimit l A c) →
++      ( {l : Level} → universal-property-sequential-colimit l A c') →
++      is-equiv h
++    is-equiv-universal-property-sequential-colimit-universal-property-sequential-colimit
++      ( up-sequential-colimit)
++      ( up-sequential-colimit') =
++      is-equiv-is-equiv-precomp h
++        ( λ l Z →
++          is-equiv-right-factor-htpy
++            ( cocone-map-sequential-diagram A c')
++            ( cocone-map-sequential-diagram A c)
++            ( precomp h Z)
++            ( triangle-cocone-map-precomp-sequential-diagram Z)
++            ( up-sequential-colimit Z)
++            ( up-sequential-colimit' Z))
++
++    universal-property-sequential-colimit-is-equiv-universal-property-sequential-colomit :
++      ( {l : Level} → universal-property-sequential-colimit l A c) →
++      is-equiv h →
++      ( {l : Level} → universal-property-sequential-colimit l A c')
++    universal-property-sequential-colimit-is-equiv-universal-property-sequential-colomit
++      ( up-sequential-colimit)
++      ( is-equiv-h)
++      ( Z) =
++      is-equiv-comp-htpy
++        ( cocone-map-sequential-diagram A c')
++        ( cocone-map-sequential-diagram A c)
++        ( precomp h Z)
++        ( triangle-cocone-map-precomp-sequential-diagram Z)
++        ( is-equiv-precomp-is-equiv h is-equiv-h Z)
++        ( up-sequential-colimit Z)
++
++    universal-property-sequential-colimit-universal-property-sequential-colimit-is-equiv :
++      is-equiv h →
++      ( {l : Level} → universal-property-sequential-colimit l A c') →
++      ( {l : Level} → universal-property-sequential-colimit l A c)
++    universal-property-sequential-colimit-universal-property-sequential-colimit-is-equiv
++      ( is-equiv-h)
++      ( up-sequential-colimit)
++      ( Z) =
++      is-equiv-left-factor-htpy
++        ( cocone-map-sequential-diagram A c')
++        ( cocone-map-sequential-diagram A c)
++        ( precomp h Z)
++        ( triangle-cocone-map-precomp-sequential-diagram Z)
++        ( up-sequential-colimit Z)
++        ( is-equiv-precomp-is-equiv h is-equiv-h Z)
++```
++
++### Unique uniqueness of of sequential colimits
++
++```agda
++module _
++  { l1 l2 l3 : Level} (A : sequential-diagram l1) {X : UU l2} {Y : UU l3}
++  ( c : cocone-sequential-diagram A X)
++  ( c' : cocone-sequential-diagram A Y)
++  ( up-sequential-diagram :
++    {l : Level} → universal-property-sequential-colimit l A c)
++  ( up-sequential-diagram' :
++    {l : Level} → universal-property-sequential-colimit l A c')
++  where
++
++  abstract
++    uniquely-unique-sequential-colimit :
++      is-contr
++        ( Σ ( X ≃ Y)
++            ( λ e →
++              htpy-cocone-sequential-diagram A
++                ( cocone-map-sequential-diagram A c (map-equiv e))
++                ( c')))
++    uniquely-unique-sequential-colimit =
++      is-torsorial-Eq-subtype
++        ( uniqueness-map-universal-property-sequential-colimit A c
++          ( up-sequential-diagram)
++          ( c'))
++        ( is-property-is-equiv)
++        ( map-universal-property-sequential-colimit A c
++          ( up-sequential-diagram)
++          ( c'))
++        ( htpy-cocone-universal-property-sequential-colimit A c
++          ( up-sequential-diagram)
++          ( c'))
++        ( is-equiv-universal-property-sequential-colimit-universal-property-sequential-colimit
++          ( A)
++          ( c)
++          ( c')
++          ( map-universal-property-sequential-colimit A c
++            ( up-sequential-diagram)
++            ( c'))
++          ( htpy-cocone-universal-property-sequential-colimit A c
++            ( up-sequential-diagram)
++            ( c'))
++          ( up-sequential-diagram)
++          ( up-sequential-diagram'))
++```

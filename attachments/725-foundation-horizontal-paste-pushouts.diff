@@ -1,14 +1,3 @@
-From b0197432f854b633ba502764bf244056fd0c50f0 Mon Sep 17 00:00:00 2001
-From: VojtechStep <vojtechstepancik@outlook.com>
-Date: Fri, 8 Sep 2023 22:15:33 +0200
-Subject: [PATCH] Horizontal pasting of pushouts
-
----
- .../cocones-under-spans.lagda.md              | 22 ++++-
- .../pullback-property-pushouts.lagda.md       |  9 +-
- .../universal-property-pushouts.lagda.md      | 98 +++++++++++++++++++
- 3 files changed, 125 insertions(+), 4 deletions(-)
-
 diff --git a/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md b/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md
 index ac8d493fc8..bb8ced1e79 100644
 --- a/src/synthetic-homotopy-theory/cocones-under-spans.lagda.md
