@@ -253,9 +253,15 @@ The thesis is divided into four chapters. [[#chap:hott]] provides an abridged in
 
 This section briefly introduces important concepts and results from Homotopy Type Theory, the formal setting of the thesis. For a more extensive account, see the "HoTT Book" [cite//b:@UF13], or Rijke's textbook [cite//b:@Rij22].
 
-In Homotopy Type Theory, the basic objects of study are /types/, which may have /elements/. An element $a$ of type $A$ is written $a : A$. In contrast to set theory, where an element can belong to many different sets, an element cannot be of multiple different types. Types themselves are elements of special types called /universes/, written $A : \UU$. To avoid inconsistency, we assume an infinite hierarchy of universes, such that a universe $\UU$ is an element of a bigger universe, $\UU : \UU^+$. We generally do not comment on the handling of universe levels in the text of the thesis, but the attached formalization is developed in the maximally universe-polymorphic way.
+In Homotopy Type Theory, the basic objects of study are /types/, which may have /elements/. An element $a$ of type $A$ is written $a : A$. In contrast to set theory, where an element can belong to many different sets, an element cannot be of multiple different types. Types themselves are elements of special types called /universes/, written $A : \UU$. To avoid inconsistency [cite//b:@Hur95], we assume an infinite hierarchy of universes, such that a universe $\UU$ is an element of a bigger universe, $\UU : \UU^+$. We generally do not comment on the handling of universe levels in the text of the thesis, but the attached formalization is developed in the maximally universe-polymorphic way.
 
-For any two types $A$ and $B$, there is the type of /functions/ $A \to B$, whose elements are functions taking elements of $A$ to elements of $B$. Elements of a function type into a universe are called /type families/: a type family $P$ /over/ $A$ is a function $P : A \to \UU$. The type $P(a)$ for some specific $a : A$ is occasionally referred to as the /fiber at $a$/.
+For any two types $A$ and $B$, there is the type of /functions/ $A \to B$, whose elements are functions taking elements of $A$ to elements of $B$. For any type $A$ there is the identity function $\id : A \to A$, and functions can be composed using the composition operator
+\begin{displaymath}
+  \blank \comp \blank : (B \to C) \to (A \to B) \to (A \to C),
+\end{displaymath}
+which is associative and unital with respect to $\id$.
+
+Elements of a function type into a universe are called /type families/: a type family $P$ /over/ $A$ is a function $P : A \to \UU$. The type $P(a)$ for some specific $a : A$ is occasionally referred to as the /fiber at $a$/.
 
 Given a type family $P : A \to \UU$ we may construct the "$\Sigma$ type" $\Sigma (a : A).\, P(a)$ (or $\Sigma A P$). Elements of the type $\Sigma A P$ are /dependent pairs/ $(a, p)$ where $a$ is an element of $A$ and $p$ is an element of $P(a)$.
 
@@ -265,7 +271,7 @@ For two elements of the same type $x, y : A$ there is the type of /identificatio
 
 #+name: thm:based-J
 #+begin_thm
-Consider a type $A$ and its element $a_0 : A$. Given a type family $P : (a : A) \to (a_0 = a) \to \UU$, there is an function
+Consider a type $A$ and its element $a_0 : A$. Given a type family $P : (a : A) \to (a_0 = a) \to \UU$, there is a function
 \begin{displaymath}
   J : P(a_0, \refl) \to ((a : A) (r : a_0 \to a) \to P(a, r))
 \end{displaymath}
@@ -281,7 +287,7 @@ Elements of identity types can themselves be identified --- for all $p, q : x = 
 \end{align*}
 such that taking an inverse is an involution, and concatenation is associative and unital with respect to $\refl$. Most of the just mentioned laws hold up to a higher identification, \eg the elements $p \concat \refl$ and $p$ are not judgmentally equal, but there is an identification $\runit : (p \concat \refl) = p$. In our setting only the left unit law is judgmental, \ie there is a judgmental equality $(\refl \concat p) \judeq p$.
 
-Identifications of elements $x, y : A$ also induce a map between fibers for any type family $P : A \to \UU$. This is called the *transport map*
+Identifications of elements $x, y : A$ induce a map between fibers for any type family $P : A \to \UU$. This is called the *transport map*
 \begin{displaymath}
   \tr_P : (x = y) \to P(x) \to P(y).
 \end{displaymath}
@@ -293,6 +299,16 @@ The transport map distributes over concatenation of identifications.
 Given a type $A$, a type family $P : A \to \UU$, elements $x, y, z : A$, identifications $p : x = y$ and $q : y = z$, and an element $u : P(x)$, there is an identification
 \begin{displaymath}
   \tr_P(p \concat q, u) = \tr_P(q, \tr_P(p, u)).
+\end{displaymath}
+#+end_lemma
+
+Transport in type families of certain shapes can be characterized. For example, transport in the type family $\Id(a_0)$ behaves like concatenation.
+
+#+NAME: lemma:tr-id-right
+#+begin_lemma
+Given identifications $p : x = y$ and $q : a_0 = x$, there is an identification
+\begin{displaymath}
+  \tr_{\Id(a_0)}(p, q) = q \concat p.
 \end{displaymath}
 #+end_lemma
 
@@ -348,7 +364,25 @@ By convention, homotopies in diagrams go from bottom left to top right. We often
  & D.
 \end{tikzcd}
 #+end_center
-We will occasionally mention *commuting cubes*, which \TODO.
+We will occasionally encounter higher shapes, \eg a *commuting cube* is a homotopy of homotopies
+\begin{align*}
+  \alpha : \: &((i \lwhisk BL) \hconcat (FL \rwhisk f') \hconcat (h_D \lwhisk T)) \\
+  & \htpy ((B \rwhisk h_A) \hconcat (j \lwhisk BR) \hconcat (FR \rwhisk g')),
+\end{align*}
+where $BL$, $FL$, $T$, $B$, $BR$ and $FR$ are homotopies which fit as the back left, front left, top, bottom, back right and front right faces, respectively, of the following cubical diagram:
+
+#+begin_center
+\begin{tikzcd}
+  & A' \arrow[dl, "f'"'] \arrow[d, "h_A"] \arrow[dr, "g'"] \\
+  B' \arrow[d, "h_B"']
+  & A \arrow[dl, "f"', very near start] \arrow[dr, "g", very near start]
+  & C' \arrow[dl, "j'", very near end, crossing over] \arrow[d, "h_C"] \\
+  B \arrow[dr, "i"']
+  & D' \arrow[from=ul, "i'"', very near end, crossing over] \arrow[d, "h_D"]
+  & C \arrow[dl, "j"] \\
+  & D.
+\end{tikzcd}
+#+end_center
 
 Given a map $f : A \to B$, we call a converse map $s : B \to A$ its *section* if it comes equipped with a homotopy $(f \comp s) \htpy \id$, and likewise we call a map $r : B \to A$ a *retraction* of $f$ if there is a homotopy $(r \comp f) \htpy \id$.
 
@@ -371,15 +405,6 @@ are equivalences.
 For every type $A$, type family $B : A \to \UU$, two elements $x, y : A$ and an identification $p : x = y$, the transport map $\tr_P p : B x \to B y$ is an equivalence.
 #+end_lemma
 
-Every function $f : A \to B$ gives rise to the type family of *fibers* ${\term{fib}_f : B \to \UU}$; the fiber of $f$ over $b : B$ is the type of elements $a : A$ equipped with an identification of type $f a = b$.
-
-We note that equivalences can be characterized by a special property of their fibers. To state it, we need a notion of contractibility --- a type $A$ is *contractible* if there is a point $a_0 : A$ and a family of identifications of type $(a : A) \to (a_0 = a)$.
-
-#+name: lemma:is-contr-map-is-equiv
-#+begin_lemma
-A map $f : A \to B$ is an equivalence if and only if for all $b : B$ the fiber $\term{fib}_f(b)$ is contractible.
-#+end_lemma
-
 One of the elementary results about equivalences we use is their 3-for-2 property, an extension of the fact that they are closed under composition.
 
 #+NAME: lemma:3for2-equiv
@@ -391,9 +416,18 @@ Consider a commuting triangle of maps
   A \arrow[rr, "f"] \arrow[rd, "h"'] & & B \arrow[ld, "g"] \\
   & C.
 \end{tikzcd}
+#+end_center
 
 If any two of the maps are equivalences, then so is the third.
-#+end_center
+#+end_lemma
+
+Every function $f : A \to B$ gives rise to the type family of *fibers* ${\term{fib}_f : B \to \UU}$; the fiber of $f$ over $b : B$ is the type of elements $a : A$ equipped with an identification of type $f a = b$.
+
+We note that equivalences can be characterized by a special property of their fibers. To state it, we need a notion of contractibility --- a type $A$ is *contractible* if there is a point $a_0 : A$ and a family of identifications of type $(a : A) \to (a_0 = a)$.
+
+#+name: lemma:is-contr-map-is-equiv
+#+begin_lemma
+A map $f : A \to B$ is an equivalence if and only if for all $b : B$ the fiber $\term{fib}_f(b)$ is contractible.
 #+end_lemma
 
 For a thorough discussion of different characterization of equivalences, refer to Chapter 4 of the HoTT Book [cite//b:@UF13].
@@ -409,6 +443,13 @@ For any two types $A, B : \UU$, the map
 \end{displaymath}
 defined by taking $\refl$ to the identity equivalence $\id$, is an equivalence.
 #+end_axiom
+
+The map $\term{equiv-eq}$ gives an alternative way to turn an identification $x = y$ into an equivalence $P(x) \simeq P(y)$. This turns out to be the same equivalence as transport.
+
+#+NAME: lemma:compute-equiv-eq-ap
+#+begin_lemma
+Given an identification $p : x = y$ in $A$ and a type family $P : A \to \UU$, the equivalences $\tr_P(p)$ and $\term{equiv-eq}(\ap_P(p))$ are identical.
+#+end_lemma
 
 Voevodsky showed that function extensionality follows from univalence. For a simplified proof, see [cite//b:@UF13, section 4.9].
 
@@ -452,41 +493,53 @@ The based $J$ rule essentially states that $(\Id(a_0), \refl)$ is an identity sy
 Given a type $A$ with a basepoint $a_0$, the pair $(\Id(a_0), \refl)$ is an identity system.
 #+end_lemma
 
-#+name: lemma:eq-sigma-eq-pair
-#+begin_lemma
-\TODO[eq-sigma-eq-pair]
-#+end_lemma
-
-#+NAME: lemma:tr-id-right
-#+begin_lemma
-\TODO[tr-id-right].
-#+end_lemma
-
-#+NAME: lemma:compute-equiv-eq-ap
-#+begin_lemma
-\TODO[transport is equiv-eq(ap)].
-#+end_lemma
-
-The following is a variation of the encode-decode method due to Licata and Shulman [cite//b:@LS13]
+The following is a variation of the encode-decode method due to Licata and Shulman [cite//b:@LS13].
 #+NAME: thm:fundamental-theorem-id
 #+ATTR_LATEX: :options [Fundamental theorem of identity types]
 #+begin_thm
-\TODO[Fundamental theorem of identity types]
+Given a type $A$, an element $a_0 : A$, a type family $P : A \to \UU$, and a function $f : (x : A) \to (a_0 = x) \to P(x)$, the following are logically equivalent
+- The function $f(x) : (a_0 = x) \to P(x)$ is an equivalence for all $x : A$
+- The type $\Sigma A P$ is contractible.
 #+end_thm
 
 #+name: corol:fundamental-theorem-id-equivs
 #+begin_corol
-\TODO[point preserving equivalences are contractible]
+For a type $A$ with an element $a_0 : A$ and a type family $P : A \to \UU$ with a point $p_0 : P(a_0)$, it holds that the type of families of equivalences
+\begin{displaymath}
+  e : (x : A) \to ((a_0 = x) \simeq P(x)),
+\end{displaymath}
+such that $e(a_0, \refl) = p_0$, is contractible.
 #+end_corol
+
+Just as equivalences characterize the identity types in universes, and homotopies characterize the identity types in $\Pi$ types, there is a characterization of identity types in $\Sigma$ types.
+
+#+name: lemma:eq-sigma-eq-pair
+#+begin_lemma
+Given a type $A$ and a type family $P : A \to \UU$, the map
+\begin{displaymath}
+  \term{pair-eq-\mupSigma} : ((x, s) = (y, t)) \to \Sigma (p : x = y).\, \tr_P(p, s) = t,
+\end{displaymath}
+which sends $\refl$ to $(\refl, \refl)$, is an equivalence, for all $x, y : A$, $s : P(x)$ and $t : P(y)$.
+#+end_lemma
+
+We can dispense without mentioning transport if we have characterizations of identity types of the individual components. This theorem, known as the Structure Identity Principle, is due to [cite/t:@Acz12]
 
 #+NAME: thm:sip
 #+begin_thm
-\TODO[SIP] [cite/t:@Acz12]
+Consider a type $A$ with a point $a_0 : A$, type families $P : A \to \UU$ and $Q : A \to \UV$ pointed by $p_0 : P(a_0)$ and $q_0 : Q(a_0)$, respectively, and a type family ${D : (x : A) \to (P(x) \to Q(x) \to \UU)}$. If $Q$ is an identity system at $q_0$ and there is an element $d_0 : D(a_0, p_0, q_0)$, then the following are equivalent:
+- Any family of maps $f : (p : P(a_0)) \to ((p_0 = p) \to D(a_0, p, q_0))$ is a family of equivalences
+- The total space $\Sigma (p : P(a_0)).\, D(a_0, p, q_0)$ is contractible.
 #+end_thm
+
+The last fact we will need is distributivity of $\Pi$ over $\Sigma$, sometimes called the "type theoretic principle of choice". It states that a dependent function into a $\Sigma$ type corresponds to a dependent pair of dependent functions.
 
 #+NAME: lemma:distributive-pi-sigma
 #+begin_lemma
-\TODO[Distributivity of Pi over Sigma].
+Given a type $A$ and type families $P : A \to \UU$ and $Q : (a : A) \to P(a) \to \UV$, there is an equivalence
+\begin{align*}
+  &((x : A) \to \Sigma (p : P(x)).\, Q(x, p)) \\
+  &\simeq (\Sigma(h : (x : X) \to P(x)).\, (x : X) \to Q(x, h(x))).
+\end{align*}
 #+end_lemma
 
 * Pushouts
@@ -1665,7 +1718,7 @@ Consider a pushout square
 #+end_center
 If for all commuting cubes
 #+begin_center
-\begin{tikzcd}[]
+\begin{tikzcd}
   & S' \arrow[dl] \arrow[d] \arrow[dr] \\
   A' \arrow[d]
   & S \arrow[dl, "f"', near start] \arrow[dr, "g", near start]
