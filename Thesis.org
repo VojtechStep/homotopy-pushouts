@@ -2,17 +2,20 @@
 #+AUTHOR: Vojtěch Štěpančík
 #+KEYWORDS: synthetic homotopy theory, homotopy type theory, univalent foundations of mathematics, formalization, homotopy pushouts
 
-#+DESCRIPTION: Homotopy pushouts can be constructed as higher inductive types in Homotopy Type
-#+DESCRIPTION: Theory, and their properties may be explored using the logical framework and
-#+DESCRIPTION: formalized in a proof assistant. This thesis focuses on the descent property,
-#+DESCRIPTION: due to Rijke \cite{Rij19}, which characterizes type families over pushouts; the
-#+DESCRIPTION: flattening lemma, due to Brunerie \cite{Bru16}, which characterizes the total
-#+DESCRIPTION: spaces of such families; and the universal property of identity types of
-#+DESCRIPTION: pushouts, due to Kraus and von Raumer \cite{KvR19}. We also build elementary
-#+DESCRIPTION: infrastructure for sequential colimits, following a paper of Sojakova, van Dorn,
-#+DESCRIPTION: and Rijke \cite{SvDR20}. We then use the built machinery to provide a partial
-#+DESCRIPTION: formalized proof of Wärn's zigzag construction of identity types of pushouts as
-#+DESCRIPTION: sequential colimits \cite{War23}, leaving one coherence problem open.
+#+DESCRIPTION: Homotopy pushouts can be constructed as higher inductive types in the logical
+#+DESCRIPTION: framework of Homotopy Type Theory, where one may engage syntactic methods to
+#+DESCRIPTION: explore their properties, and formalize them in a proof assistant. This thesis
+#+DESCRIPTION: focuses on the descent property, due to Rijke \cite{Rij19}, which characterizes
+#+DESCRIPTION: type families over pushouts; the flattening lemma, due to Brunerie \cite{Bru16},
+#+DESCRIPTION: which characterizes the total spaces of such families; and the universal
+#+DESCRIPTION: property of identity types of pushouts, due to Kraus and von Raumer
+#+DESCRIPTION: \cite{KvR19}. We also build elementary infrastructure for sequential colimits,
+#+DESCRIPTION: following a paper of Sojakova, van Doorn, and Rijke \cite{SvDR20}. We then use
+#+DESCRIPTION: the built machinery to provide a partial formalized proof of Wärn's zigzag
+#+DESCRIPTION: construction of identity types of pushouts as sequential colimits \cite{War23},
+#+DESCRIPTION: leaving one coherence problem open. The thesis was simultaneously formalized in
+#+DESCRIPTION: the proof assistant Agda \cite{Agda} and results contributed to the agda-unimath
+#+DESCRIPTION: library \cite{AU24}.
 
 # Document settings
 #+LATEX_COMPILER: lualatex
@@ -171,18 +174,7 @@
 DEDICATION
 }
 \def\AbstractCS{
-\TODO[přeložit]
-Homotopy pushouts can be constructed as higher inductive types in Homotopy Type
-Theory, and their properties may be explored using the logical framework and
-formalized in a proof assistant. This thesis focuses on the descent property,
-due to Rijke \cite{Rij19}, which characterizes type families over pushouts; the
-flattening lemma, due to Brunerie \cite{Bru16}, which characterizes the total
-spaces of such families; and the universal property of identity types of
-pushouts, due to Kraus and von Raumer \cite{KvR19}. We also build elementary
-infrastructure for sequential colimits, following a paper of Sojakova, van Dorn,
-and Rijke \cite{SvDR20}. We then use the built machinery to provide a partial
-formalized proof of Wärn's zigzag construction of identity types of pushouts as
-sequential colimits \cite{War23}, leaving one coherence problem open.
+Homotopické pushouty mouhou být zkonstruovány jako vyšší induktivní typy v logickém rámci Homotopické Teorie Typů, ve kterém lze použít syntaktické metody pro zkoumání jejich vlastností, a formalizovat je v důkazovém asistentu. Tato diplomová práce se zaměřuje na vlastnost sestupu, popsanou Rijkem \cite{Rij19}, která charakterizuje rodiny typů nad pushouty; na lemma o zplošťování, popsané Bruneriem \cite{Bru16}, které charakterizuje totální prostory takových rodin; a univerzální vlastnost typů identifikací v pushoutech, formulovanou Krausem a von Raumerem \cite{KvR19}. Vybudujeme také základní infrastrukturu pro práci se sekvenčními kolimitami, podle článku Sojákové, van Doorna a Rijkeho \cite{SvDR20}. Vybudované nástroje posléze použijeme na částečný formalizovaný důkaz Wärnovy klikaté konstrukce typů identifikací v pushoutech jako sekvenčních kolimit \cite{War23}, s jedním neuzavřeným problémem koherence. Práce byla postupně formalizována v důkazovém asistentu Agda \cite{Agda}, a výsledky přispěny do knihovny agda-unimath \cite{AU24}.
 }
 \def\KeywordsCS{syntetická homotopická teorie, homotopická teorie typů, univalentní základy matematiky, formalizace, homotopické pushouty}
 \include{tex/title.tex}
