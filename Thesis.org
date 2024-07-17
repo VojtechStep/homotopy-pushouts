@@ -1,11 +1,18 @@
 #+TITLE: Formalization of Homotopy Pushouts in Homotopy Type Theory
 #+AUTHOR: Vojtěch Štěpančík
 #+KEYWORDS: synthetic homotopy theory, homotopy type theory, univalent foundations of mathematics, formalization, homotopy pushouts
-#+DESCRIPTION: Homotopy pushouts can be constructed as higher inductive types in Homotopy Type Theory, and their properties
-#+DESCRIPTION: may be explored using the logical framework and formalized in a proof assitant. This thesis focuses on
-#+DESCRIPTION: the descent property, characterizing type families over pushouts, and the flattening lemma, characterizing
-#+DESCRIPTION: the total spaces of such families. We then use the built machinery to provide the first fully formalized
-#+DESCRIPTION: proof of Wärn's zigzag construction of identity types of pushouts as sequential colimits.
+
+#+DESCRIPTION: Homotopy pushouts can be constructed as higher inductive types in Homotopy Type
+#+DESCRIPTION: Theory, and their properties may be explored using the logical framework and
+#+DESCRIPTION: formalized in a proof assistant. This thesis focuses on the descent property,
+#+DESCRIPTION: due to Rijke \cite{Rij19}, which characterizes type families over pushouts; the
+#+DESCRIPTION: flattening lemma, due to Brunerie \cite{Bru16}, which characterizes the total
+#+DESCRIPTION: spaces of such families; and the universal property of identity types of
+#+DESCRIPTION: pushouts, due to Kraus and von Raumer \cite{KvR19}. We also build elementary
+#+DESCRIPTION: infrastructure for sequential colimits, following a paper of Sojakova, van Dorn,
+#+DESCRIPTION: and Rijke \cite{SvDR20}. We then use the built machinery to provide a partial
+#+DESCRIPTION: formalized proof of Wärn's zigzag construction of identity types of pushouts as
+#+DESCRIPTION: sequential colimits \cite{War23}, leaving one coherence problem open.
 
 # Document settings
 #+LATEX_COMPILER: lualatex
@@ -44,7 +51,6 @@
 #+LATEX_HEADER: \newcommand{\defterm}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \newcommand{\term}[1]{\operatorname{#1}}
 #+LATEX_HEADER: \DeclareMathOperator{\id}{id}
-# #+LATEX_HEADER: \newcommand{\defeq}{\mathrel{:=}}
 #+LATEX_HEADER: \DeclareBinOperator{\defeq}{:=}
 #+LATEX_HEADER: \DeclareBinOperator{\judeq}{\doteq}
 #+LATEX_HEADER: \DeclareBinOperator{\comp}{\circ}
@@ -152,7 +158,9 @@
 
 # Title page
 #+begin_export latex
+\def\TitleCS{Formalizace homotopických pushoutů v homotopické teorii typů}
 \def\Department{Department of Algebra}
+\def\DepartmentCS{Katedra algebry}
 \def\ThesisSupervisor{doctor Egbert Rijke}
 \def\StudyProgramme{Mathematical Structures}
 \def\StudyBranch{MSPN}
@@ -160,6 +168,21 @@
 \def\Dedication{
 DEDICATION
 }
+\def\AbstractCS{
+\TODO[přeložit]
+Homotopy pushouts can be constructed as higher inductive types in Homotopy Type
+Theory, and their properties may be explored using the logical framework and
+formalized in a proof assistant. This thesis focuses on the descent property,
+due to Rijke \cite{Rij19}, which characterizes type families over pushouts; the
+flattening lemma, due to Brunerie \cite{Bru16}, which characterizes the total
+spaces of such families; and the universal property of identity types of
+pushouts, due to Kraus and von Raumer \cite{KvR19}. We also build elementary
+infrastructure for sequential colimits, following a paper of Sojakova, van Dorn,
+and Rijke \cite{SvDR20}. We then use the built machinery to provide a partial
+formalized proof of Wärn's zigzag construction of identity types of pushouts as
+sequential colimits \cite{War23}, leaving one coherence problem open.
+}
+\def\KeywordsCS{syntetická homotopická teorie, homotopická teorie typů, univalentní základy matematiky, formalizace, homotopické pushouty}
 \include{tex/title.tex}
 \tableofcontents
 #+end_export
@@ -3909,8 +3932,8 @@ Attachments consist of Git patch files, most of which were submitted as pull req
 - [X] Describe attachments
 - [X] +Open a PR for the zigzag construction+ included as an independent patch
 - [ ] Check capitalization of autoref
-- [ ] Cite Brunerie's thesis for the flattening lemma
-- [ ] Cite Egbert's thesis for descent
+- [X] Cite Brunerie's thesis for the flattening lemma
+- [X] Cite Egbert's thesis for descent
 - [ ] Try to move important ideas from remarks to section introductions
 - [ ] Make the first part of Pushouts a subsection, add section intro
 
