@@ -33,9 +33,9 @@
 #+LATEX_HEADER: \input{tex/pdfa.tex}
 
 # Highlight overfull
-#+LATEX_HEADER: \overfullrule=1mm
+# #+LATEX_HEADER: \overfullrule=1mm
 
-#+LATEX_HEADER: \newcommand{\TODO}[1][]{{\leavevmode\color{red}{\ifthenelse{\equal{#1}{}}{TODO}{#1}}}}
+# #+LATEX_HEADER: \newcommand{\TODO}[1][]{{\leavevmode\color{red}{\ifthenelse{\equal{#1}{}}{TODO}{#1}}}}
 
 #+LATEX_HEADER: \newcommand{\ie}{i.e.~}
 #+LATEX_HEADER: \newcommand{\eg}{e.g.~}
@@ -177,9 +177,9 @@ I would like to thank Fredrik Bakke, for our conversations both academic and per
 
 I am grateful to my family for being very excited about my work, even though I repeatedly failed to properly explain what I was doing, by nobody's fault but my own, because I often lacked the necessary understanding myself. It motivated me to try and find more intuitive descriptions of the code I was writing; hopefully some of it is reflected in the thesis.
 
-I also want to thank my colleague and friend Max Hollmann, for sitting down with me at a café after a long day's work, and listening to my tired rambling about commuting prisms. He and the rest of our friend group are a big reason why I remained motivated to keep working on my master's studies. I also appreciate the staff at Cafe Prostoru\_, where much of the research and formalization for this thesis was done, for tolerating my everyday gloomy presence, with my face buried in my laptop, and for lifting my spirits with pretty latte art on my Chai Latté.
+I also want to thank my colleague and friend Max Hollmann, for often sitting down with me at a café after a long day's work, and listening to my tired rambling about commuting prisms. He and the rest of our friend group are a big reason why I remained motivated to keep working on my master's studies. I also appreciate the staff at Cafe Prostoru\_, where much of the research and formalization for this thesis was done, for tolerating my everyday gloomy presence, with my face buried in my laptop, and for lifting my spirits with pretty latte art on my Chai Latté.
 
-And last but not least, I would like to thank Matěj Dostál, who first taught me logic and type theory, and pointed me in the direction of Homotopy Type Theory in my formative years as an academic.
+Finally, I would like to thank Matěj Dostál, who first taught me logic and type theory, and pointed me in the direction of Homotopy Type Theory in my formative years as an academic.
 
 \bigskip
 \hfill Vojtěch Štěpančík, Ljubljana
@@ -736,7 +736,7 @@ We write $\depCocone(c, P)$ for the type of dependent cocones over $c$ on $P$.
 #+end_defn
 
 #+begin_constr
-Given a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UV$, define a map
+Given a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UU$, define the map
 \begin{equation*}
   \depCoconeMap_c^P : ((x : X) \to P(x)) \to \depCocone(c, P)
 \end{equation*}
@@ -746,13 +746,13 @@ We may omit the indices $c$ or $P$ if they are clear from context.
 #+end_constr
 
 #+begin_defn
-A cocone $c : \cocone(\S, X)$ satisfies the *dependent universal property of pushouts* if for all $P : X \to \UV$, the map $\depCoconeMap_c^P$ is an equivalence.
+A cocone $c : \cocone(\S, X)$ satisfies the *dependent universal property of pushouts* if for all $P : X \to \UU$, the map $\depCoconeMap_c^P$ is an equivalence.
 #+end_defn
 
-Note that the dependent universal property isn't a property of dependent cocones, but rather a property of cocones and their extensions by dependent functions.
+Note that the dependent universal property is not a property of dependent cocones, but rather a property of cocones and their extensions by dependent functions.
 
 #+begin_defn
-Given a span diagram $\S \judeq (f, g)$, a cocone $c \judeq (\_, \_, H) : \cocone(\S, X)$ and two dependent cocones $d \judeq (i, j, L)$ and $d' \judeq (i', j', L')$ on $P$, the type of *homotopies* between $d$ and $d'$, denoted $d \judeq d'$, is the type of triples $(K_A, K_B, \alpha)$, where $K_A$ and $K_B$ are homotopies
+Given a span diagram $\S \judeq (f, g)$, a cocone $c : \cocone(\S, X)$ and two dependent cocones $d \judeq (i, j, L)$ and $d' \judeq (i', j', L')$ on $P$, the type of *homotopies* between $d$ and $d'$, denoted $d \htpy d'$, is the type of triples $(K_A, K_B, \alpha)$, where $K_A$ and $K_B$ are homotopies
 \begin{align*}
   K_A &: i \htpy i' \\
   K_B &: j \htpy j'
@@ -767,9 +767,10 @@ and $\alpha$ is a coherence witnessing that the following square of identificati
   \arrow[d, equal, "L'(s)"] \\
   j (g s)
   \arrow[r, equal, "K_B(g s)"']
-  & j' (g s).
+  & j' (g s),
 \end{tikzcd}
 #+end_center
+where $H$ is the coherence of $c$.
 #+end_defn
 
 #+begin_lemma
@@ -779,8 +780,12 @@ For every pair of dependent cocones $d, d' : \depCocone(c, P)$, there is an equi
 \end{displaymath}
 #+end_lemma
 
+#+begin_proof
+Using the structure identity principle.
+#+end_proof
+
 #+begin_lemma
-Given a span diagram $\S \judeq (f, g)$, a pushout cocone $c \judeq (i, j, H) : \cocone(\S, X)$, and a dependent cocone $d \judeq (i', j', H') : \depCocone(c, P)$, there is a unique dependent map $h : (x : X) \to P(x)$ equipped homotopies
+Given a span diagram $\S \judeq (f, g)$, its pushout cocone $c \judeq (i, j, H)$ on $X$, and a dependent cocone $d \judeq (i', j', H') : \depCocone(c, P)$, there is a unique dependent map $h : (x : X) \to P(x)$ equipped homotopies
 \begin{align*}
   K_A &: h \comp i \htpy i' \\
   K_B &: h \comp j \htpy j'
@@ -800,7 +805,11 @@ and a coherence $\alpha$ witnessing that the following square of identifications
 #+end_center
 #+end_lemma
 
-We don't introduce a new name for cocones satisfying the dependent universal property, because the two properties turn out to be equivalent. The proof relies on the pullback property and the dependent pullback property of pushouts, which relate pushouts and pullbacks of function types. As this thesis does not discuss pullbacks, we defer the proof to [cite/t:@Rij22Pre, Theorem 25.1.4].
+#+begin_proof
+The type is equivalent to the contractible fibers of $\depCoconeMap_c^P$.
+#+end_proof
+
+We do not introduce a new name for cocones satisfying the dependent universal property, because the two properties turn out to be equivalent. The proof relies on the pullback property and the dependent pullback property of pushouts, which relate pushouts and pullbacks of function types. As this thesis does not discuss pullbacks, we defer the proof to [cite/t:@Rij22Pre, Theorem 25.1.4].
 
 #+name: lemma:dup-iff-up-pushout
 #+begin_thm
@@ -819,7 +828,7 @@ There is a chain of logical equivalences
 
 #+name: remark:universal-properties
 #+begin_remark
-This equivalence of a non-dependent and dependent universal property is a more general phenomenon. In homotopy type theory, there are often multiple ways of describing universal properties. These expressions usually involve a base sort of objects and dependent objects, which can be equipped with some structure functorial in an appropriate notion of maps and dependent maps.
+This equivalence of a non-dependent and dependent universal property is a more general phenomenon. In Homotopy Type Theory, there are often multiple ways of describing universal properties. These expressions usually involve a base sort of objects and dependent objects, which can be equipped with some structure functorial in an appropriate notion of maps and dependent maps.
 
 The functorial action
 \begin{equation*}
@@ -834,18 +843,18 @@ In the dependent case, we get a map
   \term{dep-ev-map}_{(X, s)}^P : ((x : X) \to P(x)) \to \term{dep-structure}((X, s), P).
 \end{equation*}
 
-When talking about pushouts, we take the base objects to be types, dependent objects to be type families, and maps and dependent maps to be ordinary functions and dependent functions. The functorial structure on a type $X$ is the structure of a cocone on $X$ under a fixed span diagram $\S$, and the dependent structure on a type family $P : X \to \UV$ over a cocone $c$ on $X$ is the structure of a dependent cocone on $P$ over $c$. The evaluation maps are $\coconeMap$ and $\depCoconeMap$, respectively.
+When talking about pushouts, we take the base objects to be types, dependent objects to be type families, and maps and dependent maps to be ordinary functions and dependent functions. The functorial structure on a type $X$ is the structure of a cocone on $X$ under a fixed span diagram $\S$, and the dependent structure on a type family $P : X \to \UU$ over a cocone $c$ on $X$ is the structure of a dependent cocone on $P$ over $c$. The evaluation maps are $\coconeMap$ and $\depCoconeMap$, respectively.
 
 With these general definitions in place, consider a structured object $(X, s)$; we may ask for the following properties to be satisfied:
-- Universal property: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ is an equivalence
-- Dependent universal property: For every dependent object $P$, $\term{dep-ev-map}_{(X, s)}^P$ is an equivalence
-- Recursion principle and uniqueness: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ has a unique section
-- Induction principle: For every dependent object $P$, $\term{dep-ev-map}_{(X, s)}^P$ has a section
+- Universal property: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ is an equivalence.
+- Dependent universal property: For every dependent object $P$, \linebreak $\term{dep-ev-map}_{(X, s)}^P$ is an equivalence.
+- Recursion principle and uniqueness: For every object $Y$, $\term{ev-map}_{(X, s)}^Y$ has a unique section.
+- Induction principle: For every dependent object $P$, $\term{dep-ev-map}_{(X, s)}^P$ has a section.
 
 The universal properties correspond to a notion of initiality: the evaluation map is an equivalence if and only if it has contractible fibers, \ie for all structured objects $(X, s)$ and $(Y, t)$, there is a unique map $h : X \to Y$ such that $\term{ev-map}_{(X, s)}^Y h = t$. The condition asks for $h$ to preserve the structure. In other words, the universal property says that $(X, s)$ is the initial object in a hypothetical "category" of structured objects and homomorphisms.
 
 It was first shown by Awodey, Gambino and Sojakova [cite//b:@AGS12] that the four properties are equivalent for a class of examples, where we have objects, type families, ordinary functions, dependent functions, and the (dependent) structures are (fibered) algebras for a polynomial functor. The result was later extended by
-[cite/t:@Soj15] to include (fibered) algebras for W-suspensions, a higher inductive analogue of W-types. The structure of a (dependent) cocone can be expressed as a (fibered) algebra of a specific W-suspension, so this result is applicable to [[lemma:dup-iff-up-pushout]], but it hasn't been formalized in the library.
+[cite/t:@Soj15] to include (fibered) algebras for W-suspensions, a higher inductive analogue of W-types. The structure of a (dependent) cocone can be expressed as a (fibered) algebra of a specific W-suspension, so this result is applicable to [[lemma:dup-iff-up-pushout]], but it has not been formalized in the library.
 
 We will rely on informal understanding of this principle when discussing options for formalization of a universal property of the identity types of pushouts in [[#sec:identity-systems]].
 #+end_remark
@@ -878,7 +887,7 @@ Given a cocone $c \judeq (i, j, H)$ on $X$, construct a map
   \ddFam_c : (X \to \UU) \to \DD(\S)
 \end{displaymath}
 which sends a type family $P : X \to \UU$ to the descent data $(P_A, P_B, P_S)$ obtained by precomposing
-\begin{alignat*}{3}
+\begin{alignat*}{2}
   P_A &\defeq (\lambda a \to P(i a)) &&: A \to \UU \\
   P_B &\defeq (\lambda b \to P(j b)) &&: B \to \UU \\
 \intertext{and transporting in $P$}
@@ -925,10 +934,10 @@ A corollary of $\ddFam_c$ being an equivalence is that it has contractible fiber
 #+begin_defn
 Consider a span diagram $\S \judeq (f, g)$, and two descent data $(P_A, P_B, P_S)$ and $(Q_A, Q_B, Q_S)$ over it. A *morphism* of descent data between them is a pair of fiberwise maps
 \begin{align*}
-  h_A &: (a : A) → P_A a → Q_A a\\
-  h_B &: (b : B) → P_B b → Q_B b
+  h_A &: (a : A) → P_A(a) → Q_A(a)\\
+  h_B &: (b : B) → P_B(b) → Q_B(b)
 \end{align*}
-equipped with a family of homotopies $h_S$ indexed by $s : S$ making
+equipped with a family of homotopies $h_S$ indexed by $s : S$ making the square
 #+begin_center
 \begin{tikzcd}
   P_A(f s) \arrow[r, "h_A(f s)"] \arrow[d, "P_S s"'] & Q_A(f s) \arrow[d, "Q_S s"] \\
@@ -945,10 +954,10 @@ Analogously, we define equivalences of descent data.
 #+begin_defn
 Consider a span diagram $\S \judeq (f, g)$, and two descent data $(P_A, P_B, P_S)$ and $(Q_A, Q_B, Q_S)$ over it. An *equivalence* of descent data between them is a pair of fiberwise equivalences
 \begin{align*}
-  e_A &: (a : A) → P_A a \simeq Q_A a\\
-  e_B &: (b : B) → P_B b \simeq Q_B b
+  e_A &: (a : A) → P_A(a) \simeq Q_A(a)\\
+  e_B &: (b : B) → P_B(b) \simeq Q_B(b)
 \end{align*}
-equipped with a family of homotopies $e_S$ indexed by $s : S$ making
+equipped with a family of homotopies $e_S$ indexed by $s : S$ making the square
 #+begin_center
 \begin{tikzcd}
   P_A(f s) \arrow[r, "e_A(f s)"] \arrow[d, "P_S s"'] & Q_A(f s) \arrow[d, "Q_S s"] \\
@@ -973,17 +982,17 @@ defined by sending $\refl$ to the identity equivalence, is an equivalence.
 #+end_lemma
 
 #+begin_proof
-Using the structure identity principle ([[thm:sip]]).
+Using the structure identity principle.
 #+end_proof
 
 #+attr_latex: [Uniqueness of descent data]
 #+begin_thm
-Consider a span diagram $\S \judeq (f, g)$ and a pushout cocone $c \judeq (i, j, H)$ on $X$. Then for any descent data $(P_A, P_B, P_S)$ over $\S$, the type of type families $P : X \to \UU$ equipped with an equivalence of descent data $\ddFam_c(P) \simeq (P_A, P_B, P_S)$ is contractible. In other words, there is a unique quadruple $(P, e_A, e_B, e_S)$ consisting of a type family $P : X \to \UU$, equivalences
+Consider a span diagram $\S \judeq (f, g)$ and a pushout cocone $c \judeq (i, j, H)$ on $X$. Then for any descent data $(P_A, P_B, P_S)$ over $\S$, the type of type families \linebreak $P : X \to \UU$ equipped with an equivalence of descent data $\ddFam_c(P) \simeq (P_A, P_B, P_S)$ is contractible. In other words, there is a unique quadruple $(P, e_A, e_B, e_S)$ consisting of a type family $P : X \to \UU$, equivalences
 \begin{align*}
   e_A : (a : A) \to P(i a) \simeq P_A(a) \\
   e_B : (b : B) \to P(j b) \simeq P_B(b),
 \end{align*}
-and a family of coherences $e_s$
+and a family of commuting squares $e_s$
 #+begin_center
 \begin{tikzcd}
   P(i (f s)) \arrow[r, "e_A(f s)"] \arrow[d, "\tr_P(H s)"'] & P_A(f s) \arrow[d, "P_S s"] \\
@@ -1006,7 +1015,7 @@ We write $e : P \correspDD P'$ for a family $P$ with descent data $P'$ related b
 #+end_defn
 
 #+begin_remark
-Note that we don't require $c$ to be a pushout. In subsequent development, and in the formalization, we often parameterize constructions by a family with descent data, which incentivizes general constructions applicable to non-pushout cocones.
+Note that we do not require $c$ to be a pushout. In subsequent development, and in the formalization, we often parameterize constructions by a family with descent data, which incentivizes general constructions applicable to non-pushout cocones.
 #+end_remark
 
 #+begin_remark
@@ -1027,7 +1036,7 @@ The concatenation operation is an equivalence by [[lemma:is-equiv-concat]].
 #+end_constr
 
 #+begin_remark
-Note that the basepoint $x_0$ is not mentioned in the notation $(I_A, I_B, I_S)$. Whenever we use it, it should be clear from the context.
+Note that the basepoint $x_0$ is not mentioned in the notation $(I_A, I_B, I_S)$. Whenever we use this notation, the basepoint should be clear from context.
 #+end_remark
 
 #+name: lemma:fam-with-dd-id
@@ -1037,7 +1046,7 @@ Given a cocone and a basepoint $x_0 : X$ as above, the type family $\Id(x_0) : X
   e_A &: (a : A) \to (x_0 = i a) \simeq I_A(a) \\
   e_B &: (b : B) \to (x_0 = j b) \simeq I_B(b)
 \end{align*}
-and a coherence $e_S$
+and a family of commuting squares $e_S$
 #+begin_center
 \begin{tikzcd}
   (x_0 = i (f s))
@@ -1047,16 +1056,16 @@ and a coherence $e_S$
   \arrow[d, "I_S s"] \\
   (x_0 = j (g s))
   \arrow[r, "e_B(g s)"']
-  & I_B(g s)
+  & I_B(g s).
 \end{tikzcd}
 #+end_center
 #+end_lemma
 
 #+begin_proof
-By definition, $I_A(a) \judeq (x_0 = i a)$ and $I_B(b) \judeq (x_0 = j b)$, so we may choose the identity equivalence for $e_A$ and $e_B$. Then the coherence datum amounts to showing that $\tr_{\Id(x_0)}(H s, p) = p \concat (H s)$, which is [[lemma:tr-id-right]].
+By definition, $I_A(a) \judeq (x_0 = i a)$ and $I_B(b) \judeq (x_0 = j b)$, so we may choose the identity equivalence for both $e_A$ and $e_B$. Then the coherence datum amounts to showing that $\tr_{\Id(x_0)}(H s, p) = p \concat (H s)$, which is [[lemma:tr-id-right]].
 #+end_proof
 
-For any given type family $P$ over $X$, we can talk about its /sections/, elements of the type $(x : X) \to P(x)$. We define an analogous concept of /sections of descent data/, and show that indeed they correspond to sections of type families over pushouts.
+For any given type family $P : X \to \UU$, we can talk about its /sections/, elements of the type $(x : X) \to P(x)$. We define an analogous concept of /sections of descent data/, and show that indeed they correspond to sections of type families over pushouts.
 
 #+begin_defn
 Given a span diagram $\S$ and descent data $(P_A, P_B, P_S)$ over it, a *section* of $(P_A, P_B, P_S)$ is a triple $(t_A, t_B, t_S)$ consisting of sections
@@ -1118,12 +1127,12 @@ The triangle commutes by $\reflhtpy$. By the 3-for-2 property of equivalences, i
 Equipped with the tools for computing data over pushouts by gluing together data over its components, we continue by computing fiberwise maps and equivalences over pushouts. We first characterize type families of fiberwise maps, \ie families with fibers of the shape $P(x) \to Q(x)$.
 
 #+begin_remark
-It is important to differentiate between families of /function types/, \ie a type family that to every $x : X$ assigns the /type/ $P(x) \to Q(x)$, and families of /functions/, \ie a family that to every $x : X$ assigns a /function/ from $P(x)$ to $R(x)$. Descent data plays the role of a family of types, so it makes sense to talk about "descent data corresponding to a family of function types", but it doesn't make sense to talk about "descent data corresponding to a family of functions". The kind of objects that corresponds to families of functions are the sections of the descent data of a family of function types.
+It is important to differentiate between families of /function types/, \ie a type family that to every $x : X$ assigns the /type/ $P(x) \to Q(x)$, and families of /functions/, \ie a family that to every $x : X$ assigns a /function/ from $P(x)$ to $Q(x)$. Descent data plays the role of a family of types, so it makes sense to talk about "descent data corresponding to a family of function types", but it does not make sense to talk about "descent data corresponding to a family of functions". The kind of objects that corresponds to families of functions are the sections of the descent data of a family of function types.
 #+end_remark
 
 #+name: lemma:family-with-dd-function-types
 #+begin_lemma
-Given a cocone $c$ on $X$ and two families with descent data $e^P : P \approx (P_A, P_B, P_S)$ and $e^Q : Q \approx (Q_A, Q_B, Q_S)$, the type family
+Given a span diagram $\S \judeq (f, g)$, a cocone $c$ on $X$ and two families with descent data $e^P : P \approx (P_A, P_B, P_S)$ and $e^Q : Q \approx (Q_A, Q_B, Q_S)$, the type family
 \[
   (\lambda x \to (P(x) \to Q(x))) : X \to \UU
 \]
@@ -1166,7 +1175,7 @@ e_B(b, h) &\defeq e^Q_B(b) \comp h \comp (e^P_B(b))^{-1}.
 
 Transport in a type family of function types can be computed as composition of transports in the involved families by [[lemma:tr-function-type]], so the left map can be replaced by $\tr_Q(H s) \comp \blank \comp \tr_P(H s)^{-1}$. Since we want to identify two functions, we invoke function extensionality, and are left with the goal
 #+begin_center
-\begin{tikzcd}
+\begin{tikzcd}[column sep=large]
   P_B(g s)
   \arrow[r, "(P_S(s))^{-1}"]
   \arrow[d, "(e^P_B(g s))^{-1}"']
@@ -1250,10 +1259,10 @@ Additionally, the following diagrams commute for all $h : (x : X) \to P(x) \to Q
 #+begin_proof
 The type of fiberwise maps is by definition the type of sections of the family $\lambda x \to (P(x) \to Q(x))$, which is equivalent to the type of sections of the descent data from [[lemma:family-with-dd-function-types]] by [[lemma:is-equiv-sect-sect]]. That type of sections is equivalent to the type of morphisms of descent data by [[lemma:hom-sect-dd]].
 
-Computing the action of this equivalence on a fiberwise map $h : (x : X) \to P(x) \to Q(x)$, we get the judgmental equalities
+Computing the action of this composed equivalence on a fiberwise map \linebreak $h : (x : X) \to P(x) \to Q(x)$, we get the judgmental equalities
 \begin{alignat*}{2}
-  &\term{hom-map}(h)_A &&\defeq \lambda a \to e^Q_A(a) \comp h(i a) \comp (e^P_A(a))^{-1} \\
-  &\term{hom-map}(h)_B &&\defeq \lambda b \to e^Q_B(b) \comp h(j b) \comp (e^P_B(b))^{-1},
+  &\term{hom-map}(h)_A &&\judeq \lambda a \to e^Q_A(a) \comp h(i a) \comp (e^P_A(a))^{-1} \\
+  &\term{hom-map}(h)_B &&\judeq \lambda b \to e^Q_B(b) \comp h(j b) \comp (e^P_B(b))^{-1},
 \end{alignat*}
 so by transposing $e^P_A(a)$ and $e^P_B(b)$, we get the desired computation rules.
 #+end_proof
@@ -1267,7 +1276,7 @@ Given a cocone $c$ on $X$ and two families with descent data $e^P : P \correspDD
 \end{displaymath}
 is characterized by the descent data
 \begin{alignat*}{3}
-  &(\lambda a \to (P_A(a) \simeq Q_A(a))) &\quad&:\,&&A \to \UU \\
+  &(\lambda a \to (P_A(a) \simeq Q_A(a))) &\quad&:\:&&A \to \UU \\
   &(\lambda b \to (P_B(b) \simeq Q_B(b))) &&:&&B \to \UU \\
   &(\lambda s, h \to Q_S(s) \comp h \comp (P_S(s))^{-1}) &&:&&(s : S) \to \\
   &&&&&(P_A(f s) \simeq Q_A(f s)) \simeq (P_B(g s) \simeq Q_B(g s)).
@@ -1543,11 +1552,11 @@ By the descent property, there is a unique type family $P : X → \UU$ correspon
 so, again by the descent property, descent data over it correspond to type families over $\Sigma X P$. Hence we can talk about descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span diagram instead of dependent descent data. We write a $\Sigma$ in the indices of $Q$ to remind ourselves that it is descent data over the total span diagram.
 
 #+begin_constr
-Assume a span diagram $\S \judeq (f, g)$, descent data $(P_A, P_B, P_S)$ over it, a basepoint $a_0 : A$ and a point $p_0 : P_A(a_0)$. For any descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span, define the map
-\begin{align*}
-  \evreflidsystemDD : \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S}) &\to Q_{\Sigma A}(a_0, p_0) \\
-  (t_A, t_B, t_S) &\mapsto t_A (a_0, p_0).
-\end{align*}
+Assume a span diagram $\S$, descent data $(P_A, P_B, P_S)$ over it, a basepoint $a_0 : A$ and a point $p_0 : P_A(a_0)$. Then for any descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span, define the map
+\begin{displaymath}
+  \evreflidsystemDD : \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S}) \to Q_{\Sigma A}(a_0, p_0)
+\end{displaymath}
+by sending $(t_A, t_B, t_S)$ to $t_A(a_0, p_0)$.
 #+end_constr
 
 #+begin_defn
@@ -1629,7 +1638,7 @@ The top equivalences are, from left to right, $\uncurry$ and $\term{sect-sect}_{
 
 #+name: lemma:is-id-system-DD-is-id-system
 #+begin_corol
-Assume $e : P \correspDD (P_A, P_B, P_S)$ where $P$ is an identity system at $(e_A(a_0))^{-1}(p_0) : P(i a_0)$. Then $(P_A, P_B, P_S)$ is an identity system at $p_0$.
+Assume a pushout cocone $c$ on $X$ and a family with descent data $e : P \correspDD (P_A, P_B, P_S)$ where $P$ is an identity system at $(e_A(a_0))^{-1}(p_0) : P(i a_0)$. Then $(P_A, P_B, P_S)$ is an identity system at $p_0$.
 #+end_corol
 
 #+begin_proof
@@ -1653,9 +1662,9 @@ The induction principle of identity systems is stated in terms of an evaluation 
 
 #+name: lemma:identity-system-ind-singleton
 #+begin_lemma
-Consider a span diagram $\S$ and its pushout cocone $c$ on $X$. To show that $(P_A, P_B, P_S)$ is an identity system at $p₀ : P_A(a_0)$, it suffices to provide a map
+Consider a span diagram $\S$, its pushout cocone $c$ on $X$, and descent data $(P_A, P_B, P_S)$. To show that $(P_A, P_B, P_S)$ is an identity system at $p₀ : P_A(a_0)$, it suffices to provide a map
 \begin{displaymath}
-  H : Q_{\Sigma A}(a_0, p_0) \to \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
+  M : Q_{\Sigma A}(a_0, p_0) \to \sectDD(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})
 \end{displaymath}
 for every descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the total span diagram.
 #+end_lemma
@@ -1663,11 +1672,9 @@ for every descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$ over the tot
 #+begin_proof
 Construct the unique type family $P : X → \UU$ for $(P_A, P_B, P_S)$. It suffices to show that $P$ is an identity system. Equivalently, it suffices to show that the total space $\Sigma X P$ is contractible. We can prove that using the property that a type is contractible if we provide a point, here $(i a_0, (e^P_A a_0)^{-1}(p_0))$, and a map
 \begin{equation*}
-  H' : (Q_{\Sigma} : \Sigma X P → \UU) → (q_0 : Q_{\Sigma} (i a_0, (e^P_A a)^{-1} p_0)) → (u : \Sigma X P) → Q_{\Sigma}(u).
+  M' : (Q_{\Sigma} : \Sigma X P → \UU) → (q_0 : Q_{\Sigma} (i a_0, (e^P_A a)^{-1} p_0)) → (u : \Sigma X P) → Q_{\Sigma}(u).
 \end{equation*}
-Assume such $Q_{\Sigma}$ and $q_0$. A section $(u : \Sigma X P) → Q_{\Sigma}(u)$ is given by a section
-of $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, and we can get one by applying $H$ to
-$e^Q_A ((a_0, p_0), q_0): Q_{\Sigma A} (a_0, p_0)$.
+Assume such $Q_{\Sigma}$ and $q_0$. $Q_{\Sigma}$ induces descent data $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$, and a section $(u : \Sigma X P) → Q_{\Sigma}(u)$ is given by a section of $(Q_{\Sigma A}, Q_{\Sigma B}, Q_{\Sigma S})$. We can get such a section by applying $M$ to $e^Q_A ((a_0, p_0), q_0): Q_{\Sigma A} (a_0, p_0)$.
 #+end_proof
 
 #+begin_remark
@@ -1699,9 +1706,9 @@ which justifies that claim that identity systems allow alternative characterizat
 
 \TODO[Should I finish this section? It gets wishy-washy kinda quickly]. Nope, I'll potentially turn it into a blog post in the future.
 
-There is an alternative description of descent and flattening, one that doesn't mention universes and is phrased only with pushouts and pullbacks. This section is meant to be an informal exposition of the relationship between the type-theoretic and homotopy-theoretic perspectives. The material hasn't been formalized yet in the {{{AU}}} library at the time of writing.
+There is an alternative description of descent and flattening, one that does not mention universes and is phrased only with pushouts and pullbacks. This section is meant to be an informal exposition of the relationship between the type-theoretic and homotopy-theoretic perspectives. The material has not been formalized yet in the {{{AU}}} library at the time of writing.
 
-[cite/t:@LS04] define van Kampen squares as pushout squares satisfying the first and second cube theorems of [cite/t:@Mat76]. We will see that the first cube theorem corresponds to type-theoretic descent, and the second cube theorem corresponds to the flattening lemma, a results that [cite/t:@War24] hints at is folklore (\TODO[verify this, but I haven't found any explanation]). [cite/t:@Rij19 proof of Theorem 2.2.11] shows that the second cube theorem follows from the flattening lemma.
+[cite/t:@LS04] define van Kampen squares as pushout squares satisfying the first and second cube theorems of [cite/t:@Mat76]. We will see that the first cube theorem corresponds to type-theoretic descent, and the second cube theorem corresponds to the flattening lemma, a results that [cite/t:@War24] hints at is folklore (\TODO[verify this, but I have not found any explanation]). [cite/t:@Rij19 proof of Theorem 2.2.11] shows that the second cube theorem follows from the flattening lemma.
 
 #+begin_defn
 Consider a pushout square
@@ -1754,7 +1761,7 @@ Pushouts and the empty type suffice to construct many other kinds of colimits. W
 :END:
 
 #+begin_defn
-A *double arrow* is a pair of types $A : \UU$, $B : \UV$, equipped with a pair of maps $f, g : A \to U$.
+A *double arrow* is a pair of types $A$, $B$, equipped with a pair of maps $f, g : A \to U$.
 #+end_defn
 
 #+begin_defn
@@ -1764,7 +1771,7 @@ We write $\cofork(\D, X)$ for the type of coforks under $\D$ on $X$.
 #+end_defn
 
 #+begin_constr
-Given a cofork $c \judeq (i, H) : \cofork(\D, X)$ on $X$ and a type $Y : \UV$, we construct a map
+Given a cofork $c \judeq (i, H) : \cofork(\D, X)$ on $X$ and a type $Y$, we construct a map
 \begin{displaymath}
   \coforkMap_c^Y : (X \to Y) \to \cofork(\D, Y)
 \end{displaymath}
@@ -1772,7 +1779,7 @@ which sends $h$ to $(h \comp i, h \lwhisk H)$.
 #+end_constr
 
 #+begin_defn
-A cofork $c$ under $\D$ on $X$ satisfies the *universal property of coequalizers* if for all $Y : \UV$, the map $\coforkMap_c^Y$ is an equivalence.
+A cofork $c$ under $\D$ on $X$ satisfies the *universal property of coequalizers* if for all types $Y$ the map $\coforkMap_c^Y$ is an equivalence.
 
 A cofork satisfying the universal property of coequalizers is called a *coequalizer*.
 #+end_defn
@@ -1788,10 +1795,10 @@ Construct the map $\spanDoubleArrow$ from double arrows to span diagrams by
   A & A + A \arrow[l, "\codiag"'] \arrow[r, "\coprodM{f}{g}"] & B,
 \end{tikzcd}
 #+end_center
-where the left map is the codiagonal map, sending $\inl(a)$ and $\inr(a)$ to $a$, and the right map is defined by the universal property of coproducts to send $\inl(a)$ to $f(a)$ and $\inr(a)$ to $g(a)$.
+where $\nabla$ is the codiagonal map, sending $\inl(a)$ and $\inr(a)$ to $a$, and the right map is defined by the universal property of coproducts to send $\inl(a)$ to $f(a)$ and $\inr(a)$ to $g(a)$.
 #+end_constr
 
-The standard coequalizer of $\D$ may be obtained as the pushout of $\spanDoubleArrow(\D)$.
+The standard coequalizer of a double arrow $\D$ may be obtained as the pushout of $\spanDoubleArrow(\D)$.
 
 #+name: lemma:cocone-cofork
 #+begin_lemma
@@ -1828,7 +1835,7 @@ To define the forward map, assume a cofork $(j, H)$, where $j : B \to X$ and $H 
 #+end_center
 On $\inl(a) : A + A$ the square commutes by $\refl$, and on $\inr(a) : A + A$ it commutes by $H : j \comp f \htpy j \comp g$, which we write as $\coprodM{\reflhtpy}{H}$.
 
-To define the inverse map, assume a cocone $(i, j, H)$ where $i : A \to X$, $j : B \to X$, and $H$ witnesses commutativity of the square
+To define the inverse map, assume a cocone $(i, j, H)$ where $i : A \to X$, \linebreak $j : B \to X$, and $H$ witnesses commutativity of the square
 #+begin_center
 \begin{tikzcd}
   A + A
@@ -1886,7 +1893,7 @@ The first two components are identical, so it suffices to show that for all $a :
 
 #+name: lemma:coeq-pushout
 #+begin_lemma
-The equivalence $\coconeCofork$ restricts to an equivalence between \linebreak pushouts of $\spanDoubleArrow(\D)$ and coequalizers of $\D$. In other words, a cofork $c$ satisfies the universal property of coequalizers if and only if the cocone $\coconeCofork(c)$ satisfies the universal property of pushouts.
+The equivalence $\coconeCofork$ restricts to an equivalence between coequalizers of $\D$ and pushouts of $\spanDoubleArrow(\D)$. In other words, a cofork $c$ satisfies the universal property of coequalizers if and only if the cocone $\coconeCofork(c)$ satisfies the universal property of pushouts.
 #+end_lemma
 
 #+begin_proof
@@ -2022,7 +2029,7 @@ where the homotopy
 \begin{displaymath}
   \coprodM{\reflhtpy}{H} : (i \comp f \comp \codiag) \htpy (i \comp \coprodM{f}{g})
 \end{displaymath}
-is defined by sending $\inl(a)$ to $\reflhtpy(a) : i(f a) = i(f a)$ and $\inr(a)$ to $H(a) : i(f a) = i(g a)$. The equivalence
+is defined by sending elements $\inl(a)$ to $\refl : i(f a) = i(f a)$ and elements $\inr(a)$ to $H(a) : i(f a) = i(g a)$. The equivalence
 \begin{displaymath}
   \psi : (\Sigma (A + A) (P \comp i \comp f \comp \codiag)) \simeq ((\Sigma A (P \comp i \comp f)) + (\Sigma A (P \comp i \comp f)))
 \end{displaymath}
@@ -2080,7 +2087,7 @@ In the prose, we use "cocone" to mean both "cocone under a span diagram" and "co
 #+end_remark
 
 #+begin_constr
-Given a cocone $c \judeq (i, H) : \coconeN(\A, X)$ and a type $Y : \UU$, we construct a map
+Given a cocone $c \judeq (i, H) : \coconeN(\A, X)$ and a type $Y$, we construct the map
 \begin{displaymath}
   \coconeNMap_c^Y : (X \to Y) \to \coconeN(\A, Y)
 \end{displaymath}
@@ -2088,7 +2095,7 @@ which sends $h$ to $(\lambda n \to h \comp i_n, \lambda n \to h \lwhisk H_n)$.
 #+end_constr
 
 #+begin_defn
-A cocone $c : \coconeN(\A, X)$ satisfies the *universal property of sequential colimits* if for all $Y : \UU$, the map $\coconeNMap_c^Y$ is an equivalence.
+A cocone $c : \coconeN(\A, X)$ satisfies the *universal property of sequential colimits* if for all types $Y$, the map $\coconeNMap_c^Y$ is an equivalence.
 
 A cocone satisfying the universal property of sequential colimits is called a *sequential colimit*.
 #+end_defn
@@ -2126,7 +2133,7 @@ For a sequential diagram $\A$ and two cocones $c, c' : \coconeN(\A, X)$, there i
 
 #+name: lemma:comp-up-sequential-colimit
 #+begin_lemma
-Given a sequential diagram $\A \judeq (A, a)$, a sequential colimit $c \judeq (i, H) : \coconeN(\A, X)$ and a cocone $c' \judeq (i', H') : \coconeN(\A, Y)$, there is a unique map $h : X \to Y$ equipped with a family of homotopies
+Given a sequential diagram $\A \judeq (A, a)$, its sequential colimit \linebreak $c \judeq (i, H) : \coconeN(\A, X)$ and a cocone $c' \judeq (i', H') : \coconeN(\A, Y)$, there is a unique map $h : X \to Y$ equipped with a family of homotopies
 \begin{displaymath}
   K : (n : \N) \to h \comp i_n \htpy i'_n
 \end{displaymath}
@@ -2140,7 +2147,7 @@ and a family of commuting squares of homotopies, indexed by $n : \N$
   \arrow[d, squiggly, no head, "H'"] \\
   h \comp i_{n + 1} \comp a_n
   \arrow[r, squiggly, no head, "K_{n + 1} \rwhisk a_n"']
-  & i'_{n + 1} \comp a_n
+  & i'_{n + 1} \comp a_n.
 \end{tikzcd}
 #+end_center
 #+end_lemma
@@ -2151,7 +2158,7 @@ Given a sequential diagram $\A$ and its sequential colimit \linebreak $c : \coco
 #+end_lemma
 
 #+begin_proof
-Write $c \judeq (i, H)$. The map induced by the universal property is the unique map $h : X \to X$ such that there is a homotopy of cocones $\coconeNMap_c(h) \htpy c$. It then suffices to show that there is a homotopy of cocones $\coconeNMap_c(\id) \htpy c$. The homotopy on maps is satisfied by
+Write $c \judeq (i, H)$. The map induced by the universal property is the unique map $h : X \to X$ such that there is a homotopy of cocones between \linebreak $\coconeNMap_c(h)$ and $c$. It then suffices to show that there is a homotopy of cocones between $\coconeNMap_c(\id)$ and $c$. The homotopy on maps is satisfied by
 \begin{displaymath}
   (\lambda n \to \reflhtpy) : (n : \N) \to (\id \comp i_n) \htpy i_n.
 \end{displaymath}
@@ -2311,7 +2318,7 @@ For every pair of dependent cocones $d, d' : \depCoconeN(c, P)$, there is an equ
 #+end_lemma
 
 #+begin_lemma
-Given a sequential diagram $\A \judeq (A, a)$, a sequential colimit $c \judeq (i, H) : \coconeN(\A, X)$ and a dependent cocone $d \judeq (i', H') : \depCoconeN(c, P)$, there is a unique dependent map $h : (x : X) \to P(x)$ equipped with a family of homotopies
+Given a sequential diagram $\A \judeq (A, a)$, its sequential colimit $c \judeq (i, H)$ on $X$, and a dependent cocone $d \judeq (i', H') : \depCoconeN(c, P)$, there is a unique dependent map $h : (x : X) \to P(x)$ equipped with a family of homotopies
 \begin{displaymath}
   K : (n : \N) \to h \comp i_n \htpy i'_n
 \end{displaymath}
@@ -2436,7 +2443,7 @@ and pasting of commuting squares
 To construct a map $X \to Y$ between sequential colimits, we can use the universal property of $X$. That requires us to construct a cocone under $X$'s diagram on $Y$.
 
 #+begin_constr
-Given a sequential diagram $\B$ and a cocone $c \judeq (i, H) : \coconeN(\B, Y)$, define for every sequential diagram $\A$ the map
+Given a sequential diagram $\B$ and a cocone $c \judeq (i, H)$ on $Y$, define for every sequential diagram $\A$ the map
 \begin{displaymath}
   \precompHomN_c^{\A} : (\A \to \B) \to \coconeN(\A, Y)
 \end{displaymath}
@@ -2456,7 +2463,7 @@ which sends a morphism $(f, K)$ to the cocone
 #+end_constr
 
 #+begin_remark
-This construction is in a sense dual to $\coconeNMap$ --- $\coconeNMap$ extends a cocone by postcomposing a map $X \to Y$ on the right, and \linebreak $\precompHomN$ extends a cocone by "precomposing" a morphism $(B, b) \to (A, a)$ on the left.
+This construction is in a sense dual to $\coconeNMap$ --- the function $\coconeNMap$ extends a cocone by postcomposing a map $X \to Y$ on the right, and $\precompHomN$ extends a cocone by "precomposing" a morphism $\B \to \A$ on the left.
 #+end_remark
 
 #+begin_constr
@@ -2501,14 +2508,14 @@ which in turn fit into commuting prisms
 #+end_lemma
 
 #+begin_proof
-The data is obtained from the extra computation rules stated in [[lemma:comp-up-sequential-colimit]]. The commuting squares are kept as-is, which causes the unexpected change of orientation --- the computation rules provide a homotopy $\coconeNMap_c(f_{\infty}) \htpy \precompHomN(f)$, not the other way around.
+The data is obtained from the computation rules stated in [[lemma:comp-up-sequential-colimit]]. The commuting squares are kept as-is, which causes the unexpected change of orientation --- the computation rules provide a homotopy between the cocones $\coconeNMap_c(f_{\infty})$ and $\precompHomN(f)$, not the other way around.
 
 The type of prisms as above is equivalent to the type of coherences of homotopies $\coconeNMap_c(f_{\infty}) \htpy \precompHomN(f)$ by mechanical homotopy algebra.
 #+end_proof
 
 #+name: lemma:colim-preserves-id
 #+begin_lemma
-The map $\fmapHomN$ preserves identity morphisms. That is to say, given a sequential diagram $\A$ and its colimit $X$, the identity morphism $\id : \A \to \A$ induces the map $\id_{\infty} : X \to X$, which is homotopic to the identity function $\id : X \to X$.
+The map $\fmapHomN$ preserves identity morphisms. That is to say, given a sequential diagram $\A$ and its colimit $X$, the identity morphism $\id : \A \to \A$ induces the map $\id_{\infty} : X \to X$, which is homotopic to the identity map $\id : X \to X$.
 #+end_lemma
 
 #+begin_proof
@@ -2708,15 +2715,15 @@ The constructions of shifts are defined by first defining a shift by one, and th
 
 However, in our setting addition computes only on one side, so we have a choice to make: given a number $k$ to shift by, do we define the \(n\)-th level of the shifted structure to be the \((n+k)\)-th, or \((k+n)\)-th level of the original?
 
-The former runs into issues already when defining the shifted sequence, since $a_{n + k}$ has the type $A_{n + k} \to A_{(n + k) + 1}$, but we need a map of type $A_{n + k} \to A_{(n + 1) + k}$, which forces us to introduce a transport.
+The former runs into issues already when defining the shifted sequence, since $a_{n + k}$ has the type $A_{n + k} \to A_{(n + k) + 1}$, but we need a function of type \linebreak $A_{n + k} \to A_{(n + 1) + k}$, which forces us to introduce a transport.
 
-On the other hand, the latter requires transport when proving anything by induction on $k$ and doesn't satisfy the judgmental equality $\A[0] \judeq \A$, because $A_{(k + 1) + n}$ is not $A_{(k + n) + 1}$ and $A_{0 + n}$ is not $A_n$, and it requires more infrastructure for working with horizontal compositions in sequential diagrams to be formalized in terms of addition.
+On the other hand, the latter requires transport when proving anything by induction on $k$ and does not satisfy the judgmental equality $\A[0] \judeq \A$, because $A_{(k + 1) + n}$ is not $A_{(k + n) + 1}$ and $A_{0 + n}$ is not $A_n$, and it requires more infrastructure for working with horizontal compositions in sequential diagrams to be formalized in terms of addition.
 
 To contrast, defining the operations by induction does satisfy $\A[0] \judeq \A$, it computes when proving properties by induction, which is the expected primary use-case, and no further infrastructure is necessary.
 #+end_remark
 
 #+begin_constr
-Given a morphism of sequential diagrams $F \judeq (f, H) : \A \to \B$, construct its *shift* by one as the morphism
+Given sequential diagrams $\A$, $\B$ and a morphism between them $F \judeq (f, H) : \A \to \B$, construct its *shift* by one as the morphism
 #+begin_center
 \begin{tikzcd}
   A_1 \arrow[r, "a_1"]
@@ -2913,7 +2920,7 @@ is an equivalence, with the inverse
 #+begin_proof
 The goal is to show that for any $k$, we have $c[-k][k] = c$ and $c[k][-k] = c$, for appropriately typed cocones $c$.
 
-First note that for any cocone $c : \cocone(\A[1], X)$, $c[-1][1]$ computes to the cocone $c$ --- $c[-1]$ is the cocone $c$ with synthesized data at the front, and $c[-1][1]$ forgets the new data. Inductively, we define the homotopy $c[-k][k] \htpy c$ for all $k$. We have $c[-0][0] \htpy c$ by the reflexive homotopy, and
+First note that for any cocone $c : \cocone(\A[1], X)$, $c[-1][1]$ computes to the cocone $c$, because $c[-1]$ is the cocone $c$ with synthesized data at the front, and $c[-1][1]$ forgets the new data. Inductively, we define the homotopy $c[-k][k] \htpy c$ for all $k$. We have $c[-0][0] \htpy c$ by the reflexive homotopy, and
 \begin{alignat*}{3}
   c[-(k + 1)][k + 1] \,
   &\judeq &\,& c[-1][-k][k][1] &\quad& \\
@@ -2942,7 +2949,7 @@ This family of homotopies can be made into a family of identifications, and inve
 
 #+name: thm:up-shift
 #+begin_thm
-Given a sequential diagram $\A$ and its colimit cocone $c : \coconeN(\A, X)$, the cocone $c[k] : \coconeN(\A[k], X)$ is a sequential colimit of the diagram $\A[k]$, for any natural number $k$.
+Given a sequential diagram $\A$ and its colimit $c : \coconeN(\A, X)$, the cocone $c[k] : \coconeN(\A[k], X)$ is a sequential colimit of the diagram $\A[k]$, for any natural number $k$.
 #+end_thm
 
 #+begin_proof
@@ -2982,7 +2989,7 @@ To conclude this section, we show that there are inclusion morphisms of sequenti
 #+begin_constr
 Given a sequential diagram $\A \judeq (A, a)$, construct the morphism of sequential diagrams
 \begin{displaymath}
-  \inclHomN[k] : \A \to \A[1]
+  \inclHomN[1] : \A \to \A[1]
 \end{displaymath}
 as the morphism
 \begin{alignat*}{2}
@@ -3004,10 +3011,14 @@ Diagrammatically, the morphism can be drawn as
 \end{tikzcd}
 #+end_center
 
-Extend the morphism by induction, where $\inclHomN[0] : \A \to \A[0]$ is the identity morphism, and $\inclHomN[k + 1] : \A \to \A[k + 1]$ is the composition of $\inclHomN[k] : \A \to \A[k]$ and then $\inclHomN[1] : \A[k] \to \A[k][1]$.
+Extend the morphism to
+\begin{displaymath}
+  \inclHomN[k] : \A \to \A[k]
+\end{displaymath}
+for any natural number $k$ by induction, where $\inclHomN[0] : \A \to \A[0]$ is the identity morphism, and $\inclHomN[k + 1] : \A \to \A[k + 1]$ is the composition of $\inclHomN[k] : \A \to \A[k]$ and then $\inclHomN[1] : \A[k] \to \A[k][1]$.
 #+end_constr
 
-These morphisms offer another way of unshifting cocones --- a cocone $c : \coconeN(\A[k], X)$ may be precomposed with the morphism $\inclHomN[k] : \A \to \A[k]$ to get a cocone $c' : \coconeN(\A, X)$. We show that these two constructions result in homotopic cocones. We limit ourselves to the case $k = 1$, as we do not need the general case in further development.
+These morphisms offer another way of unshifting cocones. Specifically, one can precompose a cocone $c : \coconeN(\A[k], X)$ with the above morphism \linebreak $\inclHomN[k] : \A \to \A[k]$ to get a cocone $c' : \coconeN(\A, X)$. We show that these two constructions result in homotopic cocones. We limit ourselves to the case $k = 1$, as we do not need the general case in further development.
 
 #+begin_lemma
 Given a cocone $c \judeq (i, H) : \coconeN(\A[1], X)$, there is a homotopy of cocones
@@ -3070,7 +3081,7 @@ Assume a sequential diagram $\A$ with its colimit $c : \coconeN(\A, X)$. Then fo
 #+begin_proof
 Proceed by induction on $k$. For $k = 0$, note that the morphism \linebreak $\inclHomN[0] : \A \to \A[0]$ is the identity morphism, hence it is mapped to the identity by [[lemma:colim-preserves-id]].
 
-For $k = k' + 1$, the inclusion morphism computes to the composition $\A \to \A[k] \to \A[k][1]$. By [[lemma:colim-preserves-comp]], passing to the colimit preserves composition, so there is a homotopy
+For the successor case $k + 1$, the inclusion morphism computes to the composition $\A \to \A[k'] \to \A[k][1]$. By [[lemma:colim-preserves-comp]], passing to the colimit preserves composition, so there is a homotopy
 \begin{displaymath}
   \inclHomN[k + 1]_{\infty} \htpy \inclHomN[1]_{\infty} \comp \inclHomN[k]_{\infty}.
 \end{displaymath}
@@ -3112,7 +3123,7 @@ Sequential diagrams do not contain any spans, so there is no simplification to b
 #+end_remark
 
 #+begin_constr
-Given a sequential diagram $\A \judeq (A, a)$ and a cocone $c \judeq (i, H) : \coconeN(\A, X)$, construct the map
+Given a sequential diagram $\A \judeq (A, a)$ and a cocone \linebreak $c \judeq (i, H) : \coconeN(\A, X)$, construct the map
 \begin{displaymath}
   \ddNFam_c : (X \to \UU) \to \DDN(\A)
 \end{displaymath}
@@ -3124,7 +3135,7 @@ which sends a type family $B$ to the descent data
 #+end_constr
 
 #+begin_defn
-Given a sequential diagram $\A$ and a cocone \linebreak $c \judeq (i, H) : \coconeN(\A, X)$, a *type family with descent data* is a triple \linebreak $(B_{\infty}, B', e')$, where $B_{\infty} : X \to \UU$ is a type family, $B' \judeq (B, b) : \DD(\A)$ is descent data over $\A$, and $e' \judeq (e, K)$ is an equivalence of descent data consisting of a family of equivalences
+Given a sequential diagram $\A \judeq (A, a)$ and a cocone \linebreak $c \judeq (i, H) : \coconeN(\A, X)$, a *type family with descent data* is a triple \linebreak $(B_{\infty}, B', e')$, where $B_{\infty} : X \to \UU$ is a type family, $B' \judeq (B, b) : \DD(\A)$ is descent data over $\A$, and $e' \judeq (e, K)$ is an equivalence of descent data consisting of a family of equivalences
 \begin{displaymath}
   e : (n : \N)(x : A_n) \to B_{\infty}(i_n x) \simeq B_n(x)
 \end{displaymath}
@@ -3166,7 +3177,7 @@ The right equivalence sends $(B, H)$ to $(B, \lambda n, x \to \equivEq(H_n(x)))$
 #+end_proof
 
 #+begin_corol
-Given a sequential diagram $\A \judeq (A, a)$, its colimit $c \judeq (i, H) : \coconeN(\A, X)$ and descent data $(B, b) : \DDN(\A)$, there is a unique type family $B_{\infty} : X \to \UU$ and an equivalence of descent data $e : B_{\infty} \correspDD (B, b)$.
+Given a sequential diagram $\A \judeq (A, a)$, its colimit $c \judeq (i, H)$ on $X$, and descent data $(B, b) : \DDN(\A)$, there is a unique type family $B_{\infty} : X \to \UU$ and an equivalence of descent data $e : B_{\infty} \correspDD (B, b)$.
 #+end_corol
 
 #+begin_constr
@@ -3178,7 +3189,7 @@ Given a sequential diagram $\A \judeq (A, a)$ and descent data $(B, b) : \DDN(\A
 #+end_constr
 
 #+begin_constr
-Given a sequential diagram $\A \judeq (A, a)$, a cocone $c \judeq (i, H) : \coconeN(\A, X)$, and a family with descent data $(e, K) : (B, b) \correspDD B_{\infty}$, construct the *total cocone* under the total sequential diagram
+Given a sequential diagram $\A \judeq (A, a)$, a cocone $c \judeq (i, H)$ on $X$, and a family with descent data $(e, K) : (B, b) \correspDD B_{\infty}$, construct the *total cocone* under the total sequential diagram
 #+begin_center
 \begin{tikzcd}
   \Sigma A_n B_n
@@ -3198,7 +3209,7 @@ which commutes by the homotopy $H'$ given at $x : A_n$, $y : B_n(a)$ by
 
 We proceed similarly to the proof of the flattening lemma with descent data for pushouts --- we split the proof into two steps, one showing it holds for a type family $P : X \to \UU$ and its induced descent data, and one generalizing it to arbitrary families with descent data.
 
-The proofs lean on technical results regarding preservation of universal properties by equivalences of cocones and coforks (not to be confused with homotopies of cocones and coforks), which were introduced in the formalization but we don't cover them in the thesis text. The precise statements and proofs of those lemmas can be read off the attached Agda code.
+The proofs lean on technical results regarding preservation of universal properties by equivalences of cocones and coforks (not to be confused with homotopies of cocones and coforks), which were introduced in the formalization but we do not cover them in the thesis text. The precise statements and proofs of those lemmas can be read off the attached Agda code.
 
 #+begin_remark
 The idea of those lemmas is that in the context of cocones under span diagrams, a commuting cube whose vertical maps are equivalences may be regarded as an equivalence of span diagrams and cocones under them. With this perspective, [[lemma:is-pushout-bottom-ff-is-pushout-top]] says being a pushout is preserved by equivalences of cocones. Adapting it to coforks yields the concept of an equivalence of double arrows and coforks under them, and the property of being a coequalizer is preserved by such an equivalence, because equivalences of coforks induce equivalences of the associated cocones. Going one step further, we get a notion of equivalences of sequential diagrams and cocones under those, and being a sequential colimit is preserved by equivalences of cocones, because they induce equivalences of the associated coforks.
@@ -3206,13 +3217,13 @@ The idea of those lemmas is that in the context of cocones under span diagrams, 
 
 #+name: lemma:flattening-seq-family
 #+begin_lemma
-Given a sequential colimit $c : \cocone(\A, X)$ and a type family $B_{\infty} : X \to \UU$, the total cocone of the family with descent data $\id : \ddNFam_c(B_{\infty}) \correspDD B_{\infty}$ is a sequential colimit.
+Consider a sequential diagram $\A$, its colimit $c : \cocone(\A, X)$ and a type family $B_{\infty} : X \to \UU$. Then the total cocone of the family with descent data $\id : \ddNFam_c(B_{\infty}) \correspDD B_{\infty}$ is a sequential colimit.
 #+end_lemma
 
 #+begin_proof
 Similarly to the proof of the flattening lemma for coequalizers, we leverage the fact that sequential colimits correspond to certain coequalizers.
 
-We construct an equivalence of coforks
+Write $c \judeq (i, H)$. We construct an equivalence of coforks
 #+begin_center
 \begin{tikzcd}[row sep=large]
   \Sigma (n : \N) (x : A_n).\, B_{\infty}(i_n x)
@@ -3479,7 +3490,7 @@ are themselves homotopic. With some effort the pairs $U_n$ and $U_n^{-1}$, and $
 
 #+name: thm:equiv-zigzag
 #+begin_thm
-Consider sequential diagrams $\A$ and $\B$, their respective colimits $c : \coconeN(\A, X)$ and $c' : \coconeN(\B, Y)$, and a zigzag $z \judeq (f, g, U, L)$ between them. Then the associated morphism to $z$ induces a map $f_{\infty} : X \to Y$, and when we take $c[1] : \coconeN(\A[1], X)$ to be the colimit of $\A[1]$, the associated inverse morphism induces a map $g_{\infty} : Y \to X$. Then the two maps are mutually inverse equivalences.
+Consider sequential diagrams $\A$ and $\B$, their respective colimits \linebreak $c : \coconeN(\A, X)$ and $c' : \coconeN(\B, Y)$, and a zigzag $z \judeq (f, g, U, L)$ between them. Then the associated morphism to $z$ induces a map $f_{\infty} : X \to Y$, and when we take $c[1] : \coconeN(\A[1], X)$ to be the colimit of $\A[1]$, the associated inverse morphism induces a map $g_{\infty} : Y \to X$. Then the two maps are mutually inverse equivalences.
 #+end_thm
 
 #+begin_proof
@@ -3499,7 +3510,7 @@ Then consider the half-shift of $z$. The premises of the theorem are fulfilled b
 :CUSTOM_ID: sec:zigzag-constr
 :END:
 
-The following construction is a variation of the original zigzag construction of [cite/t:@War23]. It differs from Wärn's version in representation of span diagrams --- Wärn represents span diagrams as a pair of types $A$, $B$ with a type-valued relation $R : A \to B \to \UU$. We use the same representation as in the rest of the thesis, \ie a triple of types $S$, $A$, $B$, and a pair of maps $f : S \to A$, $g : S \to B$. These two representations are equivalent: a relation $R$ can be seen as the spanning type $\Sigma (a : A) (b : B).\, R(a, b)$ with the first and second projections, and conversely a spanning type $S$ with maps $f$, $g$ can be seen as the relation $\lambda a, b \to \Sigma (s : S).\, (f s = a) \times (g s = b)$. Adapting Wärn's construction involves reconstructing a relation from a span diagram and removing contractible pairs.
+The following construction is a variation of the original zigzag construction of [cite/t:@War23]. It differs from Wärn's version in representation of span diagrams --- Wärn represents span diagrams as a pair of types $A$, $B$ with a type-valued relation $R : A \to B \to \UU$. We use the same representation as in the rest of the thesis, \ie a triple of types $S$, $A$, $B$ equipped with a pair of maps $f : S \to A$, $g : S \to B$. These two representations are equivalent: a relation $R$ can be seen as the spanning type $\Sigma (a : A) (b : B).\, R(a, b)$ with the first and second projections, and conversely a spanning type $S$ with maps $f$, $g$ can be seen as the relation $\lambda a, b \to \Sigma (s : S).\, (f s = a) \times (g s = b)$. Adapting Wärn's construction involves reconstructing a relation from a span diagram and removing contractible pairs.
 
 This version of the construction is the original type-theoretic one. Wärn later published a categorical version [cite//b:@War24]. Formalization of the categorical version is not attempted in this thesis. It requires different infrastructure from the one that had already been built by the time of publication of the categorical version, and it is also not as straightforward to recover the concrete equivalences between identity types and the resulting type families.
 
@@ -3546,7 +3557,7 @@ for $a : A$, and
   & P_B^{n + 1}(b)
 \end{tikzcd}
 #+end_center
-for $b : B$. The top maps $\tot(\tot(\blank \concat_n s))$ and $\tot(\tot(\blank \concat_n \overline{s}))$ additionally transport in the type families $P_A^n$ and $P_B^n$ using the identifications $r : (a = f s)$ and $r : (b = g s)$ respectively, to make the types line up.
+for $b : B$. The top maps $\tot(\tot(\blank \concat_n s))$ and $\tot(\tot(\blank \concat_n \overline{s}))$ additionally transport in the type families $P_A^n$ and $P_B^n$ using the available identifications $r : (a = f s)$ and $r : (b = g s)$ respectively, to make the types line up.
 
 The data dependencies resulting from these definitions are summarized in [[fig:zigzag-deps]].
 
@@ -3814,7 +3825,7 @@ The behavior on $\incl_A^n$ is analogous to the one of $t_B^{n + 1}$, specifical
 \begin{displaymath}
   \overline{t_A^{n + 1}}(a, \incl_A^n(p)) \defeq \tr_{Q_{\Sigma A}(a)}(\kappa_A^n(p), t_A^n(a, p)).
 \end{displaymath}
-For the second map, we would expect to use the inverse $Q_{\Sigma S}(s, \blank)^{-1}$. It isn't that straightforward, because $t_B^{n + 1}(g s, p)$ gives an element of $Q_{\Sigma B}(g s, \iota_B^{n + 1}(p))$, and $Q_{\Sigma S}(s, \blank)^{-1}$ can only undo an application of $\blank \concat_{\infty} s$ under $Q_{\Sigma B}(g s)$, not add an application of $\blank \concat_{\infty} \overline{s}$ under $Q_{\Sigma A}(f s)$. One might try to fix this by recalling that $\blank \concat_{\infty} s$ and $\blank \concat_{\infty} \overline{s}$ are inverse equivalences, and using the homotopy
+For the second map, we would expect to use the inverse $Q_{\Sigma S}(s, \blank)^{-1}$. It is not that straightforward, because $t_B^{n + 1}(g s, p)$ gives an element of $Q_{\Sigma B}(g s, \iota_B^{n + 1}(p))$, and $Q_{\Sigma S}(s, \blank)^{-1}$ can only undo an application of $\blank \concat_{\infty} s$ under $Q_{\Sigma B}(g s)$, not add an application of $\blank \concat_{\infty} \overline{s}$ under $Q_{\Sigma A}(f s)$. One might try to fix this by recalling that $\blank \concat_{\infty} s$ and $\blank \concat_{\infty} \overline{s}$ are inverse equivalences, and using the homotopy
 \begin{displaymath}
   \id \htpy (\blank \concat_{\infty} \overline{s}) \concat_{\infty} s.
 \end{displaymath}
@@ -4107,7 +4118,7 @@ The thesis also does not attempt to formalize applications of the zigzag constru
 :CUSTOM_ID: chap:attachments
 :END:
 
-Attachments consist of Git diff files, most of which were submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
+Attachments consist of Git diff files, most of which were submitted as pull requests to the {{{AU}}} GitHub {{{AURepo}}}. They may be found in the \linebreak =attachments= directory in the thesis source [[https://github.com/VojtechStep/homotopy-pushouts][repository]], and should also be included with any distribution of the thesis.
 
 - {{{PR(535,refactor-descent-circle)}}}
   updates formalization of the descent property of the circle to be consistent with its description in [cite//b:@Rij22].
@@ -4122,7 +4133,7 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - {{{PR(758,foundation-unpaste-pushouts)}}}
   formalizes the inverse direction of pasting properties of pushout squares.
 - {{{PR(764,flattening-pushouts-family)}}}
-  formalizes the flattening lemma for pushouts, without descent data.
+  formalizes the flattening \linebreak lemma for pushouts, without descent data.
 - {{{PR(792,coequalizers)}}}
   introduces coequalizers to the extent described in the thesis.
 - {{{PR(816,flattening-pushouts-descent-data)}}}
@@ -4132,7 +4143,7 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - {{{PR(841,sequential-colimits)}}}
   defines and documents basic infrastructure of sequential diagrams and their colimits in terms of universal properties.
 - {{{PR(919,functoriality-sequential-colimits)}}}
-  introduces commuting prisms and formalizes functoriality of taking the standard sequential colimit, to the extent described in the thesis.
+  adds commuting \linebreak prisms and formalizes functoriality of taking the standard sequential colimit, to the extent described in the thesis.
 - {{{PR(972,flattening-sequential-colimits-family)}}}
   formalizes the flattening lemma for sequential colimits, without descent data.
 - {{{PR(978,refactor-functoriality-sequential-colimits)}}}
@@ -4140,11 +4151,11 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - {{{PR(988,refactor-lifts-families)}}}
   refactors and documents formalization of lifts of families of elements, which underpin the equivalence of the dependent and non-dependent pullback properties of pushouts.
 - {{{PR(1070,shifts-sequential-colimits)}}}
-  formalizes shifts of sequential diagrams and related concepts, and its preservation of sequential colimits.
+  formalizes shifts of \linebreak sequential diagrams and related concepts, and its preservation of sequential colimits.
 - {{{PR(1098,refactor-coequalizers)}}}
-  introduces infrastructure for double arrows, and adopts coequalizers to use it.
+  adds infrastructure for double arrows, and adopts coequalizers to use it.
 - {{{PR(1109,flattening-sequential-colimits-descent-data)}}}
-  formalizes descent data over sequential diagrams and the flattening lemma for sequential colimits, using descent data.
+  adds descent data over sequential diagrams and the flattening lemma for sequential colimits, using descent data.
 - {{{PR(1117,equivalences-sequential-comp)}}}
   formalizes the fact that equivalences are closed under sequential composition.
 - {{{PR(1129,zigzags-sequential-diagrams)}}}
@@ -4154,7 +4165,7 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - {{{PR(1145,descent-pushouts)}}}
   refactors, extends and documents the descent property of pushouts.
 - {{{PR(1148,characterization-families-pushouts)}}}
-  characterizes families of functions and families of equivalences over pushouts, and the family of based identity types.
+  adds characterizations of families of functions and families of equivalences over pushouts, and the family of based identity types.
 - {{{PR(1150,identity-systems-descent-pushouts)}}}
   formalizes the induction principle of identity types of pushouts, using descent data.
 - =zigzag-construction-identity-types.diff=
@@ -4179,17 +4190,18 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - [ ] Link constructions in prose to their definitions
 - [ ] Link formal statements to the formalization (fix a commit)
 - [ ] =column sep={between origins}= in wide diagrams
-- [ ] Check that there are no TODO's
+- [X] Check that there are no TODO's
 - [X] Properly cite agda-unimath, not just with a repo link
 - [X] Describe attachments
 - [X] +Open a PR for the zigzag construction+ included as an independent patch
-- [ ] Check capitalization of autoref
+- [X] Check capitalization of autoref
 - [X] Cite Brunerie's thesis for the flattening lemma
 - [X] Cite Egbert's thesis for descent
-- [ ] Cite pullback properties
+- [X] Cite pullback properties
 - [X] Replace patches with diffs
-- [ ] Try to move important ideas from remarks to section introductions
+- [X] Try to move important ideas from remarks to section introductions
 - [X] Make the first part of Pushouts a subsection, add section intro
+- [X] Disable overfull ruler
 
 * Footnotes
 
