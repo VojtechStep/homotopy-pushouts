@@ -171,10 +171,21 @@
 \def\StudyBranch{MSPN}
 \def\YearSubmitted{2024}
 \def\Dedication{
-DEDICATION
+This thesis would not be what it is today if Egbert Rijke hadn't responded to my cold email, in which I asked if he was willing to supervise my project. I would like to express my thanks to him, not only for the positive response, but also for his guidance on my journey to understanding and formalization of synthetic homotopy theory, and for the work he has done for the Homotopy Type Theory community at large, through his written material and the agda-unimath library, which he initiated with his colleagues and actively maintains. I'm happy to be a part of it.
+
+I would like to thank Fredrik Bakke, for our conversations both academic and personal. The office feels a lot emptier without him sharing his observations about simplicial type theory. I also appreciated his code review of my contributions to the library.
+
+I am grateful to my family for being very excited about my work, even though I repeatedly failed to properly explain what I was doing, by nobody's fault but my own, because I often lacked the necessary understanding myself. It motivated me to try and find more intuitive descriptions of the code I was writing; hopefully some of it is reflected in the thesis.
+
+I also want to thank my colleague and friend Max Hollmann, for sitting down with me at a café after a long day's work, and listening to my tired rambling about commuting prisms. He and the rest of our friend group are a big reason why I remained motivated to keep working on my master's studies. I also appreciate the staff at Cafe Prostoru\_, where much of the research and formalization for this thesis was done, for tolerating my everyday gloomy presence, with my face buried in my laptop, and for lifting my spirits with pretty latte art on my Chai Latté.
+
+And last but not least, I would like to thank Matěj Dostál, who first taught me logic and type theory, and pointed me in the direction of Homotopy Type Theory in my formative years as an academic.
+
+\bigskip
+\hfill Vojtěch Štěpančík, Ljubljana
 }
 \def\AbstractCS{
-Homotopické pushouty mouhou být zkonstruovány jako vyšší induktivní typy v logickém rámci Homotopické Teorie Typů, ve kterém lze použít syntaktické metody pro zkoumání jejich vlastností, a formalizovat je v důkazovém asistentu. Tato diplomová práce se zaměřuje na vlastnost sestupu, popsanou Rijkem \cite{Rij19}, která charakterizuje rodiny typů nad pushouty; na lemma o zplošťování, popsané Bruneriem \cite{Bru16}, které charakterizuje totální prostory takových rodin; a univerzální vlastnost typů identifikací v pushoutech, formulovanou Krausem a von Raumerem \cite{KvR19}. Vybudujeme také základní infrastrukturu pro práci se sekvenčními kolimitami, podle článku Sojákové, van Doorna a Rijkeho \cite{SvDR20}. Vybudované nástroje posléze použijeme na částečný formalizovaný důkaz Wärnovy klikaté konstrukce typů identifikací v pushoutech jako sekvenčních kolimit \cite{War23}, s jedním neuzavřeným problémem koherence. Práce byla postupně formalizována v důkazovém asistentu Agda \cite{Agda}, a výsledky přispěny do knihovny agda-unimath \cite{AU24}.
+Homotopické pushouty mohou být zkonstruovány jako vyšší induktivní typy v logickém rámci Homotopické Teorie Typů, ve kterém lze použít syntaktické metody pro zkoumání jejich vlastností, a formalizovat je v důkazovém asistentu. Tato diplomová práce se zaměřuje na vlastnost sestupu, popsanou Rijkem \cite{Rij19}, která charakterizuje rodiny typů nad pushouty; na lemma o zplošťování, popsané Bruneriem \cite{Bru16}, které charakterizuje totální prostory takových rodin; a univerzální vlastnost typů identifikací v pushoutech, formulovanou Krausem a von Raumerem \cite{KvR19}. Vybudujeme také základní infrastrukturu pro práci se sekvenčními kolimitami, podle článku Sojákové, van Doorna a Rijkeho \cite{SvDR20}. Vybudované nástroje posléze použijeme na částečný formalizovaný důkaz Wärnovy klikaté konstrukce typů identifikací v pushoutech jako sekvenčních kolimit \cite{War23}, s jedním neuzavřeným problémem koherence. Práce byla postupně formalizována v důkazovém asistentu Agda \cite{Agda}, a výsledky přispěny do knihovny agda-unimath \cite{AU24}.
 }
 \def\KeywordsCS{syntetická homotopická teorie, homotopická teorie typů, univalentní základy matematiky, formalizace, homotopické pushouty}
 \include{tex/title.tex}
@@ -230,7 +241,7 @@ Homotopické pushouty mouhou být zkonstruovány jako vyšší induktivní typy 
 
  Homotopy Type Theory [cite//b:@UF13] is a logical framework built on Martin-Löf's intensional type theory [cite//b:@ML75] and the univalence axiom, which characterizes identity types of universes. It is inspired by the homotopy interpretation of dependent type theory [cite//b:@AGMV11], in which types are interpreted as spaces, elements of types as points in the spaces, and identifications of elements as paths between the points. Using proof assistants such as Agda [cite//b:@Agda], one can translate proofs in Homotopy Type Theory into programs in a programming language, engaging in an activity called "formalization" [cite//b:@NPS90]. The validity of the constructions is verified by type-checking the programs.
 
- This work focuses on homotopy pushouts --- specifically we provide an exposition and formalization of the descent property [cite//b:@Rij19] and flattening lemma [cite//b:@Bru16], and use the built infrastructure to formally construct a partial proof of correctness of Wärn's zigzag construction of identity types of pushouts [cite//b:@War23], leaving one coherence problem open. We intend on finishing the formalization, in response to Wärn's statement, taken from another paper of his about the zigzag construction: "At the time of writing, no such formalisation has been carried out, but we believe it would be feasible and worthwhile." [cite//b:@War24]
+ This work focuses on homotopy pushouts --- specifically we provide an exposition and formalization of the descent property [cite//b:@Rij19] and flattening lemma [cite//b:@Bru16], and use the built infrastructure to formally construct a partial proof of correctness of Wärn's zigzag construction of identity types of pushouts [cite//b:@War23], leaving one coherence problem open. Efforts to finish the formalization will continue, in response to Wärn's statement, taken from another paper of his about the zigzag construction: "At the time of writing, no such formalization has been carried out, but we believe it would be feasible and worthwhile." [cite//b:@War24]
 
  On top of pushouts we construct sequential colimits. The infrastructure we build is more extensive than strictly necessary for the zigzag construction, since we anticipate it will be useful when formalizing its applications. The formalized material comes from a paper on treatment of sequential colimits in Homotopy Type Theory by Sojakova, van Doorn and Rijke [cite//b:@SvDR20]. As a byproduct we started an effort to collect pages for formalization of results from the literature in the agda-unimath library. Even though it is not of strictly mathematical nature, this initiative is relevant to the social aspect of formalized mathematics, as it builds more documentation, makes the development accessible, and sets an example for beginning formalizers.
 
@@ -242,7 +253,7 @@ The thesis is divided into four chapters. [[#chap:hott]] provides an abridged in
 
 **** Contributions
 
- [[#chap:hott]] and first section of [[#chap:pushouts]] consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The uniform treatment of sections of descent data, its application to identity systems in terms of descent data, the presented proof of the flattening lemma, and the partial proof of correctness of the zigzag construction is original research.
+ [[#chap:hott]] and first section of [[#chap:pushouts]] consist of exposition to material that had already been formalized in the library. Formalization of all other parts of the thesis are original contributions to the library. The application of descent data and their sections to identity systems, the presented proof of the flattening lemma, and the partial proof of correctness of the zigzag construction are original research.
 
 * Homotopy Type Theory
 :PROPERTIES:
@@ -251,7 +262,7 @@ The thesis is divided into four chapters. [[#chap:hott]] provides an abridged in
 
 This section briefly introduces important concepts and results from Homotopy Type Theory, the formal setting of the thesis. For a more extensive account, see the "HoTT Book" [cite//b:@UF13], or Rijke's textbook [cite//b:@Rij22].
 
-In Homotopy Type Theory, the basic objects of study are /types/, which may have /elements/. An element $a$ of type $A$ is written $a : A$. In contrast to set theory, where an element can belong to many different sets, an element cannot be of multiple different types. Types themselves are elements of special types called /universes/, written $A : \UU$. To avoid inconsistency [cite//b:@Hur95], we assume an infinite hierarchy of universes, such that a universe $\UU$ is an element of a bigger universe, $\UU : \UU^+$. We generally do not comment on the handling of universe levels in the text of the thesis, but the attached formalization is developed in the maximally universe-polymorphic way.
+In Homotopy Type Theory, the basic objects of study are /types/, which may have /elements/. An element $a$ of type $A$ is written $a : A$. In contrast to set theory, where an element can belong to many different sets, an element cannot be of multiple different types. Types themselves are elements of special types called /universes/, written $A : \UU$. To avoid inconsistency [cite//b:@Hur95], we assume an infinite hierarchy of universes, such that a universe $\UU$ is an element of a bigger universe, $\UU : \UU^+$. We generally do not comment on the handling of universe levels in the text of the thesis, but the attached formalization is developed in the maximally universe-polymorphic way possible.
 
 For any two types $A$ and $B$, there is the type of *functions* $A \to B$, whose elements are functions taking elements of $A$ to elements of $B$. For any type $A$ there is the identity function $\id : A \to A$, and functions can be composed using the composition operator
 \begin{displaymath}
@@ -261,7 +272,7 @@ which is associative and unital with respect to $\id$.
 
 Elements of a function type into a universe are called *type families*: a type family $P$ /over/ $A$ is a function $P : A \to \UU$. The type $P(a)$ for some specific $a : A$ is occasionally referred to as the *fiber at $a$*.
 
-Given a type family $P : A \to \UU$ we may construct the *Sigma type* $\Sigma (a : A).\, P(a)$ (or $\Sigma A P$). Elements of the type $\Sigma A P$ are *dependent pairs* $(a, p)$ where $a$ is an element of $A$ and $p$ is an element of $P(a)$.
+Given a type family $P : A \to \UU$ we may construct the *Sigma type*, or its *total space*, ${\Sigma (a : A).\, P(a)}$ (or \(\Sigma A P\,\)). Elements of the type $\Sigma A P$ are *dependent pairs* $(a, p)$ where $a$ is an element of $A$ and $p$ is an element of $P(a)$.
 
 We may also construct the *Pi type* $\Pi (a : A).\, P(a)$. We prefer the syntax $(a : A) \to P(a)$ for $\Pi$ types. Elements of the type $(a : A) \to P(a)$ are *dependent functions* $f$ which take an element $a : A$ to an element $f(a) : P(a)$. They are also referred to as *sections of $P$*. Regular function types $A \to B$ are $\Pi$ types where the codomain is constant over $A$.
 
@@ -271,7 +282,7 @@ For two elements of the same type $x, y : A$ there is the type of *identificatio
 #+begin_thm
 Consider a type $A$ and its element $a_0 : A$. Given a type family $P : (a : A) \to (a_0 = a) \to \UU$, there is a function
 \begin{displaymath}
-  J : P(a_0, \refl) \to ((a : A) (r : a_0 \to a) \to P(a, r))
+  J : P(a_0, \refl) \to ((a : A) (r : a_0 = a) \to P(a, r))
 \end{displaymath}
 such that for any point $p_0 : P(a_0, \refl)$ it computes as $J(p_0, a_0, \refl) \judeq p_0$.
 #+end_thm
@@ -307,6 +318,16 @@ Transport in type families of certain shapes can be characterized. For example, 
 Given identifications $p : x = y$ and $q : a_0 = x$, there is an identification
 \begin{displaymath}
   \tr_{\Id(a_0)}(p, q) = q \concat p.
+\end{displaymath}
+#+end_lemma
+
+Transport in a family of function types behaves like composition.
+
+#+name: lemma:tr-function-type
+#+begin_lemma
+Given a type $A$, type families $P : A \to \UU$ and $Q : A \to \UV$, and an identification $x = y$ in $A$, then for all $h : P(x) \to Q(x)$ there is an identification
+\begin{displaymath}
+  \tr_{\lambda a \to (P(a) \to Q(a))}(p, h) = (\tr_Q(p) \comp h \comp \tr_P(p^{-1})).
 \end{displaymath}
 #+end_lemma
 
@@ -384,14 +405,15 @@ where $BL$, $FL$, $T$, $B$, $BR$ and $FR$ are homotopies which fit as the back l
 
 Given a map $f : A \to B$, we call a converse map $s : B \to A$ its *section* if it comes equipped with a homotopy $(f \comp s) \htpy \id$, and likewise we call a map $r : B \to A$ a *retraction* of $f$ if there is a homotopy $(r \comp f) \htpy \id$.
 
-A function $f : A \to B$ is an *equivalence* if it is equipped with both a section and a retraction. This is different from the classical notion of being an isomorphism, \ie having a single inverse $g : B \to A$ and proofs that $g$ is a section and a retraction of $f$. Every isomorphism induces an equivalence, and it can be shown that every equivalence induces an isomorphism, but this correspondence is not one-to-one.
+A function $f : A \to B$ is an *equivalence* if it is equipped with both a section and a retraction. This is different from the classical notion of being an isomorphism, \ie having a single inverse $g : B \to A$ and proofs that $g$ is a section and a retraction of $f$. Every isomorphism induces an equivalence, and it can be shown that every equivalence induces an isomorphism, but this correspondence is not one-to-one. We denote an equivalence between $A$ and $B$ by $f : A \simeq B$.
 
 We can already give examples of equivalences: 
 
 #+NAME: lemma:is-equiv-concat
 #+begin_lemma
-For every identification $p : x = y$ in $A$ and an element $z : A$, the concatenation operations
+For every identification $p : x = y$ in $A$ and an element $z : A$, the operations
 \begin{align*}
+  (\blank)^{-1} &: (x = y) \to (y = x) \\
   \blank \concat p &: (z = x) \to (z = y) \\
   p \concat \blank &: (y = z) \to (x = z)
 \end{align*}
@@ -400,7 +422,7 @@ are equivalences.
 
 #+NAME: lemma:is-equiv-tr
 #+begin_lemma
-For every type $A$, type family $B : A \to \UU$, two elements $x, y : A$ and an identification $p : x = y$, the transport map $\tr_P p : B x \to B y$ is an equivalence.
+For every type $A$, type family $P : A \to \UU$, two elements $x, y : A$ and an identification $p : x = y$, the transport map $\tr_P p : P(x) \to P(y)$ is an equivalence.
 #+end_lemma
 
 One of the elementary results about equivalences we use is their 3-for-2 property, an extension of the fact that they are closed under composition.
@@ -454,7 +476,7 @@ Voevodsky showed that function extensionality follows from univalence. For a sim
 #+name: thm:funext
 #+attr_latex: :options [Function extensionality]
 #+begin_thm
-For any two types $A : \UU$, $B : \UV$, and maps $f, g : A \to B$, the map
+For any two types $A$ and $B$, and maps $f, g : A \to B$, the map
 \begin{displaymath}
   \term{htpy-eq} : (f = g) \to (f \simeq g),
 \end{displaymath}
@@ -465,7 +487,7 @@ Function extensionality gives us an induction principle for homotopies, analogou
 
 #+name: lemma:ind-htpy
 #+begin_lemma
-Consider a type $A$, a type family $P : A \to \UU$, and a function $f : (a : A) \to P(a)$. Given a type family $C : (g : (a : A) \to P(a)) \to (f \htpy g) \to \UV$, there is a function
+Consider a type $A$, a type family $P : A \to \UU$, and a function \linebreak $f : (a : A) \to P(a)$. Given a type family $C : (g : (a : A) \to P(a)) \to (f \htpy g) \to \UV$, there is a function
 \begin{displaymath}
   \term{ind-htpy}_C : C(f, \reflhtpy) \to ((g : (a : A) \to P(a)) (r : f \htpy g) \to C(g, r))
 \end{displaymath}
@@ -520,12 +542,12 @@ Given a type $A$ and a type family $P : A \to \UU$, the map
 which sends $\refl$ to $(\refl, \refl)$, is an equivalence, for all $x, y : A$, $s : P(x)$ and $t : P(y)$.
 #+end_lemma
 
-We can dispense without mentioning transport if we have characterizations of identity types of the individual components. This theorem, known as the Structure Identity Principle, is due to [cite/t:@Acz12]
+We can dispense without mentioning transport if we have characterizations of identity types of the individual components. The following theorem, known as the Structure Identity Principle, is due to [cite/t:@Acz12].
 
 #+NAME: thm:sip
 #+attr_latex: :options [Structure identity principle]
 #+begin_thm
-Consider a type $A$ with a point $a_0 : A$, type families $P : A \to \UU$ and $Q : A \to \UV$ pointed by $p_0 : P(a_0)$ and $q_0 : Q(a_0)$, respectively, and a type family ${D : (x : A) \to (P(x) \to Q(x) \to \UU)}$. If $Q$ is an identity system at $q_0$ and there is an element $d_0 : D(a_0, p_0, q_0)$, then the following are equivalent:
+Consider a type $A$ with a point ${a_0 : A}$, type families $P : A \to \UU$ and $Q : A \to \UV$ pointed by $p_0 : P(a_0)$ and $q_0 : Q(a_0)$, respectively, and a type family ${D : (x : A) \to (P(x) \to Q(x) \to \UU)}$. If $Q$ is an identity system at $q_0$ and there is an element $d_0 : D(a_0, p_0, q_0)$, then the following are equivalent:
 - Any family of maps $f : (p : P(a_0)) \to ((p_0 = p) \to D(a_0, p, q_0))$ is a family of equivalences
 - The total space $\Sigma (p : P(a_0)).\, D(a_0, p, q_0)$ is contractible.
 #+end_thm
@@ -534,7 +556,7 @@ The last fact we will need is distributivity of $\Pi$ over $\Sigma$, sometimes c
 
 #+NAME: lemma:distributive-pi-sigma
 #+begin_lemma
-Given a type $A$ and type families $P : A \to \UU$ and $Q : (a : A) \to P(a) \to \UV$, there is an equivalence
+Given a type $A$, a type family $P : A \to \UU$ and another type family ${Q : (a : A) \to P(a) \to \UV}$, there is an equivalence
 \begin{align*}
   &((x : A) \to \Sigma (p : P(x)).\, Q(x, p)) \\
   &\simeq (\Sigma(h : (x : X) \to P(x)).\, (x : X) \to Q(x, h(x))).
@@ -641,17 +663,17 @@ Given a cocone $c \judeq (i, j, H) : \cocone(\S, X)$, construct the *reflexivity
 
 #+name: lemma:htpy-eq-cocone
 #+begin_lemma
-For a span diagram $\S$ and two cocones $c$ and $c'$ on $X$, there is an equivalence
+For a span diagram $\S$ and two cocones $c$ and $c'$ on $X$, the map
 \begin{displaymath}
-  \term{htpy-eq-cocone} : (c = c') \simeq (c \htpy c')
+  \term{htpy-eq-cocone} : (c = c') \simeq (c \htpy c'),
 \end{displaymath}
-which sends $\refl$ to $\term{cocone-refl-htpy}$.
+which sends $\refl$ to $\term{cocone-refl-htpy}$, is an equivalence.
 #+end_lemma
 
 The proof is a prototypical application of the fundamental theorem of identity types and the structure identity principle. We only write this one out for demonstration, as other straightforward proofs of characterizations of identity types are omitted from the thesis.
 
 #+begin_proof
-The underlying map is defined by path induction to send $\refl$ to $\term{cocone-refl-htpy}$. We use [[thm:fundamental-theorem-id]] to prove that it is an equivalence, so it suffices to show that the type of cocones $c'$ such that $c \htpy c'$ is contractible. Since $c \htpy c'$ is a $\Sigma$ type, we invoke the structure identity principle ([[thm:sip]]), which leaves us to show that the type
+We use [[thm:fundamental-theorem-id]] to prove that it is an equivalence, so it suffices to show that the type of cocones $c'$ such that $c \htpy c'$ is contractible. Since $c \htpy c'$ is a $\Sigma$ type, we invoke the structure identity principle ([[thm:sip]]), which leaves us to show that the type
 \begin{displaymath}
   \Sigma (i' : A \to X).\, (i \htpy i')
 \end{displaymath}
@@ -674,7 +696,7 @@ is contractible. And it is contractible once again at $(H \hconcat \reflhtpy, \r
 #+end_proof
 
 #+begin_lemma
-Given a span diagram $\S \judeq (f, g)$, a pushout cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a cocone $c' \judeq (i', j', H') : \cocone(\S, Y)$, there is a unique map $h : X \to Y$ equipped with the homotopies
+Given a span diagram $\S \judeq (f, g)$, its pushout cocone $c \judeq (i, j, H)$ on $X$, and a cocone $c' \judeq (i', j', H') : \cocone(\S, Y)$, there is a unique map $h : X \to Y$ equipped with the homotopies
 \begin{align*}
   K_A &: h \comp i \htpy i' \\
   K_B &: h \comp j \htpy j'
@@ -699,17 +721,16 @@ The data claimed to be unique is an element of the type
 \begin{displaymath}
   \Sigma (h : X \to Y).\, (\coconeMap_c(h) \htpy c'),
 \end{displaymath}
-which is equivalent to the type of fibers of $\coconeMap_c$ at $c'$, by [[lemma:htpy-eq-cocone]]. Since $\coconeMap_c$ is an equivalence by assumption, it has contractible fibers.
+which is equivalent to the type of fibers of $\coconeMap_c$ at $c'$, by [[lemma:htpy-eq-cocone]]. Since $\coconeMap_c$ is an equivalence by assumption, it has contractible fibers by [[lemma:is-contr-map-is-equiv]].
 #+end_proof
 
 The universal property characterizes simple maps out of the colimit. In dependent type theory, we can also ask about characterizations of /dependent/ maps out of the colimit. To that end we introduce dependent cocones and the dependent universal property.
 
 #+begin_defn
-Consider a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UV$. A *dependent cocone* over $c$ on $P$ is a triple $(i', j', H')$, where $i' : (a : A) \to P(i a)$ and $j' : (b : B) \to P(j b)$ are dependent maps over $i$ and $j$, respectively, and $H$ is a family of identifications
-\begin{alignat*}{2}
-  H &:&& (s : S) \to i'(f s) =_{H s} j'(g s) \\
-    &\judeq\;&& (s : S) \to \tr_P(H s) (i'(f s)) = j'(g s).
-\end{alignat*}
+Consider a cocone $c \judeq (i, j, H) : \cocone(\S, X)$ and a type family $P : X \to \UU$. A *dependent cocone* over $c$ on $P$ is a triple $(i', j', H')$, where $i' : (a : A) \to P(i a)$ and $j' : (b : B) \to P(j b)$ are dependent maps over $i$ and $j$, respectively, and $H$ is a family of identifications
+\begin{displaymath}
+  H : (s : S) \to \tr_P(H s) (i'(f s)) = j'(g s).
+\end{displaymath}
 
 We write $\depCocone(c, P)$ for the type of dependent cocones over $c$ on $P$.
 #+end_defn
@@ -831,7 +852,7 @@ We will rely on informal understanding of this principle when discussing options
 
 ** Descent property
 
-The study of type theoretic descent describes how type families over a colimit and related concepts, such as fiberwise maps or sections, arise as local data with gluing conditions \TODO[source?]. It has been studied to some extent by Rijke in [cite//b:@Rij19] and [cite//b:@Rij22Pre].
+The study of type theoretic descent describes how type families over a colimit and related concepts, such as fiberwise maps or sections, arise as local data with gluing conditions. It has been studied to some extent by Rijke in [cite//b:@Rij19] and [cite//b:@Rij22Pre].
 
 The universal property of pushouts characterizes maps out of a pushout to any type in any universe, so in particular maps where the codomain itself is a universe: a type family $P : X \to \UU$ corresponds to a cocone $(P_A, P_B, H)$ where $P_A : A \to \UU$, $P_B : B \to \UU$ are type families, and $H$ is a homotopy in the universe $H : (s : S) \to P_A(f s) = P_B(g s)$. Since identifications in universes are characterized by equivalences via the univalence axiom, we arrive at the definition of descent data:
 
@@ -944,8 +965,16 @@ Alternatively, one could define equivalences of descent data as morphisms of des
 #+end_remark
 
 #+begin_lemma
-\TODO[Equivalences characterize identifications]
+For any two descent data $P' \judeq (P_A, P_B, P_S)$ and $Q' \judeq (Q_A, Q_B, Q_S)$, the map
+\begin{displaymath}
+  \term{equivDD-eq} : (P' = Q') \to (P' \simeq Q'),
+\end{displaymath}
+defined by sending $\refl$ to the identity equivalence, is an equivalence.
 #+end_lemma
+
+#+begin_proof
+Using the structure identity principle ([[thm:sip]]).
+#+end_proof
 
 #+attr_latex: [Uniqueness of descent data]
 #+begin_thm
@@ -989,8 +1018,8 @@ As a first example of a family with descent data, we characterize the type famil
 #+begin_constr
 Given a span diagram $\S \judeq (f, g)$, a cocone $(i, j, H)$ on $X$ and a point $x_0 : X$, construct the descent data $(I_A, I_B, I_S)$ as
 \begin{alignat*}{2}
-  I_A &\defeq (\lambda a \to x = (i a)) &&: A \to \UU \\
-  I_B &\defeq (\lambda b \to x = (j b)) &&: B \to \UU \\
+  I_A &\defeq (\lambda a \to (x = i a)) &&: A \to \UU \\
+  I_B &\defeq (\lambda b \to (x = j b)) &&: B \to \UU \\
   I_S &\defeq (\lambda s, p \to p \concat (H s)) &&: (s : S) \to I_A(f s) \simeq I_B(g s).
 \end{alignat*}
 
@@ -1005,8 +1034,8 @@ Note that the basepoint $x_0$ is not mentioned in the notation $(I_A, I_B, I_S)$
 #+begin_lemma
 Given a cocone and a basepoint $x_0 : X$ as above, the type family $\Id(x_0) : X \to \UU$ is characterized by the descent data $(I_A, I_B, I_S)$. Explicitly, there are equivalences
 \begin{align*}
-  e_A &: (a : A) \to (x_0 = (i a)) \simeq I_A(a) \\
-  e_B &: (b : B) \to (x_0 = (j b)) \simeq I_B(b)
+  e_A &: (a : A) \to (x_0 = i a) \simeq I_A(a) \\
+  e_B &: (b : B) \to (x_0 = j b) \simeq I_B(b)
 \end{align*}
 and a coherence $e_S$
 #+begin_center
@@ -1024,7 +1053,7 @@ and a coherence $e_S$
 #+end_lemma
 
 #+begin_proof
-By definition, $I_A(a) \judeq (x_0 = (i a))$ and $I_B(b) \judeq (x_0 = (j b))$, so we may choose the identity equivalence for $e_A$ and $e_B$. Then the coherence datum amounts to showing that $\tr_{\Id(x_0)}(H s, p) = p \concat (H s)$, which is [[lemma:tr-id-right]].
+By definition, $I_A(a) \judeq (x_0 = i a)$ and $I_B(b) \judeq (x_0 = j b)$, so we may choose the identity equivalence for $e_A$ and $e_B$. Then the coherence datum amounts to showing that $\tr_{\Id(x_0)}(H s, p) = p \concat (H s)$, which is [[lemma:tr-id-right]].
 #+end_proof
 
 For any given type family $P$ over $X$, we can talk about its /sections/, elements of the type $(x : X) \to P(x)$. We define an analogous concept of /sections of descent data/, and show that indeed they correspond to sections of type families over pushouts.
@@ -1135,7 +1164,7 @@ e_A(a, h) &\defeq e^Q_A(a) \comp h \comp (e^P_A(a))^{-1}\\
 e_B(b, h) &\defeq e^Q_B(b) \comp h \comp (e^P_B(b))^{-1}.
 \end{align*}
 
-Transport in a type family of function types can be computed as composition of transports in the involved families by \TODO[ref], so the left map can be replaced by $\tr_Q(H s) \comp \blank \comp \tr_P(H s)^{-1}$. Since we want to identify two functions, we invoke function extensionality, and are left with the goal
+Transport in a type family of function types can be computed as composition of transports in the involved families by [[lemma:tr-function-type]], so the left map can be replaced by $\tr_Q(H s) \comp \blank \comp \tr_P(H s)^{-1}$. Since we want to identify two functions, we invoke function extensionality, and are left with the goal
 #+begin_center
 \begin{tikzcd}
   P_B(g s)
@@ -1166,7 +1195,26 @@ The type of sections of the descent data defined in [[lemma:family-with-dd-funct
 #+end_lemma
 
 #+begin_proof
-\TODO
+The first two components of a section and a morphism are the same, namely
+\begin{align*}
+  h_A &: (a : A) \to P_A(a) \to Q_A(a) \\
+  h_B &: (b : B) \to P_B(b) \to Q_B(b).
+\end{align*}
+
+It then suffices to give, for every $s : S$, an equivalence
+\begin{align*}
+  &((Q_S(s) \comp h_A(f s) \comp (P_S(s))^{-1}) = h_B(g s)) \\
+  &\simeq ((h_B(g s) \comp P_S(s)) \htpy (Q_S(s) \comp h_A(f s))).
+\end{align*}
+
+We obtain it by composing the following chain of equivalences:
+\begin{alignat*}{2}
+  &((Q_S(s) \comp h_A(f s) \comp (P_S(s))^{-1}) = h_B(g s)) \\
+  &\simeq ((Q_S(s) \comp h_A(f s) \comp (P_S(s))^{-1}) \htpy h_B(g s)) &\qquad&\text{by function extensionality} \\
+  &\simeq ((Q_S(s) \comp h_A(f s)) \htpy (h_B(g s) \comp P_S(s))) &&\text{by transposition} \\
+  &\simeq ((h_B(g s) \comp P_S(s)) \htpy (Q_S(s) \comp h_A(f s))) &&\text{by inversion}.
+\end{alignat*}
+
 #+end_proof
 
 #+begin_thm
@@ -1202,7 +1250,7 @@ Additionally, the following diagrams commute for all $h : (x : X) \to P(x) \to Q
 #+begin_proof
 The type of fiberwise maps is by definition the type of sections of the family $\lambda x \to (P(x) \to Q(x))$, which is equivalent to the type of sections of the descent data from [[lemma:family-with-dd-function-types]] by [[lemma:is-equiv-sect-sect]]. That type of sections is equivalent to the type of morphisms of descent data by [[lemma:hom-sect-dd]].
 
-Computing the action of this equivalence on a fiberwise map $h : (x : X) \to P(x) \to Q(x)$, we get the definitional equalities
+Computing the action of this equivalence on a fiberwise map $h : (x : X) \to P(x) \to Q(x)$, we get the judgmental equalities
 \begin{alignat*}{2}
   &\term{hom-map}(h)_A &&\defeq \lambda a \to e^Q_A(a) \comp h(i a) \comp (e^P_A(a))^{-1} \\
   &\term{hom-map}(h)_B &&\defeq \lambda b \to e^Q_B(b) \comp h(j b) \comp (e^P_B(b))^{-1},
@@ -1278,16 +1326,25 @@ However, the induction principle speaks about dependent type families of the sor
 
 The flattening lemma for pushouts effectively states that pushouts commute with dependent pair types --- the total space of a type family over a pushout is a pushout of total spaces of the corresponding descent data.
 
-The presented proof is split into two parts. First we prove the statement specifically for a type family and the descent data it induces, which reduces the amount of data we need to make coherent. Then we relate the cocone for descent data induced by the family to the cocone for arbitrary corresponding descent data, in a way that preserves being a pushout.
+The presented proof is split into two parts. First we prove the statement specifically for a type family and the descent data it induces, which reduces the amount of data we need to make coherent. Then we relate the cocone for descent data induced by the family to the cocone for arbitrary corresponding descent data, via a commuting cube whose vertical maps are equivalences. We do not write down the proof of the lemma that such cubes preserve pushouts, since it factors through the dual statement for pullbacks, which is out of scope of the thesis. Its formalization can be found in the attached code. \newpage
 
 #+name: lemma:is-pushout-bottom-ff-is-pushout-top
 #+begin_lemma
-\TODO[In a cube where vertical maps are equivalences, the bottom square is a pushout iff the top square is a pushout].
+Consider a commuting cube
+#+begin_center
+\begin{tikzcd}
+  & A' \arrow[dl, "f'"'] \arrow[d, "e_A", "\simeq"'] \arrow[dr, "g'"] \\
+  B' \arrow[d, "e_B"', "\simeq"]
+  & A \arrow[dl, "f"', very near start] \arrow[dr, "g", very near start]
+  & C' \arrow[dl, "j'", very near end, crossing over] \arrow[d, "e_C", "\simeq"'] \\
+  B \arrow[dr, "i"']
+  & D' \arrow[from=ul, "i'"', very near end, crossing over] \arrow[d, "e_D", "\simeq"']
+  & C \arrow[dl, "j"] \\
+  & D.
+\end{tikzcd}
+#+end_center
+where the vertical maps are equivalences. Then the bottom square is a pushout square if and only if the top square is a pushout square.
 #+end_lemma
-
-#+begin_proof
-\TODO[Probably omitted. Goes through the pullback property and the dual statement for pullbacks].
-#+end_proof
 
 #+begin_constr
 Given a span diagram $\S \judeq (f, g)$ and descent data $(P_A, P_B, P_S)$, construct the *total span diagram* $\Sigma \S$
@@ -1439,18 +1496,18 @@ where the top square is the coherence of the total cocone of $(P_A, P_B, P_S) \c
 #+begin_proof
 The back left, front left, and front right squares commute by $\reflhtpy$. The back right square commutes by $(\refl, (e_s)^{-1})$. The commuting cube is therefore an element of the type
 \begin{align*}
-  &(\tot_i(\id) \lwhisk \reflhtpy) \hconcat (\reflhtpy \rwhisk \tot_f(\id)) \hconcat (\id \lwhisk (H, e_S^{-1})) = \\
+  &(\tot_i(\id) \lwhisk \reflhtpy) \hconcat (\reflhtpy \rwhisk \tot_f(\id)) \hconcat (\id \lwhisk (H, e_S^{-1})) \htpy {} \\
   &((H, \reflhtpy) \rwhisk \tot(e_A)) \hconcat (\tot_j(\id) \lwhisk (\reflhtpy, e_S^{-1})) \hconcat (\reflhtpy \rwhisk \tot_g(P_S)).
 \end{align*}
 
-The left homotopy computes to $\id \lwhisk (H, e_S^{-1})$, which is identical to $(H, e_S^{-1})$. The last concatenant of the right homotopy is $\reflhtpy$, so we can compute it away.
+The left homotopy computes to $\id \lwhisk (H, e_S^{-1})$, which is homotopic to $(H, e_S^{-1})$. The last concatenant of the right homotopy is $\reflhtpy$, so we can compute it away.
 
 The new goal is
 \begin{align*}
-  (H, e_S^{-1}) = (H, \reflhtpy) \hconcat (\tot_j(\id) \lwhisk (\reflhtpy, e_S^{-1})).
+  (H, e_S^{-1}) \htpy (H, \reflhtpy) \hconcat (\tot_j(\id) \lwhisk (\reflhtpy, e_S^{-1})).
 \end{align*}
 
-The total map $\tot_j(\id)$ acts on $(\reflhtpy, e_S^{-1})$ component-wise, so it can be further computed to $(\reflhtpy, \id \lwhisk (e_S^{-1}))$, which is identical to $(\reflhtpy, e_S^{-1})$. To finish the proof, we note that any identification $(p, q) : (s, t) = (s', t')$ in a $\Sigma$ type can be decomposed as $(p, \refl) \concat (\refl, q)$.
+The total map $\tot_j(\id)$ acts on $(\reflhtpy, e_S^{-1})$ component-wise, so it can be further computed to $(\reflhtpy, \id \lwhisk (e_S^{-1}))$, which is homotopic to $(\reflhtpy, e_S^{-1})$. To finish the proof, we note that any identification $(p, q) : (s, t) = (s', t')$ in a $\Sigma$ type can be decomposed as $(p, \refl) \concat (\refl, q)$.
 #+end_proof
 
 #+name: lemma:flattening-lemma
@@ -1630,12 +1687,13 @@ such that $e_A(\refl) = p_0$.
 Construct the unique type family $P : X → \UU$ corresponding to $(P_A, P_B, P_S)$. By [[thm:equivDD-equiv]] the type of point preserving equivalences between $(I_A, I_B, I_S)$ and $(P_A, P_B, P_S)$ is equivalent to the type of fiberwise equivalences $(x : X) → ((i a_0) = x) \simeq P(x)$ that send $\refl$ to $(e^P_A a_0)^{-1}(p_0)$. To show that this type is contractible, it suffices to show that the total space $\Sigma X P$ is contractible, by [[corol:fundamental-theorem-id-equivs]]. It is contractible if $P$ is an identity system, which it is by [[lemma:is-id-system-is-id-system-DD]] and the assumption that $(P_A, P_B, P_S)$ is an identity system.
 #+end_proof
 
-Unfolding the data of the equivalence, we get
+Unfolding the equivalence, we get the data
 \begin{align*}
   e_A &: (a : A) \to (i a_0 = i a) \simeq P_A(a) \\
   e_B &: (b : B) \to (i a_0 = j b) \simeq P_B(b) \\
-  e_S &: (s : S) (p : i a_0 = i(f s)) \to e_B(g s, p \concat (H s)) = P_S(s, e_A(f s, p)).
+  e_S &: (s : S) (p : i a_0 = i(f s)) \to e_B(g s, p \concat (H s)) = P_S(s, e_A(f s, p)),
 \end{align*}
+which justifies that claim that identity systems allow alternative characterizations of identity types of pushouts.
 
 ** COMMENT van Kampen squares
 
@@ -1786,7 +1844,16 @@ To define the inverse map, assume a cocone $(i, j, H)$ where $i : A \to X$, $j :
 
 Since the codomain of the homotopy is a coproduct, it corresponds to a pair of homotopies $H_1 : i \htpy j \comp f$ and $H_2 : i \htpy j \comp g$. To construct the cofork under $\D$, take $j$ to be the first component, and the concatenation $H_1^{-1} \hconcat H_2 : j \comp f \htpy j \comp g$ for the second component.
 
-\TODO[We need to show that they are mutual inverses. It requires homotopies of cocones and coforks, which I want to avoid, so maybe skip that?]; actually one is just refl, and for the other we already have homotopies of cocones.
+We need to show that the maps are mutual inverses. A cofork $(j, H)$ is first mapped to $(j \comp f, j, \coprodM{\reflhtpy}{H})$ and then to $(j, \reflhtpy^{-1} \hconcat H)$, so the composition is homotopic to $\id$ via $\reflhtpy$. Conversely, assume a cocone $c \judeq (i, j, H)$. It gets mapped to $(j, H_1^{-1} \hconcat H_2)$ and then to $(j \comp f, j, \coprodM{\reflhtpy}{H_1^{-1} \hconcat H_2})$, call it $c'$. We construct a homotopy of cocones $c' \htpy c$ --- the homotopies on maps are given by
+\begin{align*}
+  H_1^{-1} &: (j \comp f) \htpy i \\
+  \reflhtpy &: j \htpy j,
+\end{align*}
+and the coherence is $\coprodM{\alpha_1}{\alpha_2}$, where
+\begin{alignat*}{2}
+  &\alpha_1 \defeq \term{linv-htpy}^{-1} &&: \reflhtpy \htpy (H_1^{-1} \hconcat H_1) \\
+  &\alpha_2 \defeq \runithtpy &&: (H_1^{-1} \hconcat H_2 \hconcat \reflhtpy) \htpy (H_1^{-1} \hconcat H_2).
+\end{alignat*}
 
 To show commutativity of the triangle, chase a map $h : X \to Y$:
 #+begin_center
@@ -1974,20 +2041,17 @@ which we can get by unit laws for concatenating $\refl$'s and whiskering by $\id
 
 ** Sequential colimits
 
-\TODO[I formalized sections 3 and 4 from SvDR20, and the main theorem for the special case of equifibered sequencial diagrams].
-[cite/t/cf:@SvDR20]
+Sequential colimits are colimits of sequential diagrams, which are sequences of types indexed by natural numbers, equipped with connecting maps between each type $A_n$ and its successor $A_{n + 1}$. In the literature, sequential diagrams are also known as "cotowers". We decided to use "sequential diagrams" in the {{{AU}}} library, because we believe it to be a more approachable term.
 
-\TODO[Note that AFAIK descent and flattening aren't necessary for the main result of this thesis, but flattening and esp. generalized flattening are used in SvDR20 to prove connectivity results, which are then used in applications].
+This development formalizes sections 3 and 4 from a paper on treatment of sequential colimits in Homotopy Type Theory, due to Sojakova, van Doorn and Rijke [cite//b:@SvDR20], and their main theorem about commutativity of $\Sigma$ types and sequential colimits, for the special case of equifibered sequential diagrams.
+
+Not all of the built infrastructure is necessary for the zigzag construction, which we are building towards, but the flattening lemma and especially the full "generalized flattening lemma" from [cite//b:@SvDR20] are used in the same paper to prove truncatedness and connectivity results, which are used in applications of the zigzag construction.
 
 #+begin_defn
 A *sequential diagram* is a pair $(A, a)$ of a sequence of types $A : \N \to \UU$ and a family of maps $a : (n : \N) \to A(n) \to A(n + 1)$.
 
 We will often write $A_n$ and $a_n$ for $A(n)$ and $a(n)$, respectively.
 #+end_defn
-
-#+begin_remark
-In the literature, sequential diagrams are also known as "cotowers". We decided to use "sequential diagrams" in the {{{AU}}} library, because we believe it to be a more approachable term.
-#+end_remark
 
 #+begin_defn
 Given a sequential diagram $\A \judeq (A, a)$ and a type $X$, a *cocone* under $\A$ on $X$ is a pair $(i, H)$ consisting of a family of maps ${i : (n : \N) \to A_n \to X}$ and a family of homotopies $H : (n : \N) \to i_n \htpy i_{n + 1} \comp a_n$.
@@ -2308,13 +2372,13 @@ Omitted.
 
 *** Functoriality
 
-\TODO[Uniformly constructing a sequential colimit of every sequential diagram amounts to having a map from the type of sequential diagrams to a universe type. We show that this action on objects extends to an action on morphisms, which takes a morphism of sequential diagrams to a map between the corresponding types. Additionally, this action on morphisms is functorial, \ie it takes the identity morphism to the identity map and composition of morphisms to composition of maps.
+Uniformly constructing a sequential colimit of every sequential diagram amounts to having a map from the type of sequential diagrams to the type of types equipped with the structure of a sequential colimit on it. We show that this action on objects, taking a sequential diagram to a type, extends to an action on morphisms, which takes a morphism of sequential diagrams to a map between the corresponding types. Additionally, this action on morphisms is functorial, \ie it takes the identity morphism to the identity map and composition of morphisms to composition of maps.
 
 To formally state this property, we first need to define morphisms of sequential diagrams and their composition. We also show that homotopies of morphisms of sequential diagrams induce homotopies of the appropriate maps between colimits.
 
-The theory does not assume a uniform construction of standard sequential colimits. Instead the constructions and proofs are parametric over a user-provided sequential colimit. This generality is important for later applications in [[#sec:zigzags]], where the colimit is not judgmentally equal to the standard one.]
+The theory does not assume a uniform construction of standard sequential colimits. Instead the constructions and proofs are parametric over a user-provided sequential colimit. This generality is important for later applications in [[#sec:zigzags]], where the colimit is not judgmentally equal to the standard one.
 
-\TODO[The formalization covers Lemma 3.5. The text of the thesis skips the proof of preservation of equivalences.]
+The presented results cover Lemma 3.5 from [cite//b:@SvDR20], except preservation of equivalences. That result is part of the attached formalization, but not included in the thesis text. Likewise, elementary theory of commuting prisms of maps was introduced for the formalization, but not described in this text.
 
 #+begin_defn
 Given sequential diagrams $(A, a)$ and $(B, b)$, define the type of *morphisms* from $(A, a)$ to $(B, b)$, denoted $(A, a) \to (B, b)$, as the type of pairs $(f, H)$ consisting of a family of maps
@@ -2441,10 +2505,6 @@ The data is obtained from the extra computation rules stated in [[lemma:comp-up-
 
 The type of prisms as above is equivalent to the type of coherences of homotopies $\coconeNMap_c(f_{\infty}) \htpy \precompHomN(f)$ by mechanical homotopy algebra.
 #+end_proof
-
-#+begin_remark
-\TODO[Some theory of commuting prisms was built for the library as part of this thesis. The theory is not elaborated on in the text].
-#+end_remark
 
 #+name: lemma:colim-preserves-id
 #+begin_lemma
@@ -3019,7 +3079,7 @@ The map $\inclHomN[k]_{\infty}$ is homotopic to the identity map by the inductiv
 
 *** Descent property and flattening lemma
 
-\TODO[We prove the flattening lemma phrased with descent data, which can be seen as an elementary case of the main theorem from SvDR20. The full theorem could reasonably be called "generalized flattening lemma", as it shows commutativity of taking the total space and sequential colimit of not just a type family induced by descent data, but a more general case where the descent data is generated using shifts from an arbitrary dependent sequential diagram].
+We prove the flattening lemma phrased with descent data, which can be seen as an elementary case of the main theorem from [cite//b:@SvDR20]. The full theorem could reasonably be called "generalized flattening lemma", as it shows commutativity of taking the total space and sequential colimit of not just a type family induced by descent data, but a more general case where one may take an arbitrary dependent sequential diagram, and generate the descent data by taking colimits of increasingly more shifted total sequential diagrams.
 
 #+begin_defn
 Given a sequential diagram $\A \judeq (A, a)$, define the type of *descent data* over $\A$ to be the type of pairs $(B, b)$, where $B$ is a family of type families
@@ -3211,13 +3271,13 @@ where the bottom cocone is the total cocone of $B_{\infty}$ and its induced desc
 :CUSTOM_ID: chap:zigzag-construction
 :END:
 
-[cite/t:@War23] \TODO[describes an explicit construction of identity types of pushouts. He does so by fixing an element $a_0 : A$, and then defining type families $a_0 \rightsquigarrow_{\infty} a$ and $a_0 \rightsquigarrow_{\infty} b$, such that for any $a : A$ and $b : B$, there are equivalences]
+[cite/t:@War23] describes an explicit construction of identity types of pushouts. He does so by fixing an element $a_0 : A$, and then defining type families $a_0 \rightsquigarrow_{\infty} a$ and $a_0 \rightsquigarrow_{\infty} b$, such that for any $a : A$ and $b : B$, there are equivalences
 \begin{align*}
   (\inl(a_0) = \inl(a)) &\simeq (a_0 \rightsquigarrow_{\infty} a) \\
   (\inl(a_0) = \inr(b)) &\simeq (a_0 \rightsquigarrow_{\infty} b).
 \end{align*}
 
-\TODO[The type families are defined by gradual approximations of the identity types, $a_0 \rightsquigarrow_t a$ and $a_0 \rightsquigarrow_{t + 1} b$. If one thinks of the pushout $\PO{S}{A}{B}$ as a coproduct $A + B$ with added "bridges" from $f(s)$ to $g(s)$, then $a_0 \rightsquigarrow_t a$ describes the type of identifications between $\inl(a_0)$ and $\inl(a)$, provided that we can pass from the $A$ component to the $B$ component and back $t$ times, and similarly for $a_0 \rightsquigarrow_{t + 1} b$. The full identity types are then constructed by removing the upper bound on the number of steps, by taking the sequential colimit.]
+The type families are defined by gradual approximations of the identity types, $a_0 \rightsquigarrow_t a$ and $a_0 \rightsquigarrow_{t + 1} b$. If one thinks of the standard pushout $\PO{S}{A}{B}$ as a coproduct $A + B$ with added "bridges" from $f(s)$ to $g(s)$, then $a_0 \rightsquigarrow_t a$ describes the type of identifications between $\inl(a_0)$ and $\inl(a)$, provided that we can pass from the $A$ component to the $B$ component and back $t$ times, and similarly for $a_0 \rightsquigarrow_{t + 1} b$. The full identity types are then constructed by removing the upper bound on the number of steps, by taking the sequential colimit.
 
 The two type families are related --- if one can get from $\inl(a_0)$ to $\inl(f s)$ in $t$ crossings, then one can get from $\inl(a_0)$ to $\inr(g s)$ in $t + 1$ crossings, and similarly in reverse. We can formally encode this relationship in a structure called a "zigzag" between sequential diagrams. We begin by defining general zigzags of sequential diagrams and their behavior in the colimit. Then we define the type families of approximations of identity types, and a zigzag between them. At last, we present a partial proof that the construction satisfies the induction principle of identity systems of pushouts from [[#sec:identity-systems]]. One coherence proof remains unsolved. The construction and proof of correctness are presented with emphasis on their encoding in the Agda proof assistant [cite//b:@Agda], which due to its mutually inductive nature presented challenges to termination checking and computation.
 
@@ -3441,9 +3501,9 @@ Then consider the half-shift of $z$. The premises of the theorem are fulfilled b
 
 The following construction is a variation of the original zigzag construction of [cite/t:@War23]. It differs from Wärn's version in representation of span diagrams --- Wärn represents span diagrams as a pair of types $A$, $B$ with a type-valued relation $R : A \to B \to \UU$. We use the same representation as in the rest of the thesis, \ie a triple of types $S$, $A$, $B$, and a pair of maps $f : S \to A$, $g : S \to B$. These two representations are equivalent: a relation $R$ can be seen as the spanning type $\Sigma (a : A) (b : B).\, R(a, b)$ with the first and second projections, and conversely a spanning type $S$ with maps $f$, $g$ can be seen as the relation $\lambda a, b \to \Sigma (s : S).\, (f s = a) \times (g s = b)$. Adapting Wärn's construction involves reconstructing a relation from a span diagram and removing contractible pairs.
 
-This version of the construction is the original type-theoretic one. Wärn later published a categorical version [cite//b:@War24]. The categorical version was published \TODO[when I was already working on the infrastructure for the type-theoretic version, and it requires differnet tooling to be built]. It is also not as straightforward to recover the concrete equivalences between identity types and the resulting type families.
+This version of the construction is the original type-theoretic one. Wärn later published a categorical version [cite//b:@War24]. Formalization of the categorical version is not attempted in this thesis. It requires different infrastructure from the one that had already been built by the time of publication of the categorical version, and it is also not as straightforward to recover the concrete equivalences between identity types and the resulting type families.
 
-\TODO[We assume existence of all pushouts and sequential colimits, because I don't know how to ask the user for the pushouts of inductively defined spans. The maps into pushouts are called $\inl$ and $\inr$ and the square is called $\glue$. The pushout cocone of a span diagram $\S$ is written $\psh(\S)$. The unique map corresponding to a dependent cocone $d$ is called $\depCogap(d)$. The inclusion maps into the sequential colimit are called $\iota_n$, and the triangles are called $\kappa_n$. Name the computation rules].
+In the rest of the thesis we assume existence of standard pushouts and sequential colimits. The pushout cocone of a span diagram is written $\psh(\S)$. Its left and right inclusions are denoted $\inl$ and $\inr$, respectively, and its homotopy is denoted $\glue$. The unique dependent map corresponding to a dependent cocone $d$ is called $\depCogap(d)$. The sequential colimit cocone of a sequential diagram $A_{\bullet}$ is denoted $A_{\infty}$, and we abuse notation to use the same symbol for underlying type of the colimit. The inclusion maps into the sequential colimits are denoted $\iota_n$, and its homotopies are denoted $\kappa_n$.
 
 We begin by describing the construction informally, and then discuss necessary modifications to encode it in a proof assistant.
 
@@ -3462,11 +3522,11 @@ all of which are indexed by $n : \N$. The construction proceeds by induction on 
 Take $P_A^0(a)$ to be the identity type $(a_0 = a)$, $P_B^0(b)$ to be the empty type $\0$, and $\blank \concat_0 \overline{s}$ to be the unique map out of the empty type[fn:2]. Note that we cannot yet define $\blank \concat_0 s$, because its intended codomain $P_B^1(g s)$ is not defined. Then construct the types $P_A^{n + 1}(a)$, $P_B^{n + 1}(b)$ and the connecting maps $\blank \concat_{n + 1} \overline{s}$ and $\blank \concat_n s$ together as the pushouts and their inclusion maps
 #+begin_center
 \begin{tikzcd}[column sep=6em]
-  \Sigma (s : S) (r : a = (f s)). \; P_A^n(a)
+  \Sigma (s : S) (r : (a = f s)). \; P_A^n(a)
   \arrow[r, "\tot(\tot(\blank \concat_n' s))"]
   \arrow[d, "\pr_3"']
-  \arrow[rd, phantom, "\ulcorner", at end]
-  & \Sigma (s : S) (r : a = (f s)). \; P_B^{n + 1}(g s)
+  \arrow[rd, phantom, shift left=1.5ex, "\ulcorner", at end]
+  & \Sigma (s : S) (r : (a = f s)). \; P_B^{n + 1}(g s)
   \arrow[d, "\blank \concat_{n + 1} \overline{s} \defeq \inr"] \\
   P_A^n(a)
   \arrow[r]
@@ -3476,11 +3536,11 @@ Take $P_A^0(a)$ to be the identity type $(a_0 = a)$, $P_B^0(b)$ to be the empty 
 for $a : A$, and
 #+begin_center
 \begin{tikzcd}[column sep=6em]
-  \Sigma (s : S) (r : b = (g s)). \; P_B^n(b)
+  \Sigma (s : S) (r : (b = g s)). \; P_B^n(b)
   \arrow[r, "\tot(\tot(\blank \concat_n \overline{s}))"]
   \arrow[d, "\pr_3"']
-  \arrow[rd, phantom, "\ulcorner", very near end]
-  & \Sigma (s : S) (r : b = (g s)). \; P_A^n(f s)
+  \arrow[rd, phantom, shift left=1.5ex, "\ulcorner", at end]
+  & \Sigma (s : S) (r : (b = g s)). \; P_A^n(f s)
   \arrow[d, "\blank \concat_n s \defeq \inr"] \\ P_B^n(b)
   \arrow[r]
   & P_B^{n + 1}(b)
@@ -3503,7 +3563,7 @@ The data dependencies resulting from these definitions are summarized in [[fig:z
 
 Formally, we induct on the stage $n : \N$, so we need a type family over $\N$ to induct into. Writing down the type of $\blank \concat_n s$ poses a challenge already, because to define it at stage $n$, it needs to know what the type family $P_B$ is at the next stage $n + 1$. One possibility is to not refer to its codomain as $P_B^{n + 1}(g s)$, but instead inline its definition as the appropriate pushout, because all the necessary data to construct $P_B^{n + 1}(g s)$ is available at stage $n$. Then after performing the construction, its codomain will be judgmentally equal to $P_B^{n + 1}(g s)$. This approach has two disadvantages. The first one is duplication of code --- one would need to construct the exact span diagram and its pushout to both state the type, and provide an inhabitant of one of its components. Additionally, the code for the definition of the cases $\blank \concat_0 s$ and $\blank \concat_{n + 1} s$ would be identical. The other issue is computational: in contrast to $\blank \concat_n \overline{s}$, the map $\blank \concat_n s$ is defined as the right inclusion map of a pushout at every stage $n$. But this is invisible to computation, because it is defined together with the other data by induction on $n$, so the definition only computes when it is applied to either of the constructors $0$ or $n' + 1$.
 
-An alternative definition of the type family removes the $\blank \concat_n s$ component altogether. In the construction itself it is only used to define $P_A^{n + 1}$, where it can be replaced by a direct reference to the right inclusion map of the pushout $P_B^{n + 1}(g s)$, which is already defined by the time we need to define $P_A^{n + 1}$. Then $\blank \concat_n s$ can be defined after the construction as the right inclusion map at every stage, without induction, removing code duplication and giving it the right computational behavior. We also want to refer to the span diagrams defining $P_B^{n + 1}$ and $P_A^{n + 1}$ later in the code, hence we also remember those in the construction.
+The preferred definition of the type family, which we chose to formalize, removes the $\blank \concat_n s$ component altogether. In the construction itself it is only used to define $P_A^{n + 1}$, where it can be replaced by a direct reference to the right inclusion map of the pushout $P_B^{n + 1}(g s)$, which is already defined by the time we need to define $P_A^{n + 1}$. Then $\blank \concat_n s$ can be defined after the construction as the right inclusion map at every stage, without induction, removing code duplication and giving it the right computational behavior. We also want to refer to the span diagrams defining $P_B^{n + 1}$ and $P_A^{n + 1}$ later in the code, hence we also remember those in the construction.
 
 #+begin_defn
 Given a natural number $n$, define the type of *zigzag construction data* at stage $n$ to be the type of quadruples $(P_B^n, P_A^n, \blank \concat_n \overline{s}, D)$, where
@@ -3515,7 +3575,7 @@ are type families,
 \begin{displaymath}
   \blank \concat_n \overline{s} : P_B^n(g s) \to P_A^n(f s)
 \end{displaymath}
-is a family of map indexed by $s : S$, and $D$ is an element of the unit type if $n = 0$, or of the type of pairs $(\T_B^n, \T_A^n)$ where $\T_B^n$ is a family of span diagrams indexed by $B$, and $\T_A^n$ is a family of span diagrams indexed by $A$ if $n$ is a successor.
+is a family of maps indexed by $s : S$, and $D$ is an element of the unit type if $n = 0$, or of the type of pairs $(\T_B^n, \T_A^n)$ where $\T_B^n$ is a family of span diagrams indexed by $B$, and $\T_A^n$ is a family of span diagrams indexed by $A$ if $n$ is a successor.
 #+end_defn
 
 This type can be inhabited for all $n : \N$, using the construction described above.
@@ -3541,7 +3601,7 @@ For the successor case $n + 1$, first construct the families of span diagrams $\
   & \Sigma (s : S) (r : b = g s). \, P_A^n(f s),
 \end{tikzcd}
 #+end_center
-where $\varphi$ sends $(s, r, p)$ to $(s, r, (\tr_{P_B^n}(r, p)) \concat_n \overline{s})$. Take $P_B^{n + 1}(b)$ to be the standard pushout of this diagram. Analogously, for an element $a : A$, define $\T_A^{n + 1}(a)$ to be the span diagram
+where $\varphi$ sends $(s, r, p)$ to $(s, r, (\tr_{P_B^n}(r, p)) \concat_n \overline{s})$. Take $P_B^{n + 1}(b)$ to be the standard pushout of this diagram, and to denote its homotopy $\glue_B^n$. Analogously, for an element $a : A$, define $\T_A^{n + 1}(a)$ to be the span diagram
 #+begin_center
 \begin{tikzcd}
   P_A^n(a)
@@ -3551,7 +3611,7 @@ where $\varphi$ sends $(s, r, p)$ to $(s, r, (\tr_{P_B^n}(r, p)) \concat_n \over
   & \Sigma (s : S) (r : a = f s). \, P_B^{n + 1}(g s)
 \end{tikzcd}
 #+end_center
-where the map $\psi$ takes $(s, r, p)$ to $(s, r, \inr(s, \refl, \tr_{P_A^n}(r, p)))$, using the right inclusion $\inr$ into the pushout $P_B^{n + 1}(g s)$. Then define $P_A^{n + 1}(a)$ to be the standard pushout of $\T_A^{n + 1}(a)$. Finally, define $p \concat_{n + 1} \overline{s}$ to be $\inr(s, \refl, p)$ using the right inclusion map into $P_A^{n + 1}(f s)$.
+where the map $\psi$ takes $(s, r, p)$ to $(s, r, \inr(s, \refl, \tr_{P_A^n}(r, p)))$, using the right inclusion $\inr$ into the pushout $P_B^{n + 1}(g s)$. Then define $P_A^{n + 1}(a)$ to be the standard pushout of $\T_A^{n + 1}(a)$, and denote its homotopy $\glue_A^n$. Finally, define $p \concat_{n + 1} \overline{s}$ to be $\inr(s, \refl, p)$ using the right inclusion map into $P_A^{n + 1}(f s)$.
 #+end_constr
 
 We keep using the names $P_B^n$, $P_A^n$, $\blank \concat_n s$, $\T_B^n$ and $\T_A^n$ for the corresponding elements of this canonical construction. Note that the span diagrams $\T_B^n(b)$ and $\T_A^n(a)$ are not defined when $n$ is zero; they are the defining span diagrams of $P_B^n(b)$ and $P_A^n(a)$, respectively, which are only pushouts in the successor case.
@@ -3580,6 +3640,8 @@ Given an element $b : B$, define the sequential diagram $P_B^{\bullet}(b)$ to be
 \end{tikzcd}
 #+end_center
 where the maps $\incl_B^n$ are the left inclusions $\inl$ of the pushouts defining $P_B^{n + 1}(b)$.
+
+Denote its sequential colimit $P_B^{\infty}(b)$, with inclusion maps $\iota_B^n$ and coherences $\kappa_B^n$.
 #+end_constr
 
 #+begin_constr
@@ -3596,11 +3658,13 @@ Given an element $a : A$, define the sequential diagram $P_A^{\bullet}(a)$ to be
 \end{tikzcd}
 #+end_center
 where the maps $\incl_A^n$ are the left inclusions $\inl$ of the pushouts defining $P_A^{n + 1}(a)$.
+
+Denote its sequential colimit $P_A^{\infty}(a)$, with inclusion maps $\iota_A^n$ and coherences $\kappa_A^n$.
 #+end_constr
 
-\TODO[While we define the full sequential diagram starting with $P_B^0(b)$, we only do so for uniformity of the zigzag construction. This way exactly the type families with a non-zero index are pushouts. When working with the construction we drop the first vertex, and compute only with $P_B^{n + 1}(b)$, which are all pushouts].
+While we define the full sequential diagram starting with $P_B^0(b)$, we only do so for uniformity of the zigzag construction. This way exactly the type families with a non-zero index are pushouts. When working with the construction we drop the first vertex and compute only with $P_B^{n + 1}(b)$, which are all pushouts. This is accomplished by passing to the shift $P_B^{\bullet}(b)[1]$, which has the same colimit $P_B^{\infty}(b)$.
 
-When constrained to the sequential diagrams $P_B^{\bullet}(g s)$ and $P_A^{\bullet}(f s)$, those sequential diagrams admit a zigzag between them.
+When constrained to $P_B^{\bullet}(g s)$ and $P_A^{\bullet}(f s)$, the two sequential diagrams admit a zigzag between them.
 
 #+name: constr:zigzag-zigzag
 #+begin_constr
@@ -3635,9 +3699,9 @@ Define the *zigzag descent data* $(P_A^{\infty}, P_B^{\infty}, \blank \concat_{\
 \begin{displaymath}
   \blank \concat_{\infty} s : P_A^{\infty}(f s) \simeq P_B^{\infty}(g s)
 \end{displaymath}
-is induced by the zigzag between $P_A^{\infty}(f s)$ and $P_B^{\infty}(g s)$ for an element $s : S$, using [[thm:equiv-zigzag]].
+is induced by the zigzag between $P_A^{\bullet}(f s)$ and $P_B^{\bullet}(g s)[1]$ for an element $s : S$, using [[thm:equiv-zigzag]].
 
-Additionally, this descent data is pointed with $\iota_0(\refl_{a_0}) : P_A^\infty(a_0)$, which we call $\refl_{\infty}$.
+Additionally, this descent data is pointed with $\iota_A^0(\refl_{a_0}) : P_A^\infty(a_0)$, which we call $\refl_{\infty}$.
 #+end_constr
 
 #+name: lemma:coherence-prism-zigzag
@@ -3969,7 +4033,7 @@ where the top identification is obtained from the computation rule for maps out 
 where the top identification is [[lemma:comp-tB]], the middle identification is the computation rule of $t_B$, and the bottom identification is the inverse of \linebreak $\apd_{t_B(g s)}(C^n(s, p))$. We may "unapply" the transport from the composite, because transporting is an equivalence.
 #+end_constr
 
-At the time of writing, the coherences $K_S^n$ have not been formally constructed, so we leave their existence as a conjecture, and claim only a partial proof of correctness.
+At the time of writing, the coherences $K_S^n$ have not been informally nor formally constructed, neither here nor in available published literature by Wärn or anyone else. We leave their existence as a conjecture, and claim only a partial proof of correctness.
 
 #+name: conj:zigzag-coherence
 #+begin_conj
@@ -4116,7 +4180,7 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - [ ] Link formal statements to the formalization (fix a commit)
 - [ ] =column sep={between origins}= in wide diagrams
 - [ ] Check that there are no TODO's
-- [ ] Properly cite agda-unimath, not just with a repo link
+- [X] Properly cite agda-unimath, not just with a repo link
 - [X] Describe attachments
 - [X] +Open a PR for the zigzag construction+ included as an independent patch
 - [ ] Check capitalization of autoref
@@ -4125,9 +4189,10 @@ Attachments consist of Git diff files, most of which were submitted as pull requ
 - [ ] Cite pullback properties
 - [X] Replace patches with diffs
 - [ ] Try to move important ideas from remarks to section introductions
-- [ ] Make the first part of Pushouts a subsection, add section intro
+- [X] Make the first part of Pushouts a subsection, add section intro
 
 * Footnotes
+
 [fn:2] Since the types $A$, $B$ and $S$ can all live in different universes, we also formally have to raise the identity type and the empty type to the smallest universe containing all of them. This is done in the formalization, but it is omitted from the thesis text. 
 
 [fn:1] There is a slight inaccuracy caused by universe levels --- the type families $P_A$, $P_B$ and $P_S$ should be allowed to range over different universes $\UU$, $\UV$, $\UW$. This can be formally rectified by appropriately raising to the common universe $\UU \sqcup \UV \sqcup \UW$.
